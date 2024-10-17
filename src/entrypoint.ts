@@ -1,8 +1,25 @@
 const regex = getRegex()
 
-const commentElements = getCommentElements()
+function updateCommentElement(comment: CrowdinComment) {
+    if (comment.references.length === 0) {
+        return;
+    }
+    const element = document.getElementById(comment.elementId);
+    if (element === null) {
+        return;
+    }
+    element.innerHTML = comment.references
+        .filter(r => r instanceof ReferencedStringActual)
+        .filter(r => r.translation !== undefined)
+        .map(r => `<div>${r.translation}</div>`)
+        .join("<br>")
+}
+
+getCommentElements()
     .map(e => new CrowdinComment(e.id, Array.prototype.slice.call(e.getElementsByClassName("comment-item-text"))[0].innerText))
     .map(comment => getLinks(comment, regex))
+    .map(comment => getApprovedTranslations(comment))
+    .map(commentPromise => commentPromise.then(updateCommentElement))
 
 class CrowdinComment {
     elementId: string;
@@ -13,6 +30,10 @@ class CrowdinComment {
         this.elementId = elementId;
         this.text = text;
         this.references = references;
+    }
+
+    withReferences(references: ReferencedString[]): CrowdinComment {
+        return new CrowdinComment(this.elementId, this.text, references);
     }
 }
 
@@ -51,6 +72,10 @@ class ReferencedStringActual implements ReferencedString {
         this.id = new ReferencedStringId(projectId, stringId);
     }
 
+    static from(other: ReferencedString, source: string, translation?: string): ReferencedStringActual {
+        return new ReferencedStringActual(other.getProjectId(), other.getStringId(), source, translation);
+    }
+
     getProjectId(): number {
         return this.id.getProjectId();
     }
@@ -58,6 +83,24 @@ class ReferencedStringActual implements ReferencedString {
     getStringId(): number {
         return this.id.getStringId();
     }
+}
+
+class TranslationStatus {
+    translated!: boolean;
+    partially_translated!: boolean;
+    approved!: boolean;
+    partially_approved!: boolean;
+}
+
+class CrowdinPhraseResponseData {
+    success!: boolean;
+    top_suggestion!: string;
+    translation_status!: TranslationStatus;
+}
+
+class CrowdinPhraseResponse {
+    data!: CrowdinPhraseResponseData;
+    version!: number;
 }
 
 
@@ -69,19 +112,35 @@ function getCommentElements(): HTMLElement[] {
     return Array.prototype.slice.call(discussionsMessages.getElementsByTagName("li"));
 }
 
-function getLinks(comment: CrowdinComment, regex: RegExp) {
-    comment.text.matchAll(regex).map(v => v.groups)
+function getLinks(comment: CrowdinComment, regex: RegExp): CrowdinComment {
+    const references = comment.text.matchAll(regex).toArray().map(v => v.groups)
         .filter(g => g !== undefined)
         .map(g => new ReferencedStringId(parseInt(g["projectId"]), parseInt(g["identifier"])))
+    return comment.withReferences(references);
 }
 
-function getApprovedTranslations(comment: CrowdinComment) {
-    comment.references.map(r => getApprovedTranslation(r))
+function getApprovedTranslations(comment: CrowdinComment): Promise<CrowdinComment> {
+    return Promise.all(comment.references.map(async r => getPhrase(r)))
+        .then(r => comment.withReferences(r))
 }
 
-function getApprovedTranslation(referencedString: ReferencedString) {
-    fetch(getPhraseUrl(referencedString.getProjectId(), getLanguageId(), referencedString.getStringId()), {credentials: "same-origin"})
-    // TODO: Continue from here
+async function getPhrase(referencedString: ReferencedString): Promise<ReferencedString> {
+    return await fetch(getPhraseUrl(referencedString.getProjectId(), getLanguageId(), referencedString.getStringId()), {credentials: "same-origin"})
+        .then(r => r.text())
+        .then(r => JSON.parse(r) as CrowdinPhraseResponse)
+        .then(r => r.data)
+        .then(r => {
+            if (r.success) {
+                return r;
+            }
+            throw new Error("Could not retrieve translation")
+        })
+        .then(r => new ReferencedStringActual(referencedString.getProjectId(), referencedString.getStringId(), "", r.top_suggestion));
+
+}
+
+function checkIfApproved(phraseData: CrowdinPhraseResponseData): boolean {
+    return phraseData.success && phraseData.translation_status.approved;
 }
 
 function getPhraseUrl(projectId: number, languageId: number, stringId: number) {
