@@ -1,3 +1,11 @@
+import {CrowdinComment} from "./crowdin-comment";
+import {ReferencedString} from "./referenced-string";
+import {ReferencedStringId} from "./referenced-string-id";
+import {ReferencedStringActual} from "./referenced-string-actual";
+import {CrowdinPhraseResponse} from "./crowdin-phrase-response";
+import {CrowdinPhraseResponseData} from "./crowdin-phrase-response-data";
+import queryString from "../node_modules/query-string";
+
 const regex = getRegex()
 
 function updateCommentElement(comment: CrowdinComment) {
@@ -21,88 +29,6 @@ getCommentElements()
     .map(comment => getApprovedTranslations(comment))
     .map(commentPromise => commentPromise.then(updateCommentElement))
 
-class CrowdinComment {
-    elementId: string;
-    text: string;
-    references: ReferencedString[];
-
-    constructor(elementId: string, text: string, references: ReferencedString[] = []) {
-        this.elementId = elementId;
-        this.text = text;
-        this.references = references;
-    }
-
-    withReferences(references: ReferencedString[]): CrowdinComment {
-        return new CrowdinComment(this.elementId, this.text, references);
-    }
-}
-
-interface ReferencedString {
-    getProjectId(): number;
-    getStringId(): number;
-
-}
-
-class ReferencedStringId implements ReferencedString {
-    projectId: number;
-    stringId: number;
-
-    constructor(projectId: number, stringId: number) {
-        this.projectId = projectId;
-        this.stringId = stringId;
-    }
-
-    getProjectId(): number {
-        return this.projectId;
-    }
-
-    getStringId(): number {
-        return this.stringId;
-    }
-}
-
-class ReferencedStringActual implements ReferencedString {
-    source: string;
-    translation?: string;
-    id: ReferencedStringId;
-
-    constructor(projectId: number, stringId: number, source: string, translation?: string) {
-        this.source = source;
-        this.translation = translation;
-        this.id = new ReferencedStringId(projectId, stringId);
-    }
-
-    static from(other: ReferencedString, source: string, translation?: string): ReferencedStringActual {
-        return new ReferencedStringActual(other.getProjectId(), other.getStringId(), source, translation);
-    }
-
-    getProjectId(): number {
-        return this.id.getProjectId();
-    }
-
-    getStringId(): number {
-        return this.id.getStringId();
-    }
-}
-
-class TranslationStatus {
-    translated!: boolean;
-    partially_translated!: boolean;
-    approved!: boolean;
-    partially_approved!: boolean;
-}
-
-class CrowdinPhraseResponseData {
-    success!: boolean;
-    top_suggestion!: string;
-    translation_status!: TranslationStatus;
-}
-
-class CrowdinPhraseResponse {
-    data!: CrowdinPhraseResponseData;
-    version!: number;
-}
-
 
 function getCommentElements(): HTMLElement[] {
     const discussionsMessages = document.getElementById("discussions_messages");
@@ -119,13 +45,13 @@ function getLinks(comment: CrowdinComment, regex: RegExp): CrowdinComment {
     return comment.withReferences(references);
 }
 
-function getApprovedTranslations(comment: CrowdinComment): Promise<CrowdinComment> {
-    return Promise.all(comment.references.map(async r => getPhrase(r)))
-        .then(r => comment.withReferences(r))
+async function getApprovedTranslations(comment: CrowdinComment): Promise<CrowdinComment> {
+    const r_1 = await Promise.all(comment.references.map(async (r) => getPhrase(r)));
+    return comment.withReferences(r_1);
 }
 
 async function getPhrase(referencedString: ReferencedString): Promise<ReferencedString> {
-    return await fetch(getPhraseUrl(referencedString.getProjectId(), getLanguageId(), referencedString.getStringId()), {credentials: "same-origin"})
+    return await fetch(getPhraseUrl(referencedString.getProjectId(), getLanguageId(), referencedString.getStringId()), {credentials: "include", headers: { "X-Csrf-Token": getCsrfToken() }})
         .then(r => r.text())
         .then(r => JSON.parse(r) as CrowdinPhraseResponse)
         .then(r => r.data)
@@ -133,9 +59,9 @@ async function getPhrase(referencedString: ReferencedString): Promise<Referenced
             if (r.success) {
                 return r;
             }
-            throw new Error("Could not retrieve translation")
+            throw new Error(`Could not retrieve translation for project ${referencedString.getProjectId()} and string ${referencedString.getStringId()}`)
         })
-        .then(r => new ReferencedStringActual(referencedString.getProjectId(), referencedString.getStringId(), "", r.top_suggestion));
+        .then(r => new ReferencedStringActual(referencedString.getProjectId(), referencedString.getStringId(), "", r.top_suggestion))
 
 }
 
@@ -144,16 +70,22 @@ function checkIfApproved(phraseData: CrowdinPhraseResponseData): boolean {
 }
 
 function getPhraseUrl(projectId: number, languageId: number, stringId: number) {
-    return `${window.location.origin}/backend/translation/phrase?project_id=${projectId}&target_language_id=${languageId}&translation_id=${stringId}`;
+    let s = `${window.location.origin}/backend/translation/phrase?project_id=${projectId}&target_language_id=${languageId}&translation_id=${stringId}`;
+    console.log(s);
+    return s;
 }
 
 function getRegex() {
     return new RegExp(`${window.location.origin}/editor/(?<projectId>\\d+)\\S+#(?<identifier>\\d+)`, 'g')
 }
 
-function getLanguageId() {
+function getLanguageId(): number {
     //@ts-ignore
-    return crowdin.editor.target_language.id
+    const href: string = document.getElementById("action-string-history-url").href
+    console.log(href)
+    let lang = queryString.parseUrl(href).query.lang;
+    console.log(lang)
+    return parseInt(lang as string)
 }
 
 function getCsrfToken() {
