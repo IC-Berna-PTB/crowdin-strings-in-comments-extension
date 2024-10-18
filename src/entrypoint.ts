@@ -4,7 +4,6 @@ import {ReferencedStringId} from "./referenced-string-id";
 import {ReferencedStringActual} from "./referenced-string-actual";
 import {CrowdinPhraseResponse} from "./phrase-response/crowdin-phrase-response";
 import {CrowdinInitResponse} from "./init-response/crowdin-init-response";
-import * as _ from "lodash";
 
 function setupCommentElement(comment: CrowdinComment) {
     if (comment.references.length === 0) {
@@ -25,7 +24,7 @@ function setupCommentElement(comment: CrowdinComment) {
 const regex = getRegex()
 
 function updateCommentElement(comment: CrowdinComment) {
-    const textElement = document.querySelector(comment.elementId).querySelector(".comment-item-text")
+    const textElement = document.querySelector(comment.elementId).querySelector("span.comment-item-text")
     if (textElement === null) {
         return;
     }
@@ -35,23 +34,24 @@ function updateCommentElement(comment: CrowdinComment) {
         textElement.innerHTML = comment.text;
     } else {
         linkElement.innerText = "See original comment";
-        textElement.innerHTML = generateLinkList(comment);
+        textElement.replaceChildren(generateLinkList(comment));
     }
     comment.showingStrings = !comment.showingStrings;
 }
 
-function  generateLinkList(comment: CrowdinComment): string {
+function  generateLinkList(comment: CrowdinComment): HTMLElement {
     return comment.references
         .filter(r => r instanceof ReferencedStringActual)
         .filter(r => r.translation !== undefined)
-        .map(r => `
-<div>
-    <span class="term_item" onclick='navigator.clipboard.writeText("${r.translation}")'>${_.escape(r.translation)}</span>
-</div>
-<div>
-    <span class="suggestion_tm_source" style="font-style: italic;">${r.source}</span>
-</div>`)
-        .join("<br>")
+        .map(r => r.generateHtml())
+        .filter(r => r !== undefined)
+        .reduce((p, c) => {
+            if (p.innerText.trim().length !== 0) {
+                p.appendChild(document.createElement("br"))
+            }
+            p.appendChild(c)
+            return p;
+        }, document.createElement("div"))
 }
 
 function getCommentElements(): HTMLElement[] {

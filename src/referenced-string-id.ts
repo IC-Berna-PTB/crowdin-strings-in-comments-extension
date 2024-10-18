@@ -9,6 +9,9 @@ export class ReferencedStringId implements ReferencedString {
         this.stringId = stringId;
     }
 
+    generateHtml(): HTMLElement | undefined {
+        return undefined;
+    }
     getProjectId(): number {
         return this.projectId;
     }
