@@ -2,6 +2,7 @@
   "name": "crowdin-strings-in-comments",
   "private": true,
   "version": "1.0.0",
+  "author": "Bernardo Lopes (Berna)",
   "scripts": {
     "build": "webpack",
     "build-dev": "webpack --mode=development",
