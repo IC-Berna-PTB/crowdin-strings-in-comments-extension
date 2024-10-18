@@ -4,6 +4,7 @@ import {ReferencedStringId} from "./referenced-string-id";
 import {ReferencedStringActual} from "./referenced-string-actual";
 import {CrowdinPhraseResponse} from "./phrase-response/crowdin-phrase-response";
 import {CrowdinInitResponse} from "./init-response/crowdin-init-response";
+import * as _ from "lodash";
 
 function setupCommentElement(comment: CrowdinComment) {
     if (comment.references.length === 0) {
@@ -17,7 +18,6 @@ function setupCommentElement(comment: CrowdinComment) {
     toBeAppendedElement.classList.add("swap-comment-and-strings", "comment-item-date");
     toBeAppendedElement.innerText = "See original comment";
     toBeAppendedElement.addEventListener("click", () => updateCommentElement(comment))
-    destElement.innerHTML += "<br>"
     destElement.append(toBeAppendedElement);
     updateCommentElement(comment);
 }
@@ -40,13 +40,13 @@ function updateCommentElement(comment: CrowdinComment) {
     comment.showingStrings = !comment.showingStrings;
 }
 
-function generateLinkList(comment: CrowdinComment): string {
+function  generateLinkList(comment: CrowdinComment): string {
     return comment.references
         .filter(r => r instanceof ReferencedStringActual)
         .filter(r => r.translation !== undefined)
         .map(r => `
 <div>
-    <span class="term_item" onclick='navigator.clipboard.writeText("${r.translation}")'>${r.translation}</span>
+    <span class="term_item" onclick='navigator.clipboard.writeText("${r.translation}")'>${_.escape(r.translation)}</span>
 </div>
 <div>
     <span class="suggestion_tm_source" style="font-style: italic;">${r.source}</span>

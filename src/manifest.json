@@ -1,11 +1,19 @@
 {
-   "manifest_version": 2,
-  "version": "0.0.0",
+   "manifest_version": 3,
+  "version": "1.0.0",
   "name": "Crowdin Strings in Comments",
+  "icons": {
+    "128": "icon/128.png"
+  },
   "content_scripts": [
     {
       "matches": ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"],
       "js": ["entrypoint.js"]
     }
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{8d65cd1e-0d9d-4e86-a688-ae8d40a88e83}"
+    }
+  }
 }
