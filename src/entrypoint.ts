@@ -130,7 +130,6 @@ function getProjectId(): number {
 async function getLanguageId(projectId: number): Promise<number> {
     //@ts-ignore
     const languages = window.location.pathname.split("/")[4];
-    const targetLanguage = languages.split("-")[1];
     return fetch(`${window.location.origin}/backend/editor/init?editor_mode=translate&project_id=${projectId}&file_id=all&languages=${languages}`, getFetchParams())
         .then(r => r.text())
         .then(r => JSON.parse(r) as CrowdinInitResponse)
@@ -150,7 +149,7 @@ function getCsrfToken() {
 }
 
 function elementReady(selector: string) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         const el = document.querySelector(selector);
         if (el) {
             resolve(el);
