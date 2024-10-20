@@ -2,8 +2,9 @@ import {CrowdinComment} from "./crowdin-comment";
 import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
 import {ReferencedStringActual} from "./referenced-string-actual";
-import {CrowdinPhraseResponse} from "./phrase-response/crowdin-phrase-response";
-import {CrowdinInitResponse} from "./init-response/crowdin-init-response";
+import {CrowdinPhraseResponse} from "./crowdin-api/phrase-response/crowdin-phrase-response";
+import {CrowdinInitResponse} from "./crowdin-api/init-response/crowdin-init-response";
+import {getFetchParams} from "./util";
 
 function setupCommentElement(comment: CrowdinComment) {
     if (comment.references.length === 0) {
@@ -13,11 +14,15 @@ function setupCommentElement(comment: CrowdinComment) {
     if (destElement.querySelector(".swap-comment-and-strings") !== null) {
         return;
     }
-    let toBeAppendedElement = document.createElement("div");
-    toBeAppendedElement.classList.add("swap-comment-and-strings", "comment-item-date");
+    let toBeAppendedElementWrapper = document.createElement("div");
+    toBeAppendedElementWrapper.classList.add("comment-item-date");
+    let toBeAppendedElement = document.createElement("a");
+    toBeAppendedElement.classList.add("swap-comment-and-strings");
     toBeAppendedElement.innerText = "See original comment";
-    toBeAppendedElement.addEventListener("click", () => updateCommentElement(comment))
-    destElement.append(toBeAppendedElement);
+    toBeAppendedElement.style.cursor = "pointer"
+    toBeAppendedElement.addEventListener("click", () => updateCommentElement(comment));
+    toBeAppendedElementWrapper.append(toBeAppendedElement);
+    destElement.append(toBeAppendedElementWrapper);
     updateCommentElement(comment);
 }
 
@@ -87,12 +92,6 @@ async function getApprovedTranslations(comment: CrowdinComment): Promise<Crowdin
     return comment.withReferences(r_1);
 }
 
-function getFetchParams(): RequestInit {
-    return {
-        credentials: "include",
-        headers: {"X-Csrf-Token": getCsrfToken()}
-    };
-}
 
 async function getPhrase(referencedString: ReferencedString): Promise<ReferencedString> {
     return await fetch(getPhraseUrl(referencedString.getProjectId(), await getLanguageId(getProjectId()), referencedString.getStringId()), getFetchParams())
@@ -111,7 +110,7 @@ async function getPhrase(referencedString: ReferencedString): Promise<Referenced
             }
             throw new Error(`Could not retrieve translation for project ${referencedString.getProjectId()} and string ${referencedString.getStringId()}`)
         })
-        .then(r => new ReferencedStringActual(referencedString.getProjectId(), referencedString.getStringId(), r.translation.text, r.top_suggestion))
+        .then(r => new ReferencedStringActual(referencedString.getProjectId(), referencedString.getStringId(), r.translation.text, r.top_suggestion, r.translation.key))
         .catch(() => null)
 
 }
@@ -139,15 +138,6 @@ async function getLanguageId(projectId: number): Promise<number> {
         .then(r => r.id)
 }
 
-function getCsrfToken() {
-    const csrfTokenRegex = /csrf_token=(\S+)/
-    let match = document.cookie.split("; ").map(c => c.match(csrfTokenRegex))!?.find(c => c !== null);
-    if (match === undefined) {
-        throw new Error(`Could not parse Csrf token: ${match}`);
-    }
-    return match[1];
-}
-
 function elementReady(selector: string) {
     return new Promise((resolve) => {
         const el = document.querySelector(selector);
@@ -171,7 +161,9 @@ function elementReady(selector: string) {
 elementReady("#discussions_messages").then((element: HTMLElement) => {
     reload();
     new MutationObserver(() => {
-        reload();
+        if (element.querySelector(".swap-comment-and-strings") === null) {
+            reload();
+        }
     }).observe(element, {childList: true, subtree: true});
 });
 

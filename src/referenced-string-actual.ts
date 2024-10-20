@@ -1,25 +1,30 @@
 import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
+import {CrowdinUserProjects} from "./crowdin-api/user-projects-response/crowdin-user-projects";
 
 export class ReferencedStringActual implements ReferencedString {
     source: string;
     translation?: string;
+    key?: string;
     id: ReferencedStringId;
 
-    constructor(projectId: number, stringId: number, source: string, translation?: string) {
+    constructor(projectId: number, stringId: number, source: string, translation?: string, key?: string) {
         this.source = source;
         this.translation = translation;
         this.id = new ReferencedStringId(projectId, stringId);
+        this.key = key;
     }
 
-    static from(other: ReferencedString, source: string, translation?: string): ReferencedStringActual {
-        return new ReferencedStringActual(other.getProjectId(), other.getStringId(), source, translation);
+    static from(other: ReferencedString, source: string, translation?: string, key?: string): ReferencedStringActual {
+        return new ReferencedStringActual(other.getProjectId(), other.getStringId(), source, translation, key);
     }
 
     generateHtml(): HTMLElement | undefined {
         if (this.translation === undefined) {
             return undefined;
         }
+        const languages = window.location.pathname.split("/")[4];
+
         const translationDiv = document.createElement("div");
         const translationSpan = document.createElement("span");
         translationSpan.classList.add("term_item");
@@ -29,10 +34,17 @@ export class ReferencedStringActual implements ReferencedString {
         translationSpan.title = "Click to copy to clipboard"
 
         const sourceDiv = document.createElement("div");
-        const sourceSpan = document.createElement("span");
+        const sourceSpan = document.createElement("a");
+        sourceSpan.href = `${window.location.origin}/editor/${this.getProjectId()}/all/${languages}/#${this.getStringId()}`;
         sourceSpan.classList.add("suggestion_tm_source");
         sourceSpan.style.fontStyle += "italic";
+        sourceSpan.style.fontStyle += "underline";
         sourceSpan.innerText = this.source;
+        if (this.key !== undefined) {
+            CrowdinUserProjects.getFromId(this.getProjectId())
+                .then(name => sourceSpan.title = `Key: ${this.key}\nProject: ${name}`)
+        }
+        sourceSpan.target = "_blank";
         sourceDiv.appendChild(sourceSpan);
 
         const container = document.createElement("div");
