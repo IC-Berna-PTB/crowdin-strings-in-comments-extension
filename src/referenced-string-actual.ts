@@ -35,7 +35,7 @@ export class ReferencedStringActual implements ReferencedString {
         translationSpan.addEventListener("click", () => navigator.clipboard.writeText(this.translation))
         translationSpan.innerText = truncateIfLong(this.translation, 100);
         translationDiv.appendChild(translationSpan)
-        translationSpan.title = "Click to copy to clipboard\n(if truncated, the full text will be copied)";
+        translationSpan.title = (translationSpan.innerText.length > 100 ? this.translation + "\n" : "") + "Click to copy to clipboard";
 
         const sourceDiv = document.createElement("div");
         const sourceSpan = document.createElement("a");
@@ -46,7 +46,7 @@ export class ReferencedStringActual implements ReferencedString {
         sourceSpan.innerText = truncateIfLong(this.source, 100);
         if (this.key !== undefined) {
             CrowdinUserProjects.getFromId(this.getProjectId())
-                .then(name => sourceSpan.title = `Key: ${this.key}\nProject: ${name}`)
+                .then(name => sourceSpan.title = (sourceSpan.innerText.length > 100 ? this.source + "\n" : "") + `Key: ${this.key}\nProject: ${name}`)
         }
         sourceSpan.target = "_blank";
         sourceDiv.appendChild(sourceSpan);
