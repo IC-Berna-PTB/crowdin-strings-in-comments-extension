@@ -22,7 +22,7 @@ export default {
             sourceDir: path.resolve(__dirname, 'dist'),
             overwriteDest: true,
         }),
-        new UserscriptPlugin({headers: {include: ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"]}})
+        new UserscriptPlugin({headers: {include: ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"], version: "1.3.0"}})
     ],
     entry: './src/entrypoint.ts',
     module: {
