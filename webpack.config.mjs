@@ -21,8 +21,8 @@ export default {
             buildPackage: true,
             sourceDir: path.resolve(__dirname, 'dist'),
             overwriteDest: true,
-        }),
-        new UserscriptPlugin({headers: {include: ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"], version: "1.3.0"}})
+        })
+        // new UserscriptPlugin({headers: {include: ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"], version: "1.3.0"}})
     ],
     entry: './src/entrypoint.ts',
     module: {
@@ -37,6 +37,7 @@ export default {
     resolve: {
         extensions: ['.tsx', '.ts', '.js'],
     },
+    devtool: 'inline-source-map',
     output: {
         filename: 'entrypoint.js',
         path: path.resolve(__dirname, 'dist'),
