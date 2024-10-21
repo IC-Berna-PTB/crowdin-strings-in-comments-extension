@@ -1,7 +1,8 @@
 import WebExtPlugin from 'web-ext-plugin';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 import CopyPlugin from "copy-webpack-plugin";
+import {UserscriptPlugin} from "webpack-userscript";
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
@@ -12,15 +13,16 @@ export default {
         new CopyPlugin({
             patterns:
                 [
-                    { from: "src/manifest.json", to: "manifest.json" },
-                    { from: "icon/128.png", to: "icon/128.png" },
+                    {from: "src/manifest.json", to: "manifest.json"},
+                    {from: "icon/128.png", to: "icon/128.png"},
                 ]
         }),
         new WebExtPlugin({
             buildPackage: true,
             sourceDir: path.resolve(__dirname, 'dist'),
             overwriteDest: true,
-        })
+        }),
+        new UserscriptPlugin({headers: {include: ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"]}})
     ],
     entry: './src/entrypoint.ts',
     module: {

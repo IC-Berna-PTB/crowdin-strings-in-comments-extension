@@ -2,6 +2,10 @@ import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
 import {CrowdinUserProjects} from "./crowdin-api/user-projects-response/crowdin-user-projects";
 
+function truncateIfLong(text: string, maxLength: number) {
+    return text.length > maxLength ? text.substring(0, maxLength) + "…" : text;
+}
+
 export class ReferencedStringActual implements ReferencedString {
     source: string;
     translation?: string;
@@ -29,9 +33,9 @@ export class ReferencedStringActual implements ReferencedString {
         const translationSpan = document.createElement("span");
         translationSpan.classList.add("term_item");
         translationSpan.addEventListener("click", () => navigator.clipboard.writeText(this.translation))
-        translationSpan.innerText = this.translation;
+        translationSpan.innerText = truncateIfLong(this.translation, 100);
         translationDiv.appendChild(translationSpan)
-        translationSpan.title = "Click to copy to clipboard"
+        translationSpan.title = "Click to copy to clipboard\n(if truncated, the full text will be copied)";
 
         const sourceDiv = document.createElement("div");
         const sourceSpan = document.createElement("a");
@@ -39,7 +43,7 @@ export class ReferencedStringActual implements ReferencedString {
         sourceSpan.classList.add("suggestion_tm_source");
         sourceSpan.style.fontStyle += "italic";
         sourceSpan.style.fontStyle += "underline";
-        sourceSpan.innerText = this.source;
+        sourceSpan.innerText = truncateIfLong(this.source, 100);
         if (this.key !== undefined) {
             CrowdinUserProjects.getFromId(this.getProjectId())
                 .then(name => sourceSpan.title = `Key: ${this.key}\nProject: ${name}`)
