@@ -165,6 +165,13 @@ elementReady("#discussions_messages").then((element: HTMLElement) => {
             reload();
         }
     }).observe(element, {childList: true, subtree: true});
+    new MutationObserver(() => {
+        element.querySelectorAll("button.save_comment")
+            .forEach(e => e.addEventListener("click", () => {
+                element.querySelector(".swap-comment-and-strings").remove();
+                reload()
+            }))
+    }).observe(element, {childList: true, subtree: true});
 });
 
 function reload() {

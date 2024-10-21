@@ -9,7 +9,6 @@ export class CrowdinUserProjects {
         if (this.userProjects.length === 0) {
             await CrowdinUserProjects.reloadUserProjects()
         }
-        console.log(this.userProjects);
         return this.userProjects.find(up => up.id === id)?.name;
     }
 
