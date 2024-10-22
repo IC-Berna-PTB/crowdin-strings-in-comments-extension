@@ -111,7 +111,12 @@ async function getPhrase(referencedString: ReferencedString): Promise<Referenced
             }
             throw new Error(`Could not retrieve translation for project ${referencedString.getProjectId()} and string ${referencedString.getStringId()}`)
         })
-        .then(r => new ReferencedStringActual(referencedString.getProjectId(), referencedString.getStringId(), r.translation.text, r.top_suggestion, r.translation.key))
+        .then(r => new ReferencedStringActual(referencedString.getProjectId(),
+            referencedString.getStringId(),
+            r.translation.text,
+            r.top_suggestion,
+            (r.translation_status.approved ? "approved" : (r.translation_status.translated ? "translated" : "not-translated")),
+            r.translation.key))
         .catch(() => null)
 
 }

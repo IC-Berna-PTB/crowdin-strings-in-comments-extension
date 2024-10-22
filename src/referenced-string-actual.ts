@@ -1,27 +1,42 @@
 import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
 import {CrowdinUserProjects} from "./crowdin-api/user-projects-response/crowdin-user-projects";
+import {TranslationStatus} from "./util";
+import {crowdinTranslationStatusIcon} from "./crowdin-html-elements";
 
 function truncateIfLong(text: string, maxLength: number) {
     return text.length > maxLength ? text.substring(0, maxLength) + "…" : text;
 }
 
+function detailIfLong(element: HTMLElement, maxLength: number) {
+    if (element.innerText.length > maxLength) {
+        const text = element.innerText;
+        element.innerText = "";
+        const summary = document.createElement("summary");
+        summary.innerText = text.substring(0, maxLength);
+        const details = document.createElement("details");
+        details.innerText = text;
+        details.appendChild(summary);
+        element.appendChild(details);
+    }
+}
+
 export class ReferencedStringActual implements ReferencedString {
     source: string;
     translation?: string;
+    translationStatus: TranslationStatus;
     key?: string;
     id: ReferencedStringId;
 
-    constructor(projectId: number, stringId: number, source: string, translation?: string, key?: string) {
+    constructor(projectId: number, stringId: number, source: string, translation?: string, translationStatus?: TranslationStatus, key?: string) {
         this.source = source;
         this.translation = translation;
+        this.translationStatus = translationStatus;
         this.id = new ReferencedStringId(projectId, stringId);
         this.key = key;
     }
 
-    static from(other: ReferencedString, source: string, translation?: string, key?: string): ReferencedStringActual {
-        return new ReferencedStringActual(other.getProjectId(), other.getStringId(), source, translation, key);
-    }
+    private readonly MAX_TEXT_LENGTH = 100;
 
     generateHtml(): HTMLElement | undefined {
         if (this.translation === undefined) {
@@ -29,31 +44,48 @@ export class ReferencedStringActual implements ReferencedString {
         }
         const languages = window.location.pathname.split("/")[4];
 
-        const translationDiv = document.createElement("div");
-        const translationSpan = document.createElement("span");
-        translationSpan.classList.add("term_item");
-        translationSpan.addEventListener("click", () => navigator.clipboard.writeText(this.translation))
-        translationSpan.innerText = truncateIfLong(this.translation, 100);
-        translationDiv.appendChild(translationSpan)
-        translationSpan.title = (translationSpan.innerText.length > 100 ? this.translation + "\n" : "") + "Click to copy to clipboard";
+        const translationStatusWrapper = document.createElement("div");
+        translationStatusWrapper.style.display = "flex";
+        translationStatusWrapper.style.flexDirection = "row";
+        translationStatusWrapper.style.position = "absolute";
 
-        const sourceDiv = document.createElement("div");
-        const sourceSpan = document.createElement("a");
-        sourceSpan.href = `${window.location.origin}/editor/${this.getProjectId()}/all/${languages}/#${this.getStringId()}`;
-        sourceSpan.classList.add("suggestion_tm_source");
-        sourceSpan.style.fontStyle += "italic";
-        sourceSpan.style.fontStyle += "underline";
-        sourceSpan.innerText = truncateIfLong(this.source, 100);
+        const translationStatus = crowdinTranslationStatusIcon(this.translationStatus);
+        translationStatusWrapper.appendChild(translationStatus);
+
+        const translationText = document.createElement("span");
+        if (this.translationStatus === "not-translated") {
+            translationText.classList.add("suggestion_tm_source");
+            translationText.innerText = "<no suggestion available>"
+        } else {
+            translationText.classList.add("term_item");
+            translationText.addEventListener("click", () => navigator.clipboard.writeText(this.translation))
+            translationText.innerText = truncateIfLong(this.translation, this.MAX_TEXT_LENGTH);
+            translationText.title = (translationText.innerText.length > this.MAX_TEXT_LENGTH ? this.translation + "\n\n" : "") + "Click to copy to clipboard";
+        }
+
+        const translationTextWrapper = document.createElement("div");
+        translationTextWrapper.style.marginLeft = "24px";
+        translationTextWrapper.appendChild(translationText);
+
+        const sourceTextWrapper = document.createElement("div");
+        sourceTextWrapper.style.marginLeft = "24px";
+        const sourceText = document.createElement("a");
+        sourceText.href = `${window.location.origin}/editor/${this.getProjectId()}/all/${languages}/#${this.getStringId()}`;
+        sourceText.classList.add("suggestion_tm_source");
+        sourceText.style.fontStyle += "italic";
+        sourceText.style.fontStyle += "underline";
+        sourceText.innerText = truncateIfLong(this.source, this.MAX_TEXT_LENGTH);
         if (this.key !== undefined) {
             CrowdinUserProjects.getFromId(this.getProjectId())
-                .then(name => sourceSpan.title = (sourceSpan.innerText.length > 100 ? this.source + "\n" : "") + `Key: ${this.key}\nProject: ${name}`)
+                .then(name => sourceText.title = (sourceText.innerText.length > this.MAX_TEXT_LENGTH ? this.source + "\n\n" : "") + `Key: ${this.key}\nProject: ${name}`)
         }
-        sourceSpan.target = "_blank";
-        sourceDiv.appendChild(sourceSpan);
+        sourceText.target = "_blank";
+        sourceTextWrapper.appendChild(sourceText);
 
         const container = document.createElement("div");
-        container.appendChild(translationDiv);
-        container.appendChild(sourceDiv);
+        container.appendChild(translationStatusWrapper);
+        container.appendChild(translationTextWrapper);
+        container.appendChild(sourceTextWrapper);
         return container;
     }
 
