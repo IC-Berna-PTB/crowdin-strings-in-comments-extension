@@ -4,14 +4,14 @@ import {ReferencedStringId} from "./referenced-string-id";
 import {ReferencedStringActual} from "./referenced-string-actual";
 import {CrowdinPhraseResponse} from "./crowdin-api/phrase-response/crowdin-phrase-response";
 import {CrowdinInitResponse} from "./crowdin-api/init-response/crowdin-init-response";
-import {getFetchParams} from "./util";
+import {getFetchParams, parsedClass, swapClassSelector} from "./util";
 
 function setupCommentElement(comment: CrowdinComment) {
     if (comment.references.length === 0) {
         return;
     }
     let destElement = document.querySelector(comment.elementId).querySelector(".comment-item-container");
-    if (destElement.querySelector(".swap-comment-and-strings") !== null) {
+    if (destElement.querySelector(swapClassSelector) !== null) {
         return;
     }
     let toBeAppendedElementWrapper = document.createElement("div");
@@ -33,7 +33,7 @@ function updateCommentElement(comment: CrowdinComment) {
     if (textElement === null) {
         return;
     }
-    let linkElement = document.querySelector(comment.elementId).querySelector(".swap-comment-and-strings") as HTMLElement;
+    let linkElement = document.querySelector(comment.elementId).querySelector(swapClassSelector) as HTMLElement;
     if (comment.showingStrings) {
         linkElement.innerText = "See linked strings";
         textElement.innerHTML = comment.text;
@@ -58,6 +58,7 @@ function  generateLinkList(comment: CrowdinComment): HTMLElement {
             return p;
         }, document.createElement("div"))
 }
+
 
 function getCommentElements(): HTMLElement[] {
     const discussionsMessages = document.querySelector("#discussions_messages");
@@ -158,25 +159,68 @@ function elementReady(selector: string) {
     });
 }
 
+function hookDeleteButtons(element: HTMLElement) {
+    Array.from(element.querySelectorAll(".static-icon-trash"))
+        .map(e => e.parentElement)
+        .filter(e => !e.classList.contains("hooked"))
+        .forEach(e => {
+            e.addEventListener("click", () => {
+                let li = document.querySelector(`#discussion${e.getAttribute("data-id")}`);
+                li?.querySelector(swapClassSelector).parentElement?.remove();
+                li?.querySelector(swapClassSelector)?.remove();
+            })
+            e.classList.add("hooked")
+        })
+}
+
+function hookSaveEditButtons(element: HTMLElement) {
+    element.querySelectorAll(".edit-comment-mode")
+        .forEach(e => {
+            e.querySelector("button.save_comment").addEventListener("click", () => {
+                e.querySelector(swapClassSelector)?.parentElement?.remove();
+                e.querySelector(swapClassSelector)?.remove();
+                e.classList.remove(parsedClass);
+                reload();
+            })
+        })
+}
+
 elementReady("#discussions_messages").then((element: HTMLElement) => {
     reload();
     new MutationObserver(() => {
-        if (element.querySelector(".swap-comment-and-strings") === null) {
-            reload();
-        }
-    }).observe(element, {childList: true, subtree: true});
-    new MutationObserver(() => {
-        element.querySelectorAll("button.save_comment")
-            .forEach(e => e.addEventListener("click", () => {
-                element.querySelector(".swap-comment-and-strings").remove();
-                reload()
-            }))
+        hookDeleteButtons(element);
+        hookSaveEditButtons(element);
+        reload();
     }).observe(element, {childList: true, subtree: true});
 });
 
+function cleanupElement(e: HTMLElement): HTMLElement | undefined {
+    if (e.querySelector(".deleted-comment") !== null) {
+        e.querySelector(swapClassSelector)?.remove();
+        e.classList.remove(parsedClass);
+        return undefined;
+    }
+    return e;
+}
+
+function notYetParsed(e: HTMLElement): boolean {
+    return !e.classList.contains(parsedClass);
+}
+
+function markAsParsed(e: HTMLElement): HTMLElement {
+    if (e.id != "discussion-1") {
+        e.classList.add(parsedClass);
+    }
+    return e;
+}
+
 function reload() {
     getCommentElements()
-        .map(e => new CrowdinComment(`#${e.id}`, e.querySelector(".comment-item-text").innerHTML))
+        .map(e => cleanupElement(e))
+        .filter(e => e !== undefined)
+        .filter(e => notYetParsed(e))
+        .map(e => markAsParsed(e))
+        .map(e => new CrowdinComment(`#${e.id}`, e.querySelector(".comment-item-text")?.innerHTML))
         .map(comment => getLinks(comment, regex))
         .map(comment => getApprovedTranslations(comment))
         .map(commentPromise => commentPromise.then(setupCommentElement))
