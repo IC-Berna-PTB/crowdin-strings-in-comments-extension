@@ -1,3 +1,22 @@
-a {
-    color: #ff1493;
+.csic-collapsible.csic-expanded > .csic-arrow {
+    transform: rotate(0deg);
+}
+
+.csic-collapsible > a.csic-arrow {
+    content: "";
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    opacity: .5;
+    background: var(--crowdin-body-color);
+    mask-image: var(--csic-icon-arrow-drop-down);
+    mask-repeat: no-repeat;
+    mask-size: 24px 24px;
+    transform: rotate(-90deg);
+    transition: transform .2s ease;
+    margin-left: 24px;
+}
+
+:root {
+    --csic-icon-arrow-drop-down: url("data:image/svg+xml, %3csvg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" fill=\"none\"%3e%3cpath d=\"M5 5 0 0H10L5 5Z\" fill=\"black\"/%3e%3c/svg%3e")
 }
