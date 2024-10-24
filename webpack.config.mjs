@@ -14,6 +14,7 @@ export default {
             patterns:
                 [
                     {from: "src/manifest.json", to: "manifest.json"},
+                    {from: "src/style.css", to: "style.css"},
                     {from: "icon/128.png", to: "icon/128.png"},
                 ]
         }),

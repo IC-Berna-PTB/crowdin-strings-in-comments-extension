@@ -8,7 +8,8 @@
   "content_scripts": [
     {
       "matches": ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"],
-      "js": ["entrypoint.js"]
+      "js": ["entrypoint.js"],
+      "css": ["style.css"]
     }
   ],
   "browser_specific_settings": {
