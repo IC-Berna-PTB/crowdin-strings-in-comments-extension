@@ -1,24 +1,30 @@
 import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
-import {CrowdinUserProjects} from "./crowdin-api/user-projects-response/crowdin-user-projects";
 import {TranslationStatus} from "./util";
 import {crowdinTranslationStatusIcon} from "./crowdin-html-elements";
 
-function truncateIfLong(text: string, maxLength: number) {
-    return text.length > maxLength ? text.substring(0, maxLength) + "…" : text;
-}
 
-function detailIfLong(element: HTMLElement, maxLength: number) {
-    if (element.innerText.length > maxLength) {
-        const text = element.innerText;
-        element.innerText = "";
-        const summary = document.createElement("summary");
-        summary.innerText = text.substring(0, maxLength);
-        const details = document.createElement("details");
-        details.innerText = text;
-        details.appendChild(summary);
-        element.appendChild(details);
+function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HTMLElement {
+    let fullText = element.innerHTML;
+    if (fullText.length <= lengthToCollapse) {
+        return element;
     }
+    let truncatedText = element.innerHTML.substring(0, lengthToCollapse) + "…";
+    let wrappingElement = document.createElement("div");
+    wrappingElement.classList.add("csic-collapsible");
+    const arrowElement = document.createElement("a");
+    arrowElement.classList.add("csic-arrow");
+    arrowElement.addEventListener("click", () => {
+        element.classList.toggle("csic-expanded");
+        if (element.classList.contains("csic-expanded")) {
+            element.innerHTML = fullText;
+        } else {
+            element.innerHTML = truncatedText;
+        }
+    })
+    element.innerHTML = truncatedText;
+    wrappingElement.replaceChildren(arrowElement, element);
+    return wrappingElement;
 }
 
 export class ReferencedStringActual implements ReferencedString {
@@ -50,15 +56,15 @@ export class ReferencedStringActual implements ReferencedString {
         const translationStatus = crowdinTranslationStatusIcon(this.translationStatus);
         translationStatusWrapper.appendChild(translationStatus);
 
-        const translationText = document.createElement("span");
+        let translationText = document.createElement("span");
         if (this.translationStatus === "not-translated") {
             translationText.classList.add("suggestion_tm_source");
             translationText.innerText = "<no suggestion available>"
         } else {
             translationText.classList.add("term_item");
             translationText.addEventListener("click", () => navigator.clipboard.writeText(this.translation))
-            translationText.innerText = truncateIfLong(this.translation, this.MAX_TEXT_LENGTH);
-            translationText.title = (translationText.innerText.length > this.MAX_TEXT_LENGTH ? this.translation + "\n\n" : "") + "Click to copy to clipboard";
+            translationText.innerText = this.translation;
+            translationText = applyCollapseIfLong(translationText, this.MAX_TEXT_LENGTH);
         }
 
         const translationTextWrapper = document.createElement("div");
@@ -67,16 +73,13 @@ export class ReferencedStringActual implements ReferencedString {
 
         const sourceTextWrapper = document.createElement("div");
         sourceTextWrapper.classList.add("csic-source-text-wrapper");
-        const sourceText = document.createElement("a");
+        let sourceText = document.createElement("a");
         sourceText.href = `${window.location.origin}/editor/${this.getProjectId()}/all/${languages}/#${this.getStringId()}`;
         sourceText.classList.add("suggestion_tm_source", "csic-source-text");
-        sourceText.innerText = truncateIfLong(this.source, this.MAX_TEXT_LENGTH);
-        if (this.key !== undefined) {
-            CrowdinUserProjects.getFromId(this.getProjectId())
-                .then(name => sourceText.title = (sourceText.innerText.length > this.MAX_TEXT_LENGTH ? this.source + "\n\n" : "") + `Key: ${this.key}\nProject: ${name}`)
-        }
+        sourceText.innerText = this.source;
         sourceText.target = "_blank";
-        sourceTextWrapper.appendChild(sourceText);
+        sourceText.title = "Click to open string in a new tab";
+        sourceTextWrapper.appendChild(applyCollapseIfLong(sourceText, this.MAX_TEXT_LENGTH));
 
         const container = document.createElement("div");
         container.appendChild(translationStatusWrapper);
