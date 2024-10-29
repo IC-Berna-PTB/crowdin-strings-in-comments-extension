@@ -1,5 +1,11 @@
-.csic-collapsible.csic-expanded > .csic-arrow {
+.csic-collapsible.csic-expanded > a.csic-arrow {
     transform: rotate(0deg);
+}
+
+.csic-translation-status-wrapper {
+    display: flex;
+    flex-direction: row;
+    position: absolute;
 }
 
 .csic-collapsible > a.csic-arrow {
@@ -15,6 +21,18 @@
     transform: rotate(-90deg);
     transition: transform .2s ease;
     margin-left: 24px;
+}
+
+.csic-translation-text-wrapper {
+    margin-left: 24px;
+}
+
+.csic-source-text-wrapper {
+    margin-left: 24px;
+}
+
+.csic-source-text {
+    font-style: italic;
 }
 
 :root {

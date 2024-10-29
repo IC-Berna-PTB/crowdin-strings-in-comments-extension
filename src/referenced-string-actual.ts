@@ -45,9 +45,7 @@ export class ReferencedStringActual implements ReferencedString {
         const languages = window.location.pathname.split("/")[4];
 
         const translationStatusWrapper = document.createElement("div");
-        translationStatusWrapper.style.display = "flex";
-        translationStatusWrapper.style.flexDirection = "row";
-        translationStatusWrapper.style.position = "absolute";
+        translationStatusWrapper.classList.add("csic-translation-status-wrapper");
 
         const translationStatus = crowdinTranslationStatusIcon(this.translationStatus);
         translationStatusWrapper.appendChild(translationStatus);
@@ -64,16 +62,14 @@ export class ReferencedStringActual implements ReferencedString {
         }
 
         const translationTextWrapper = document.createElement("div");
-        translationTextWrapper.style.marginLeft = "24px";
+        translationTextWrapper.classList.add("csic-translation-text-wrapper");
         translationTextWrapper.appendChild(translationText);
 
         const sourceTextWrapper = document.createElement("div");
-        sourceTextWrapper.style.marginLeft = "24px";
+        sourceTextWrapper.classList.add("csic-source-text-wrapper");
         const sourceText = document.createElement("a");
         sourceText.href = `${window.location.origin}/editor/${this.getProjectId()}/all/${languages}/#${this.getStringId()}`;
-        sourceText.classList.add("suggestion_tm_source");
-        sourceText.style.fontStyle += "italic";
-        sourceText.style.fontStyle += "underline";
+        sourceText.classList.add("suggestion_tm_source", "csic-source-text");
         sourceText.innerText = truncateIfLong(this.source, this.MAX_TEXT_LENGTH);
         if (this.key !== undefined) {
             CrowdinUserProjects.getFromId(this.getProjectId())
