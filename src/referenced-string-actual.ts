@@ -64,6 +64,7 @@ export class ReferencedStringActual implements ReferencedString {
             translationText.classList.add("term_item");
             translationText.addEventListener("click", () => navigator.clipboard.writeText(this.translation))
             translationText.innerText = this.translation;
+            translationText.title = "Click to copy to clipboard";
             translationText = applyCollapseIfLong(translationText, this.MAX_TEXT_LENGTH);
         }
 
