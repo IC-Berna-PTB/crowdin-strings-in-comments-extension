@@ -16,8 +16,8 @@ function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HT
     const arrowElement = document.createElement("a");
     arrowElement.classList.add("csic-arrow");
     arrowElement.addEventListener("click", () => {
-        element.classList.toggle("csic-expanded");
-        if (element.classList.contains("csic-expanded")) {
+        wrappingElement.classList.toggle("csic-expanded");
+        if (wrappingElement.classList.contains("csic-expanded")) {
             element.innerHTML = fullText;
         } else {
             element.innerHTML = truncatedText;
