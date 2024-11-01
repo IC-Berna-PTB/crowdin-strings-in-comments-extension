@@ -6,10 +6,14 @@ import {CrowdinPhraseResponse} from "./crowdin-api/phrase-response/crowdin-phras
 import {CrowdinInitResponse} from "./crowdin-api/init-response/crowdin-init-response";
 import {getFetchParams, parsedClass, swapClassSelector} from "./util";
 
-function setupCommentElement(comment: CrowdinComment) {
+function setupCommentElementTopDown(comment: CrowdinComment) {
     if (comment.references.length === 0) {
         return;
     }
+    updateCommentElementTopDown(comment);
+}
+
+function setupCommentElementToggle(comment: CrowdinComment) {
     let destElement = document.querySelector(comment.elementId).querySelector(".comment-item-container");
     if (destElement.querySelector(swapClassSelector) !== null) {
         return;
@@ -20,15 +24,15 @@ function setupCommentElement(comment: CrowdinComment) {
     toBeAppendedElement.classList.add("swap-comment-and-strings");
     toBeAppendedElement.innerText = "See original comment";
     toBeAppendedElement.style.cursor = "pointer"
-    toBeAppendedElement.addEventListener("click", () => updateCommentElement(comment));
+    toBeAppendedElement.addEventListener("click", () => updateCommentElementToggle(comment));
     toBeAppendedElementWrapper.append(toBeAppendedElement);
     destElement.append(toBeAppendedElementWrapper);
-    updateCommentElement(comment);
+    updateCommentElementToggle(comment);
 }
 
 const regex = getRegex()
 
-function updateCommentElement(comment: CrowdinComment) {
+function updateCommentElementToggle(comment: CrowdinComment) {
     const textElement = document.querySelector(comment.elementId).querySelector("span.comment-item-text")
     if (textElement === null) {
         return;
@@ -43,6 +47,18 @@ function updateCommentElement(comment: CrowdinComment) {
     }
     comment.showingStrings = !comment.showingStrings;
 }
+
+function updateCommentElementTopDown(comment: CrowdinComment) {
+    const textElement = document.querySelector(comment.elementId).querySelector("span.comment-item-text")
+    if (textElement === null) {
+        return;
+    }
+    let separator = document.createElement("hr");
+    separator.classList.add("csic-separator");
+    textElement.appendChild(separator);
+    textElement.appendChild(generateLinkList(comment));
+}
+
 
 function  generateLinkList(comment: CrowdinComment): HTMLElement {
     return comment.references
@@ -228,5 +244,5 @@ function reload() {
         .map(e => new CrowdinComment(`#${e.id}`, e.querySelector(".comment-item-text")?.innerHTML))
         .map(comment => getLinks(comment, regex))
         .map(comment => getApprovedTranslations(comment))
-        .map(commentPromise => commentPromise.then(setupCommentElement))
+        .map(commentPromise => commentPromise.then(setupCommentElementTopDown))
 }
