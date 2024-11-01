@@ -2,6 +2,7 @@ import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
 import {TranslationStatus} from "./util";
 import {crowdinTranslationStatusIcon} from "./crowdin-html-elements";
+import {CrowdinUserProjects} from "./crowdin-api/user-projects-response/crowdin-user-projects";
 
 
 function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HTMLElement {
@@ -79,7 +80,11 @@ export class ReferencedStringActual implements ReferencedString {
         sourceText.classList.add("suggestion_tm_source", "csic-source-text");
         sourceText.innerText = this.source;
         sourceText.target = "_blank";
-        sourceText.title = "Click to open string in a new tab";
+        if (this.key !== undefined) {
+            CrowdinUserProjects.getFromId(this.getProjectId())
+                .then(name => sourceText.title =
+                    `Key: ${this.key}\nProject: ${name}\n\nClick to open string in a new tab`)
+        }
         sourceTextWrapper.appendChild(applyCollapseIfLong(sourceText, this.MAX_TEXT_LENGTH));
 
         const container = document.createElement("div");
