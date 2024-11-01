@@ -56,6 +56,16 @@ export class ReferencedStringActual implements ReferencedString {
 
         const translationStatus = crowdinTranslationStatusIcon(this.translationStatus);
         translationStatusWrapper.appendChild(translationStatus);
+        const metadata = document.createElement("a");
+        metadata.classList.add("csic-metadata");
+        metadata.href = `${window.location.origin}/editor/${this.getProjectId()}/all/${languages}/#${this.getStringId()}`;
+        metadata.target = "_blank";
+        translationStatusWrapper.appendChild(metadata);
+        if (this.key !== undefined) {
+            metadata.innerText = `🔑 ${this.key}`;
+            CrowdinUserProjects.getFromId(this.getProjectId())
+                .then(name => {metadata.title = `Project: ${name}`})
+        }
 
         let translationText = document.createElement("span");
         if (this.translationStatus === "not-translated") {
@@ -75,16 +85,9 @@ export class ReferencedStringActual implements ReferencedString {
 
         const sourceTextWrapper = document.createElement("div");
         sourceTextWrapper.classList.add("csic-source-text-wrapper");
-        let sourceText = document.createElement("a");
-        sourceText.href = `${window.location.origin}/editor/${this.getProjectId()}/all/${languages}/#${this.getStringId()}`;
+        let sourceText = document.createElement("span");
         sourceText.classList.add("suggestion_tm_source", "csic-source-text");
         sourceText.innerText = this.source;
-        sourceText.target = "_blank";
-        if (this.key !== undefined) {
-            CrowdinUserProjects.getFromId(this.getProjectId())
-                .then(name => sourceText.title =
-                    `Key: ${this.key}\nProject: ${name}\n\nClick to open string in a new tab`)
-        }
         sourceTextWrapper.appendChild(applyCollapseIfLong(sourceText, this.MAX_TEXT_LENGTH));
 
         const container = document.createElement("div");
