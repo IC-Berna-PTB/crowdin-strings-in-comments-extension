@@ -37,6 +37,13 @@ hr.csic-separator {
     font-size: 12px;
     font-weight: 400;
     margin-left: var(--csic-status-margin-left);
+}
+
+.csic-metadata > .csic-metadata-key-icon {
+    user-select: none;
+}
+
+.csic-metadata > * {
     color: var(--crowdin-text-muted);
 }
 

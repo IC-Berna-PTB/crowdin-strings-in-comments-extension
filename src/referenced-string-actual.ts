@@ -57,14 +57,23 @@ export class ReferencedStringActual implements ReferencedString {
         const translationStatus = crowdinTranslationStatusIcon(this.translationStatus);
         translationStatusWrapper.appendChild(translationStatus);
         const metadata = document.createElement("a");
-        metadata.classList.add("csic-metadata");
         metadata.href = `${window.location.origin}/editor/${this.getProjectId()}/all/${languages}/#${this.getStringId()}`;
         metadata.target = "_blank";
-        translationStatusWrapper.appendChild(metadata);
+        const key = document.createElement("span");
+        key.classList.add("csic-metadata-key-icon");
+        key.innerText = "🔑 ";
+
+        const metadataWrapper = document.createElement("span");
+        metadataWrapper.classList.add("csic-metadata");
+        metadataWrapper.appendChild(key);
+        metadataWrapper.appendChild(metadata);
+        translationStatusWrapper.appendChild(metadataWrapper);
         if (this.key !== undefined) {
-            metadata.innerText = `🔑 ${this.key}`;
+            metadata.innerText = `${this.key}`;
             CrowdinUserProjects.getFromId(this.getProjectId())
                 .then(name => {metadata.title = `Project: ${name}`})
+        } else {
+            metadata.innerText = "&lt;loading key...&gt;";
         }
 
         let translationText = document.createElement("span");
