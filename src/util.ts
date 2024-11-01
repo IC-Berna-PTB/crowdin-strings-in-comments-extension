@@ -15,6 +15,6 @@ export function getCsrfToken() {
 }
 
 export const swapClassSelector = ".swap-comment-and-strings";
-export const parsedClass = "swap-parsed";
+export const parsedClass = "csic-parsed";
 
 export type TranslationStatus = "not-translated" | "translated" | "approved";
