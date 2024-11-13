@@ -156,7 +156,7 @@ async function getLanguageId(projectId: number): Promise<number> {
         .then(r => JSON.parse(r) as CrowdinInitResponse)
         .then(r => r.data)
         .then(r => r.init_editor)
-        .then(r => r.target_language)
+        .then(r => r.target_language ?? r.out_of_scope_target_lang)
         .then(r => r.id)
 }
 
