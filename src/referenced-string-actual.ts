@@ -69,7 +69,11 @@ export class ReferencedStringActual implements ReferencedString {
         metadataWrapper.appendChild(metadata);
         translationStatusWrapper.appendChild(metadataWrapper);
         if (this.key !== undefined) {
-            metadata.innerText = `${this.key}`;
+            if (this.key.trim() === "") {
+                metadata.innerText = `Crowdin ID ${this.getStringId()}`
+            } else {
+                metadata.innerText = `${this.key}`;
+            }
             CrowdinUserProjects.getFromId(this.getProjectId())
                 .then(name => {metadata.title = `Project: ${name}`})
         } else {
