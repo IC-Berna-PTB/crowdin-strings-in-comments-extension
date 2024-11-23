@@ -34,13 +34,15 @@ export class ReferencedStringActual implements ReferencedString {
     translationStatus: TranslationStatus;
     key?: string;
     id: ReferencedStringId;
+    filePath?: string;
 
-    constructor(projectId: number, stringId: number, source: string, translation?: string, translationStatus?: TranslationStatus, key?: string) {
+    constructor(projectId: number, stringId: number, source: string, translation?: string, translationStatus?: TranslationStatus, key?: string, filePath?: string) {
         this.source = source;
         this.translation = translation;
         this.translationStatus = translationStatus;
         this.id = new ReferencedStringId(projectId, stringId);
         this.key = key;
+        this.filePath = filePath;
     }
 
     private readonly MAX_TEXT_LENGTH = 100;
@@ -75,7 +77,7 @@ export class ReferencedStringActual implements ReferencedString {
                 metadata.innerText = `${this.key}`;
             }
             CrowdinUserProjects.getFromId(this.getProjectId())
-                .then(name => {metadata.title = `Project: ${name}`})
+                .then(name => {metadata.title = `File: ${this.filePath ?? "unknown"}\nProject: ${name}`})
         } else {
             metadata.innerText = "&lt;loading key...&gt;";
         }
