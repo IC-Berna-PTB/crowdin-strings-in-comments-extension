@@ -132,7 +132,8 @@ async function getPhrase(referencedString: ReferencedString): Promise<Referenced
             r.translation.text,
             r.top_suggestion,
             (r.translation_status.approved ? "approved" : (r.translation_status.translated ? "translated" : "not-translated")),
-            r.translation.key))
+            r.translation.key,
+            r.translation.file_path))
         .catch(() => null)
 
 }
