@@ -167,7 +167,7 @@ function hookSaveEditButtons(element: HTMLElement) {
                 e.querySelector(swapClassSelector)?.parentElement?.remove();
                 e.querySelector(swapClassSelector)?.remove();
                 e.classList.remove(parsedClass);
-                reload();
+                reloadComments();
             })
         })
 }
@@ -192,7 +192,7 @@ function markAsParsed(e: HTMLElement): HTMLElement {
     return e;
 }
 
-function reload() {
+function reloadComments() {
     getCommentElements()
         .map(e => cleanupElement(e))
         .filter(e => e !== undefined)
@@ -205,10 +205,25 @@ function reload() {
 }
 
 elementReady("#discussions_messages").then((element: HTMLElement) => {
-    reload();
+    reloadComments();
     new MutationObserver(() => {
         hookDeleteButtons(element);
         hookSaveEditButtons(element);
-        reload();
+        reloadComments();
     }).observe(element, {childList: true, subtree: true});
 });
+
+function reloadFileName(element: HTMLElement) {
+    let actualElement: HTMLAnchorElement = element.querySelector(".current-file-name > a")
+    if (actualElement && actualElement.dataset.csicOldHref != actualElement.href) {
+        actualElement.text = actualElement.title.replace("Translate file: ", "");
+        actualElement.dataset.csicOldHref = actualElement.href;
+    }
+}
+
+elementReady("#source_context_wrapper").then((element: HTMLElement) => {
+    reloadFileName(element);
+    new MutationObserver(() => {
+        reloadFileName(element);
+    }).observe(element, {childList: true, subtree: true});
+})
