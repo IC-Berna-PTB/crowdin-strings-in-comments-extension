@@ -12,42 +12,7 @@ function setupCommentElementTopDown(comment: CrowdinComment) {
     }
     updateCommentElementTopDown(comment);
 }
-
-function setupCommentElementToggle(comment: CrowdinComment) {
-    let destElement = document.querySelector(comment.elementId).querySelector(".comment-item-container");
-    if (destElement.querySelector(swapClassSelector) !== null) {
-        return;
-    }
-    let toBeAppendedElementWrapper = document.createElement("div");
-    toBeAppendedElementWrapper.classList.add("comment-item-date");
-    let toBeAppendedElement = document.createElement("a");
-    toBeAppendedElement.classList.add("swap-comment-and-strings");
-    toBeAppendedElement.innerText = "See original comment";
-    toBeAppendedElement.style.cursor = "pointer"
-    toBeAppendedElement.addEventListener("click", () => updateCommentElementToggle(comment));
-    toBeAppendedElementWrapper.append(toBeAppendedElement);
-    destElement.append(toBeAppendedElementWrapper);
-    updateCommentElementToggle(comment);
-}
-
 const regex = getRegex()
-
-function updateCommentElementToggle(comment: CrowdinComment) {
-    const textElement = document.querySelector(comment.elementId).querySelector("span.comment-item-text")
-    if (textElement === null) {
-        return;
-    }
-    let linkElement = document.querySelector(comment.elementId).querySelector(swapClassSelector) as HTMLElement;
-    if (comment.showingStrings) {
-        linkElement.innerText = "See linked strings";
-        textElement.innerHTML = comment.text;
-    } else {
-        linkElement.innerText = "See original comment";
-        textElement.replaceChildren(generateLinkList(comment));
-    }
-    comment.showingStrings = !comment.showingStrings;
-}
-
 function updateCommentElementTopDown(comment: CrowdinComment) {
     const textElement = document.querySelector(comment.elementId).querySelector("span.comment-item-text")
     if (textElement === null) {
@@ -168,7 +133,7 @@ function elementReady(selector: string) {
             resolve(el);
         }
 
-        new MutationObserver((mutationRecords, observer) => {
+        new MutationObserver((_mutationRecords, observer) => {
             Array.from(document.querySelectorAll(selector)).forEach(element => {
                 resolve(element);
                 observer.disconnect();
