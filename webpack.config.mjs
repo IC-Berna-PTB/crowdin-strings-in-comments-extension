@@ -23,7 +23,10 @@ export default {
         })
         // new UserscriptPlugin({headers: {include: ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"], version: "1.3.0"}})
     ],
-    entry: './src/entrypoint.ts',
+    entry: {
+        'strings-in-comments': './src/strings-in-comments/strings-in-comments-entrypoint.ts',
+        'show-full-file-name': './src/show-full-file-name/full-file-name-entrypoint.ts'
+    },
     module: {
         rules: [
             {
@@ -38,7 +41,7 @@ export default {
     },
     devtool: 'inline-source-map',
     output: {
-        filename: 'entrypoint.js',
         path: path.resolve(__dirname, 'dist'),
+        filename: '[name].js'
     },
 };

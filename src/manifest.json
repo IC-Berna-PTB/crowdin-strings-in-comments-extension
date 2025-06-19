@@ -15,7 +15,8 @@
         "style.css"
       ],
       "js": [
-        "entrypoint.js"
+        "strings-in-comments.js",
+        "show-full-file-name.js"
       ]
     }
   ],

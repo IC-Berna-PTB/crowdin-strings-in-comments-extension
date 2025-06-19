@@ -4,7 +4,7 @@
   "version": "1.8.1",
   "author": "Bernardo Lopes (Berna)",
   "scripts": {
-    "compile-css": "npx sass src/style.scss dist/style.css",
+    "compile-css": "npx sass src/strings-in-comments/style.scss dist/style.css",
     "build": "npm run compile-css && webpack --mode=production",
     "build-dev": "npm run compile-css && webpack --mode=development",
     "package-dev": "rm -rf dist/** && npm run build-dev && cp src/manifest.json dist/manifest.json && zip -j dist/extension.zip dist/**",

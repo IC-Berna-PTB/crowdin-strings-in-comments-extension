@@ -1,4 +1,4 @@
-import {getFetchParams} from "../../util";
+import {getFetchParams} from "../../../util";
 import {CrowdinUserProject} from "./crowdin-user-project";
 import {CrowdinUserProjectsResponse} from "./crowdin-user-projects-response";
 

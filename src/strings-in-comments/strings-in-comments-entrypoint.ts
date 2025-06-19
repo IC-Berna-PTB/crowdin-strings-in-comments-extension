@@ -1,10 +1,10 @@
-import {CrowdinComment} from "./crowdin-comment";
+import {CrowdinComment} from "../crowdin/crowdin-comment";
 import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
 import {ReferencedStringActual} from "./referenced-string-actual";
-import {CrowdinPhraseResponse} from "./crowdin-api/phrase-response/crowdin-phrase-response";
-import {CrowdinInitResponse} from "./crowdin-api/init-response/crowdin-init-response";
-import {getFetchParams, parsedClass, swapClassSelector} from "./util";
+import {CrowdinPhraseResponse} from "../crowdin/api/phrase-response/crowdin-phrase-response";
+import {CrowdinInitResponse} from "../crowdin/api/init-response/crowdin-init-response";
+import {elementReady, getFetchParams, parsedClass, swapClassSelector} from "../util";
 
 function setupCommentElementTopDown(comment: CrowdinComment) {
     if (comment.references.length === 0) {
@@ -126,26 +126,6 @@ async function getLanguageId(projectId: number): Promise<number> {
         .then(r => r.id)
 }
 
-function elementReady(selector: string) {
-    return new Promise((resolve) => {
-        const el = document.querySelector(selector);
-        if (el) {
-            resolve(el);
-        }
-
-        new MutationObserver((_mutationRecords, observer) => {
-            Array.from(document.querySelectorAll(selector)).forEach(element => {
-                resolve(element);
-                observer.disconnect();
-            });
-        })
-            .observe(document.documentElement, {
-                childList: true,
-                subtree: true
-            });
-    });
-}
-
 function hookDeleteButtons(element: HTMLElement) {
     Array.from(element.querySelectorAll(".static-icon-trash"))
         .map(e => e.parentElement)
@@ -212,18 +192,3 @@ elementReady("#discussions_messages").then((element: HTMLElement) => {
         reloadComments();
     }).observe(element, {childList: true, subtree: true});
 });
-
-function reloadFileName(element: HTMLElement) {
-    let actualElement: HTMLAnchorElement = element.querySelector(".current-file-name > a")
-    if (actualElement && actualElement.dataset.csicOldHref != actualElement.href) {
-        actualElement.text = actualElement.title.replace("Translate file: ", "");
-        actualElement.dataset.csicOldHref = actualElement.href;
-    }
-}
-
-elementReady("#source_context_wrapper").then((element: HTMLElement) => {
-    reloadFileName(element);
-    new MutationObserver(() => {
-        reloadFileName(element);
-    }).observe(element, {childList: true, subtree: true});
-})

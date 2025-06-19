@@ -18,3 +18,23 @@ export const swapClassSelector = ".swap-comment-and-strings";
 export const parsedClass = "csic-parsed";
 
 export type TranslationStatus = "not-translated" | "translated" | "approved";
+
+export function elementReady(selector: string) {
+    return new Promise((resolve) => {
+        const el = document.querySelector(selector);
+        if (el) {
+            resolve(el);
+        }
+
+        new MutationObserver((_mutationRecords, observer) => {
+            Array.from(document.querySelectorAll(selector)).forEach(element => {
+                resolve(element);
+                observer.disconnect();
+            });
+        })
+            .observe(document.documentElement, {
+                childList: true,
+                subtree: true
+            });
+    });
+}
