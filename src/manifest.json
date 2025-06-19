@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "1.9.0",
+  "version": "2.0.0",
   "name": "Crowdin Strings in Comments",
   "icons": {
     "128": "icon/128.png"
@@ -12,11 +12,22 @@
         "*://crowdin.com/*"
       ],
       "css": [
-        "style.css"
+        "css/strings-in-comments.css"
       ],
       "js": [
         "strings-in-comments.js",
         "show-full-file-name.js"
+      ]
+    },
+    {
+      "matches": [
+        "*://valve.crowdin.com/*"
+      ],
+      "css": [
+        "css/source-2-plural-gender.css"
+      ],
+      "js": [
+        "source-2-plural-gender.js"
       ]
     }
   ],
@@ -24,5 +35,9 @@
     "gecko": {
       "id": "{8d65cd1e-0d9d-4e86-a688-ae8d40a88e83}"
     }
-  }
+  },
+  "web_accessible_resources": [ {
+    "matches": [ "\u003Call_urls>" ],
+    "resources": [ "resource/*" ]
+  } ]
 }

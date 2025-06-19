@@ -4,13 +4,16 @@
   "version": "1.8.1",
   "author": "Bernardo Lopes (Berna)",
   "scripts": {
-    "compile-css": "npx sass src/strings-in-comments/style.scss dist/style.css",
+    "compile-csic-css": "npx sass src/strings-in-comments/style.scss dist/css/strings-in-comments.css",
+    "compile-s2pg-css": "npx sass src/source-2-plural-gender/style.scss dist/css/source-2-plural-gender.css",
+    "compile-css": "npm run compile-csic-css && npm run compile-s2pg-css",
     "build": "npm run compile-css && webpack --mode=production",
     "build-dev": "npm run compile-css && webpack --mode=development",
     "package-dev": "rm -rf dist/** && npm run build-dev && cp src/manifest.json dist/manifest.json && zip -j dist/extension.zip dist/**",
     "package": "rm -rf dist/** && npm run build && cp src/manifest.json dist/manifest.json && zip -j dist/extension.zip dist/**"
   },
   "devDependencies": {
+    "@types/chrome": "^0.0.326",
     "copy-webpack-plugin": "^12.0.2",
     "sass": "^1.80.4",
     "ts-loader": "^9.5.1",
@@ -21,6 +24,8 @@
     "webpack-userscript": "^3.2.2"
   },
   "dependencies": {
+    "@types/jquery": "^3.5.32",
+    "jquery": "^3.7.1",
     "query-string": "^9.1.1"
   }
 }

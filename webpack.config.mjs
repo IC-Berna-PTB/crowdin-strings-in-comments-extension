@@ -14,6 +14,7 @@ export default {
                 [
                     {from: "src/manifest.json", to: "manifest.json"},
                     {from: "icon/128.png", to: "icon/128.png"},
+                    {from: "resource", to: "resource"},
                 ]
         }),
         new WebExtPlugin({
@@ -25,7 +26,8 @@ export default {
     ],
     entry: {
         'strings-in-comments': './src/strings-in-comments/strings-in-comments-entrypoint.ts',
-        'show-full-file-name': './src/show-full-file-name/full-file-name-entrypoint.ts'
+        'show-full-file-name': './src/show-full-file-name/full-file-name-entrypoint.ts',
+        'source-2-plural-gender': './src/source-2-plural-gender/source-2-plural-gender-entrypoint.ts',
     },
     module: {
         rules: [
