@@ -207,15 +207,6 @@ function hookSaveEditButtons(element: HTMLElement) {
         })
 }
 
-elementReady("#discussions_messages").then((element: HTMLElement) => {
-    reload();
-    new MutationObserver(() => {
-        hookDeleteButtons(element);
-        hookSaveEditButtons(element);
-        reload();
-    }).observe(element, {childList: true, subtree: true});
-});
-
 function cleanupElement(e: HTMLElement): HTMLElement | undefined {
     if (e.querySelector(".deleted-comment") !== null) {
         e.querySelector(swapClassSelector)?.remove();
@@ -247,3 +238,12 @@ function reload() {
         .map(comment => getApprovedTranslations(comment))
         .map(commentPromise => commentPromise.then(setupCommentElementTopDown))
 }
+
+elementReady("#discussions_messages").then((element: HTMLElement) => {
+    reload();
+    new MutationObserver(() => {
+        hookDeleteButtons(element);
+        hookSaveEditButtons(element);
+        reload();
+    }).observe(element, {childList: true, subtree: true});
+});

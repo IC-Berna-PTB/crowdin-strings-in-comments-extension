@@ -1,15 +1,22 @@
 {
-   "manifest_version": 3,
-  "version": "1.8.0",
+  "manifest_version": 3,
+  "version": "1.8.1",
   "name": "Crowdin Strings in Comments",
   "icons": {
     "128": "icon/128.png"
   },
   "content_scripts": [
     {
-      "matches": ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"],
-      "js": ["entrypoint.js"],
-      "css": ["style.css"]
+      "matches": [
+        "*://*.crowdin.com/*",
+        "*://crowdin.com/*"
+      ],
+      "css": [
+        "style.css"
+      ],
+      "js": [
+        "entrypoint.js"
+      ]
     }
   ],
   "browser_specific_settings": {
