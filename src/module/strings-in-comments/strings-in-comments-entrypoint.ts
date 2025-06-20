@@ -1,4 +1,4 @@
-import {CrowdinComment} from "../../util/crowdin/crowdin-comment";
+import {CrowdinComment} from "./crowdin-comment";
 import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
 import {ReferencedStringActual} from "./referenced-string-actual";
