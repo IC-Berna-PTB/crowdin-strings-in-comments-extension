@@ -5,6 +5,7 @@ import {ReferencedStringActual} from "./referenced-string-actual";
 import {CrowdinPhraseResponse} from "../../util/crowdin/api/phrase-response/crowdin-phrase-response";
 import {CrowdinInitResponse} from "../../util/crowdin/api/init-response/crowdin-init-response";
 import {elementReady, getFetchParams, parsedClass, swapClassSelector} from "../../util/util";
+import {CrowdinBasicSearchQueryParams, CrowdinSearchQueryParams} from "../../util/crowdin/crowdin-search-query-params";
 
 function setupCommentElementTopDown(comment: CrowdinComment) {
     if (comment.references.length === 0) {
@@ -76,8 +77,10 @@ function getLinksWithCrowdinSearch(comment: CrowdinComment): CrowdinComment {
     const regex = getUrlWithSearchQueryRegex()
     const urls = comment.text.matchAll(regex).toArray()
     for (let url of urls) {
-        const searchParams =  new URLSearchParams(url[0])
-        console.log(searchParams)
+        let aaaa = CrowdinSearchQueryParams.generateFromUrl(url[0]);
+        if (aaaa instanceof CrowdinBasicSearchQueryParams) {
+            console.log(aaaa)
+        }
     }
     return comment
 }
