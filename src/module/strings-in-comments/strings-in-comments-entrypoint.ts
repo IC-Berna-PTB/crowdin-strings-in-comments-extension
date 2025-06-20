@@ -12,7 +12,6 @@ function setupCommentElementTopDown(comment: CrowdinComment) {
     }
     updateCommentElementTopDown(comment);
 }
-const regex = getRegex()
 function updateCommentElementTopDown(comment: CrowdinComment) {
     const textElement = document.querySelector(comment.elementId).querySelector("span.comment-item-text")
     if (textElement === null) {
@@ -59,19 +58,36 @@ function isFirst(entry: ReferencedString, index: number, array: ReferencedString
     return true;
 }
 
-function getLinks(comment: CrowdinComment, regex: RegExp): CrowdinComment {
+function getLinks(comment: CrowdinComment): CrowdinComment {
+    const commentPostExact = getLinksWithExactId(comment);
+    return getLinksWithCrowdinSearch(commentPostExact);
+}
+
+function getLinksWithExactId(comment: CrowdinComment): CrowdinComment {
+    const regex = getUrlWithExactIdRegex()
     const references = comment.text.matchAll(regex).toArray().map(v => v.groups)
         .filter(g => g !== undefined)
         .map(g => new ReferencedStringId(parseInt(g["projectId"]), parseInt(g["identifier"])))
         .filter((entry, index, array) => isFirst(entry, index, array))
-    return comment.withReferences(references);
+    return comment.withAppendedReferences(references);
+}
+
+function getLinksWithCrowdinSearch(comment: CrowdinComment): CrowdinComment {
+    const regex = getUrlWithSearchQueryRegex()
+    const urls = comment.text.matchAll(regex).toArray()
+    for (let url of urls) {
+        const searchParams =  new URLSearchParams(url[0])
+        console.log(searchParams)
+    }
+    return comment
 }
 
 async function getApprovedTranslations(comment: CrowdinComment): Promise<CrowdinComment> {
     const r_1 = await Promise.all(comment.references
+        .filter(r => r instanceof ReferencedStringActual || r instanceof ReferencedStringId)
         .map(async (r) => getPhrase(r)))
         .then(promises => promises.filter(r => r !== null));
-    return comment.withReferences(r_1);
+    return comment.withReplacedReferences(r_1);
 }
 
 
@@ -106,8 +122,12 @@ function getPhraseUrl(projectId: number, languageId: number, stringId: number) {
     return `${window.location.origin}/backend/translation/phrase?project_id=${projectId}&target_language_id=${languageId}&translation_id=${stringId}`;
 }
 
-function getRegex() {
+function getUrlWithExactIdRegex() {
     return new RegExp(`${window.location.origin}/editor/(?<projectId>\\d+)\\S+#(?<identifier>\\d+)`, 'g')
+}
+
+function getUrlWithSearchQueryRegex(): RegExp {
+    return new RegExp(`${window.location.origin}/editor/(?<projectId>\\d+)\\S+#q=(?<query>\\S+)`, 'g')
 }
 
 function getProjectId(): number {
@@ -178,8 +198,8 @@ function reloadComments() {
         .filter(e => e !== undefined)
         .filter(e => notYetParsed(e))
         .map(e => markAsParsed(e))
-        .map(e => new CrowdinComment(`#${e.id}`, e.querySelector(".comment-item-text")?.innerHTML))
-        .map(comment => getLinks(comment, regex))
+        .map(e => new CrowdinComment(`#${e.id}`, e.querySelector(".comment-item-text")?.textContent))
+        .map(comment => getLinks(comment))
         .map(comment => getApprovedTranslations(comment))
         .map(commentPromise => commentPromise.then(setupCommentElementTopDown))
 }
