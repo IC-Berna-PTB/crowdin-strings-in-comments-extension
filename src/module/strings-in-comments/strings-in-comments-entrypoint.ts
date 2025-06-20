@@ -1,10 +1,10 @@
-import {CrowdinComment} from "../crowdin/crowdin-comment";
+import {CrowdinComment} from "../../util/crowdin/crowdin-comment";
 import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
 import {ReferencedStringActual} from "./referenced-string-actual";
-import {CrowdinPhraseResponse} from "../crowdin/api/phrase-response/crowdin-phrase-response";
-import {CrowdinInitResponse} from "../crowdin/api/init-response/crowdin-init-response";
-import {elementReady, getFetchParams, parsedClass, swapClassSelector} from "../util";
+import {CrowdinPhraseResponse} from "../../util/crowdin/api/phrase-response/crowdin-phrase-response";
+import {CrowdinInitResponse} from "../../util/crowdin/api/init-response/crowdin-init-response";
+import {elementReady, getFetchParams, parsedClass, swapClassSelector} from "../../util/util";
 
 function setupCommentElementTopDown(comment: CrowdinComment) {
     if (comment.references.length === 0) {

@@ -4,8 +4,8 @@
   "version": "1.8.1",
   "author": "Bernardo Lopes (Berna)",
   "scripts": {
-    "compile-csic-css": "npx sass src/strings-in-comments/style.scss dist/css/strings-in-comments.css",
-    "compile-s2pg-css": "npx sass src/source-2-plural-gender/style.scss dist/css/source-2-plural-gender.css",
+    "compile-csic-css": "npx sass src/module/strings-in-comments/style.scss dist/css/strings-in-comments.css",
+    "compile-s2pg-css": "npx sass src/module/source-2-plural-gender/style.scss dist/css/source-2-plural-gender.css",
     "compile-css": "npm run compile-csic-css && npm run compile-s2pg-css",
     "build": "npm run compile-css && webpack --mode=production",
     "build-dev": "npm run compile-css && webpack --mode=development",

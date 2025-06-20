@@ -1,4 +1,4 @@
-import {ReferencedString} from "../strings-in-comments/referenced-string";
+import {ReferencedString} from "../../module/strings-in-comments/referenced-string";
 
 export class CrowdinComment {
     elementId: string;

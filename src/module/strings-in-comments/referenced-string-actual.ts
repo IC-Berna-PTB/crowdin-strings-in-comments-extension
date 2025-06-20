@@ -1,8 +1,8 @@
 import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
-import {TranslationStatus} from "../util";
-import {crowdinTranslationStatusIcon} from "../crowdin/crowdin-html-elements";
-import {CrowdinUserProjects} from "../crowdin/api/user-projects-response/crowdin-user-projects";
+import {TranslationStatus} from "../../util/util";
+import {crowdinTranslationStatusIcon} from "../../util/crowdin/crowdin-html-elements";
+import {CrowdinUserProjects} from "../../util/crowdin/api/user-projects-response/crowdin-user-projects";
 
 
 function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HTMLElement {

@@ -1,4 +1,4 @@
-import {elementReady} from "../util";
+import {elementReady} from "../../util/util";
 
 function reloadFileName(element: HTMLElement) {
     let actualElement: HTMLAnchorElement = element.querySelector(".current-file-name > a")
