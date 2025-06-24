@@ -28,8 +28,6 @@ function updateCommentElementTopDown(comment: CrowdinComment) {
 
 function  generateLinkList(comment: CrowdinComment): HTMLElement {
     return comment.references
-        .filter(r => r instanceof ReferencedStringActual)
-        .filter(r => r.translation !== undefined)
         .map(r => r.generateHtml())
         .filter(r => r !== undefined)
         .reduce((p, c) => {
