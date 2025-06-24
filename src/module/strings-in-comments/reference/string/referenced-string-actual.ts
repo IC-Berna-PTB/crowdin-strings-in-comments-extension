@@ -1,8 +1,12 @@
 import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
-import {TranslationStatus} from "../../util/util";
-import {crowdinTranslationStatusIcon} from "../../util/crowdin/crowdin-html-elements";
-import {CrowdinUserProjects} from "../../util/crowdin/api/user-projects-response/crowdin-user-projects";
+import {convertCrowdinTranslationStatus, TranslationStatus} from "../../../../util/util";
+import {crowdinTranslationStatusIcon} from "../../../../util/crowdin/crowdin-html-elements";
+import {CrowdinUserProjects} from "../../../../util/crowdin/api/user-projects-response/crowdin-user-projects";
+import {
+    CrowdinPhrasesResponseDataPhrase
+} from "../../../../util/crowdin/api/phrases-request/crowdin-phrases-response-data-phrase";
+import {ReferencedSearchQuery} from "../search-query/referenced-search-query";
 
 
 function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HTMLElement {
@@ -119,4 +123,16 @@ export class ReferencedStringActual implements ReferencedString {
     getStringId(): number {
         return this.id.getStringId();
     }
+
 }
+
+export function fromPhrasesResponseDataPhrase(phrase: CrowdinPhrasesResponseDataPhrase, query: ReferencedSearchQuery) {
+    return new ReferencedStringActual(query.getProjectId(),
+        phrase.id,
+        phrase.text,
+        phrase.top_suggestion_text,
+        convertCrowdinTranslationStatus(phrase.translation_status),
+        phrase.key,
+        phrase.file_path)
+}
+

@@ -1,11 +1,12 @@
 import {CrowdinComment} from "./crowdin-comment";
-import {ReferencedString} from "./referenced-string";
-import {ReferencedStringId} from "./referenced-string-id";
-import {ReferencedStringActual} from "./referenced-string-actual";
-import {CrowdinPhraseResponse} from "../../util/crowdin/api/phrase-response/crowdin-phrase-response";
-import {CrowdinInitResponse} from "../../util/crowdin/api/init-response/crowdin-init-response";
-import {elementReady, getFetchParams, parsedClass, swapClassSelector} from "../../util/util";
-import {CrowdinBasicSearchQueryParams, CrowdinSearchQueryParams} from "../../util/crowdin/crowdin-search-query-params";
+import {ReferencedString} from "./reference/string/referenced-string";
+import {ReferencedStringId} from "./reference/string/referenced-string-id";
+import {ReferencedStringActual} from "./reference/string/referenced-string-actual";
+import {elementReady, parsedClass, swapClassSelector} from "../../util/util";
+import {CrowdinSearchParameters} from "../../util/crowdin/crowdin-search-parameters";
+import {getPhrase, getPhrases, getProjectId} from "../../util/crowdin/api/crowdin-api-client";
+import {ReferencedSearchQuery} from "./reference/search-query/referenced-search-query";
+import {ReferencedSearchQueryActual} from "./reference/search-query/referenced-search-query-actual";
 
 function setupCommentElementTopDown(comment: CrowdinComment) {
     if (comment.references.length === 0) {
@@ -59,9 +60,9 @@ function isFirst(entry: ReferencedString, index: number, array: ReferencedString
     return true;
 }
 
-function getLinks(comment: CrowdinComment): CrowdinComment {
+async function getLinks(comment: CrowdinComment): Promise<CrowdinComment> {
     const commentPostExact = getLinksWithExactId(comment);
-    return getLinksWithCrowdinSearch(commentPostExact);
+    return await getLinksWithCrowdinSearch(commentPostExact);
 }
 
 function getLinksWithExactId(comment: CrowdinComment): CrowdinComment {
@@ -73,57 +74,36 @@ function getLinksWithExactId(comment: CrowdinComment): CrowdinComment {
     return comment.withAppendedReferences(references);
 }
 
-function getLinksWithCrowdinSearch(comment: CrowdinComment): CrowdinComment {
+async function getLinksWithCrowdinSearch(comment: CrowdinComment): Promise<CrowdinComment> {
     const regex = getUrlWithSearchQueryRegex()
     const urls = comment.text.matchAll(regex).toArray()
-    for (let url of urls) {
-        let aaaa = CrowdinSearchQueryParams.generateFromUrl(url[0]);
-        if (aaaa instanceof CrowdinBasicSearchQueryParams) {
-            console.log(aaaa)
-        }
-    }
-    return comment
+    const references: ReferencedSearchQuery[] = []
+    await Promise.all(urls
+        .map(url => url[0])
+        .map(async url => ({
+            url: url,
+            params: await CrowdinSearchParameters.generateFromUrl(url)
+        })).map(promise => promise.then(obj => references.push(
+                new ReferencedSearchQuery(getProjectId(new URL(obj.url)), obj.params)))
+        ))
+    return comment.withAppendedReferences(references)
 }
 
 async function getApprovedTranslations(comment: CrowdinComment): Promise<CrowdinComment> {
-    const r_1 = await Promise.all(comment.references
+    const references = comment.references
+    const r_1 = await Promise.all(references
         .filter(r => r instanceof ReferencedStringActual || r instanceof ReferencedStringId)
         .map(async (r) => getPhrase(r)))
         .then(promises => promises.filter(r => r !== null));
-    return comment.withReplacedReferences(r_1);
+    var partialComment = comment.withReplacedReferences(r_1);
+
+    const r_2 = await Promise.all(references
+        .filter(r => r instanceof ReferencedSearchQuery || r instanceof ReferencedSearchQueryActual)
+        .map(async (r) => getPhrases(r)))
+        .then(promises => promises.filter(r => r !== null));
+    return partialComment.withAppendedReferences(r_2);
 }
 
-
-async function getPhrase(referencedString: ReferencedString): Promise<ReferencedString> {
-    return await fetch(getPhraseUrl(referencedString.getProjectId(), await getLanguageId(getProjectId()), referencedString.getStringId()), getFetchParams())
-        .then(r => {
-            if (r.status !== 200) {
-                throw new Error("User does not have access!")
-            }
-            return r;
-        })
-        .then(r => r.text())
-        .then(r => JSON.parse(r) as CrowdinPhraseResponse)
-        .then(r => r.data)
-        .then(r => {
-            if (r.success) {
-                return r;
-            }
-            throw new Error(`Could not retrieve translation for project ${referencedString.getProjectId()} and string ${referencedString.getStringId()}`)
-        })
-        .then(r => new ReferencedStringActual(referencedString.getProjectId(),
-            referencedString.getStringId(),
-            r.translation.text,
-            r.top_suggestion,
-            (r.translation_status.approved ? "approved" : (r.translation_status.translated ? "translated" : "not-translated")),
-            r.translation.key,
-            r.translation.file_path))
-        .catch(() => null)
-
-}
-function getPhraseUrl(projectId: number, languageId: number, stringId: number) {
-    return `${window.location.origin}/backend/translation/phrase?project_id=${projectId}&target_language_id=${languageId}&translation_id=${stringId}`;
-}
 
 function getUrlWithExactIdRegex() {
     return new RegExp(`${window.location.origin}/editor/(?<projectId>\\d+)\\S+#(?<identifier>\\d+)`, 'g')
@@ -131,22 +111,6 @@ function getUrlWithExactIdRegex() {
 
 function getUrlWithSearchQueryRegex(): RegExp {
     return new RegExp(`${window.location.origin}/editor/(?<projectId>\\d+)\\S+#q=(?<query>\\S+)`, 'g')
-}
-
-function getProjectId(): number {
-    return parseInt(window.location.pathname.split("/")[2])
-}
-
-async function getLanguageId(projectId: number): Promise<number> {
-    //@ts-ignore
-    const languages = window.location.pathname.split("/")[4];
-    return fetch(`${window.location.origin}/backend/editor/init?editor_mode=translate&project_id=${projectId}&file_id=all&languages=${languages}`, getFetchParams())
-        .then(r => r.text())
-        .then(r => JSON.parse(r) as CrowdinInitResponse)
-        .then(r => r.data)
-        .then(r => r.init_editor)
-        .then(r => r.target_language ?? r.out_of_scope_target_lang)
-        .then(r => r.id)
 }
 
 function hookDeleteButtons(element: HTMLElement) {
@@ -202,8 +166,8 @@ function reloadComments() {
         .filter(e => notYetParsed(e))
         .map(e => markAsParsed(e))
         .map(e => new CrowdinComment(`#${e.id}`, e.querySelector(".comment-item-text")?.textContent))
-        .map(comment => getLinks(comment))
-        .map(comment => getApprovedTranslations(comment))
+        .map(async comment => await getLinks(comment))
+        .map(commentPromise => commentPromise.then(p => getApprovedTranslations(p)))
         .map(commentPromise => commentPromise.then(setupCommentElementTopDown))
 }
 

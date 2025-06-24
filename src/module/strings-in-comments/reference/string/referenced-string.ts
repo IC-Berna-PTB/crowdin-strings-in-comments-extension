@@ -1,4 +1,4 @@
-import {Reference} from "./reference";
+import {Reference} from "../reference";
 
 export interface ReferencedString extends Reference {
     getProjectId(): number;

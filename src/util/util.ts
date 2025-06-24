@@ -1,7 +1,13 @@
+import {
+    CrowdinPhraseResponseTranslationStatus
+} from "./crowdin/api/phrase-response/crowdin-phrase-response-translation-status";
+
 export function getFetchParams(): RequestInit {
+    const headers = new Headers();
+    headers.append("X-Csrf-Token", getCsrfToken());
     return {
         credentials: "include",
-        headers: {"X-Csrf-Token": getCsrfToken()}
+        headers: headers,
     };
 }
 
@@ -18,6 +24,16 @@ export const swapClassSelector = ".swap-comment-and-strings";
 export const parsedClass = "csic-parsed";
 
 export type TranslationStatus = "not-translated" | "translated" | "approved";
+
+export function convertCrowdinTranslationStatus(status: CrowdinPhraseResponseTranslationStatus): TranslationStatus {
+    if (status.approved) {
+        return "approved";
+    }
+    if (status.translated) {
+        return "translated";
+    }
+    return "not-translated";
+}
 
 export function elementReady(selector: string) {
     return new Promise((resolve) => {

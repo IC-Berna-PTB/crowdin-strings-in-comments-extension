@@ -1,4 +1,4 @@
-import {Reference} from "./reference";
+import {Reference} from "./reference/reference";
 
 export class CrowdinComment {
     elementId: string;
