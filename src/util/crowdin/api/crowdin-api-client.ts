@@ -69,7 +69,7 @@ export async function getPhrases(referencedSearchQuery: ReferencedSearchQuery): 
         .then(r => r.data)
         .then(r => new ReferencedSearchQueryActual(referencedSearchQuery.getQuery().project_id,
             referencedSearchQuery.getQuery(),
-            r.phrases.map(p => fromPhrasesResponseDataPhrase(p, referencedSearchQuery))))
+            r.phrases.map(p => fromPhrasesResponseDataPhrase(p, referencedSearchQuery)), r.found))
 }
 
 function getPhraseUrl(projectId: number, languageId: number, stringId: number) {

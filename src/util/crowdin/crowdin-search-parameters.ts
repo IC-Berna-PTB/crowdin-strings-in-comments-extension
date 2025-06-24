@@ -168,12 +168,12 @@ export class CrowdinSearchParametersAdvanced extends CrowdinSearchParameters {
 
     static generateFromSearchParams(params: URLSearchParams, projectId: number, fileId: "all" | number, targetLanguageId: number, query: string): CrowdinSearchParametersAdvanced {
         const result = new CrowdinSearchParametersAdvanced(projectId, fileId, targetLanguageId, 1, query);
-        result.custom_filter.added_from = Date.parse(params.get("added_from"))
-        result.custom_filter.added_to = Date.parse(params.get("added_to"))
-        result.custom_filter.updated_from = Date.parse(params.get("updated_from"))
-        result.custom_filter.updated_to = Date.parse(params.get("updated_to"))
-        result.custom_filter.changed_from = Date.parse(params.get("changed_from"))
-        result.custom_filter.changed_to = Date.parse(params.get("changed_to"))
+        result.custom_filter.added_from = params.get("added_from")
+        result.custom_filter.added_to = params.get("added_to")
+        result.custom_filter.updated_from = params.get("updated_from")
+        result.custom_filter.updated_to = params.get("updated_to")
+        result.custom_filter.changed_from = params.get("changed_from")
+        result.custom_filter.changed_to = params.get("changed_to")
 
         result.custom_filter.verbal_expression_scope = params.get("verbal_expression_scope") as CrowdinSearchScope
         result.custom_filter.verbal_expression = params.get("verbal_expression")
@@ -225,12 +225,12 @@ class CustomFilter {
 
 class CustomFilterAdvanced extends CustomFilter {
 
-    added_from?: number
-    added_to?: number
-    updated_from?: number
-    updated_to?: number
-    changed_from?: number
-    changed_to?: number
+    added_from?: string
+    added_to?: string
+    updated_from?: string
+    updated_to?: string
+    changed_from?: string
+    changed_to?: string
 
     verbal_expression_scope?: CrowdinSearchScope
     verbal_expression?: string
