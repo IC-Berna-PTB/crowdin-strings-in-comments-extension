@@ -30,7 +30,8 @@
 }
 
 .csic-search-query--container {
-  border: 1px solid #0E1013;
+  border: 1px solid #000000;
+  border-radius: 10px;
   padding: 10px;
 }
 
@@ -38,9 +39,19 @@
   text-align: center;
 }
 
-.crowdin-search-query--inner-container {
+.csic-superscript {
+  vertical-align: super;
+  font-size: smaller;
+  line-height: normal;
+  color: var(--crowdin-body-color);
+}
+
+.csic-search-query--inner-container {
   overflow-y: auto;
-  max-height: calc(100vh - 16px);
+  max-height: calc(50vh - 16px);
+  border: 1px dotted black;
+  padding: 5px 10px;
+  background-color: color-mix(in srgb, var(--crowdin-gray-005), transparent 95%);
 }
 
 hr.csic-separator {

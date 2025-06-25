@@ -29,7 +29,7 @@ export class ReferencedSearchQueryActual extends ReferencedSearchQuery {
         upperLabel.textContent = [textFirstLine, textSecondLine].join("\n");
         div.append(upperLabel);
         const innerDiv = document.createElement("div");
-        innerDiv.classList.add("crowdin-search-query--inner-container");
+        innerDiv.classList.add("csic-search-query--inner-container");
         for (let i = 0; i < Math.min(this.results.length); i++) {
             innerDiv.append(this.results[i].generateHtml())
             const separator = document.createElement("hr");
