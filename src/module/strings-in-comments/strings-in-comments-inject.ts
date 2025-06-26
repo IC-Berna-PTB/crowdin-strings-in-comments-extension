@@ -7,7 +7,6 @@ class Test {
 const updateStringUrlInterval = setInterval(() => {
     //@ts-ignore
     if (window.crowdin && window.crowdin.helpers && window.crowdin.helpers.translation) {
-        console.log("Let's fucking goooooo")
         //@ts-ignore
         const originalGetStringUrl = window.crowdin.helpers.translation.getStringUrl;
         //@ts-ignore
@@ -22,7 +21,6 @@ const updateStringUrlInterval = setInterval(() => {
         }
         clearInterval(updateStringUrlInterval);
     } else {
-        console.log("Ainda não...")
     }
 }, 500);
 
