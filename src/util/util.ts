@@ -20,6 +20,7 @@ export function getCsrfToken() {
     return match[1];
 }
 
+export const nonPersistedCommentId = "discussion-1";
 export const swapClassSelector = ".swap-comment-and-strings";
 export const parsedClass = "csic-parsed";
 

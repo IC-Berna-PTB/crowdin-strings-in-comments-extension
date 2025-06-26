@@ -2,7 +2,7 @@ import {CrowdinComment} from "./crowdin-comment";
 import {ReferencedString} from "./reference/string/referenced-string";
 import {ReferencedStringId} from "./reference/string/referenced-string-id";
 import {ReferencedStringActual} from "./reference/string/referenced-string-actual";
-import {elementReady, parsedClass, swapClassSelector} from "../../util/util";
+import {elementReady, nonPersistedCommentId, parsedClass, swapClassSelector} from "../../util/util";
 import {CrowdinSearchParameters, CrowdinSearchQueryType} from "../../util/crowdin/crowdin-search-parameters";
 import {getCurrentLanguageId, getPhrase, getPhrases, getProjectId} from "../../util/crowdin/api/crowdin-api-client";
 import {ReferencedSearchQuery} from "./reference/search-query/referenced-search-query";
@@ -11,6 +11,8 @@ import {Reference} from "./reference/reference";
 
 function setupCommentElementTopDown(comment: CrowdinComment) {
     if (comment.references.length === 0) {
+        const textElement = document.querySelector(comment.elementId).querySelector("span.comment-item-text");
+        textElement.querySelectorAll(".csic-container").forEach(c => c.remove());
         return;
     }
     updateCommentElementTopDown(comment);
@@ -167,17 +169,21 @@ function markAsParsed(e: HTMLElement): HTMLElement {
 }
 
 function markAsLoading(comment: CrowdinComment): CrowdinComment {
-    const textElement = document.querySelector(comment.elementId).querySelector("span.comment-item-text")
+    let commentElement = document.querySelector(comment.elementId);
+    const textElement = commentElement.querySelector("span.comment-item-text")
     if (textElement === null) {
         return comment;
     }
+    let container = document.createElement("div");
+    container.classList.add("csic-container");
     let separator = document.createElement("hr");
     separator.classList.add("csic-separator");
-    textElement.appendChild(separator);
+    container.appendChild(separator);
     const loadingDiv = document.createElement("div");
     loadingDiv.classList.add("csic-loading");
     loadingDiv.append("Loading...");
-    textElement.appendChild(loadingDiv);
+    container.appendChild(loadingDiv);
+    textElement.appendChild(container);
     return comment;
 }
 
@@ -186,9 +192,11 @@ async function reloadComments(): Promise<void> {
     getCommentElements()
         .map(e => cleanupElement(e))
         .filter(e => e !== undefined)
+        .filter(e => e.id !== nonPersistedCommentId)
         .filter(e => notYetParsed(e))
         .map(e => markAsParsed(e))
         .map(e => new CrowdinComment(`#${e.id}`, e.querySelector(".comment-item-text")?.innerHTML))
+        .filter(comment => comment.elementId !== nonPersistedCommentId)
         .map(comment => getLinks(comment, currentLanguageId))
         .map(comment => markAsLoading(comment))
         .map(comment => getApprovedTranslations(comment))

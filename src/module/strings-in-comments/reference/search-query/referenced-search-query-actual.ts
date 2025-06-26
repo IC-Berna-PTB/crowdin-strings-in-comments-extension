@@ -1,6 +1,6 @@
 import {ReferencedSearchQuery} from "./referenced-search-query";
 import {ReferencedStringActual} from "../string/referenced-string-actual";
-import {CrowdinSearchParameters} from "../../../../util/crowdin/crowdin-search-parameters";
+import {CrowdinSearchParameters, CrowdinSearchQueryType} from "../../../../util/crowdin/crowdin-search-parameters";
 import {convertUrlToCurrentLanguage} from "../../../../util/util";
 
 export class ReferencedSearchQueryActual extends ReferencedSearchQuery {
@@ -46,7 +46,7 @@ export class ReferencedSearchQueryActual extends ReferencedSearchQuery {
         upperLabel.classList.add("csic-search-query--upper-label");
         const searchForPrefixElement = this.createSearchForPrefixElement();
         upperLabel.append(searchForPrefixElement);
-        upperLabel.append(this.getSearchParameters().query);
+        upperLabel.append(this.createSearchTargetElement());
         const resultInfoElement = this.createResultInfoElement();
         upperLabel.append(document.createElement("br"));
         upperLabel.append(resultInfoElement);
@@ -57,8 +57,7 @@ export class ReferencedSearchQueryActual extends ReferencedSearchQuery {
         let text;
         if (this.totalResults === 1) {
             text = `(Only one result!)`
-        }
-        else if (this.totalResults > this.MAX_RESULTS) {
+        } else if (this.totalResults > this.MAX_RESULTS) {
             text = `(Showing first 50 of ${this.totalResults} results, click here to view all)`
         } else {
             text = `(Showing all ${this.totalResults} results, click here to open in another tab)`
@@ -77,5 +76,20 @@ export class ReferencedSearchQueryActual extends ReferencedSearchQuery {
         firstLineSpan.classList.add("csic-muted");
         firstLineSpan.textContent = "Search for ";
         return firstLineSpan;
+    }
+
+    private createSearchTargetElement() {
+        if (this.getSearchParameters().query && this.getSearchParameters().query.trim() !== "") {
+            return this.getSearchParameters().query.trim();
+        }
+        const span = document.createElement("span");
+        span.classList.add("csic-muted");
+        if (this.getSearchParameters().filter === CrowdinSearchQueryType.CROQL_FILTERING) {
+            span.textContent = "CroQL query";
+        }
+        if (this.getSearchParameters().filter === CrowdinSearchQueryType.ADVANCED_FILTERING) {
+            span.textContent = "advanced filters";
+        }
+        return span;
     }
 }
