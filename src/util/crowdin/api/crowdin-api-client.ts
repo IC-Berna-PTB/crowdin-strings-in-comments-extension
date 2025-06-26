@@ -44,13 +44,8 @@ export async function getPhrase(referencedString: ReferencedString): Promise<Ref
                     referencedString.getFallbackKey());
                 searchParameters.search_scope = "key";
                 searchParameters.search_strict = true;
-                let url = new URL(window.location.origin);
-                url.pathname = `editor/${referencedString.getProjectId()}/${referencedString.getFallbackFileId()}/${(getCurrentLanguagePair())}`;
-                url.searchParams.append("search_strict", "1")
-                url.searchParams.append("search_scope", "key")
-                url.hash = `q=${referencedString.getFallbackKey()}`;
                 let fallbackResponse = await getPhrases(new ReferencedSearchQuery(referencedString.getProjectId(),
-                    searchParameters, url));
+                    searchParameters, searchParameters.url));
                 if (fallbackResponse.totalResults === 1) {
                     return fallbackResponse.results[0];
                 }

@@ -3,6 +3,7 @@ import {
     getProjectId,
     getSearchQuery
 } from "./api/crowdin-api-client";
+import {getCurrentLanguagePair} from "../util";
 
 export enum CrowdinSearchQueryType {
     ADVANCED_FILTERING = 12,
@@ -108,6 +109,16 @@ export class CrowdinSearchParametersBasic extends CrowdinSearchParameters {
         this.search_option = crowdinSearchScopeToOption.get(search_scope)
     }
 
+    get url(): URL {
+        const url = new URL(window.location.origin);
+        url.pathname = [this.project_id, this.file_id, getCurrentLanguagePair()].join("/")
+        url.searchParams.append("search_strict", String(booleanToInt(this.search_strict)));
+        url.searchParams.append("search_full_match", String(booleanToInt(this.search_full_match)))
+        url.searchParams.append("search_scope", this.search_scope)
+        url.hash = `q=${this.query}`
+        return url;
+    }
+
     static generateFromSearchParams(params: URLSearchParams, projectId: number, fileId: number | "all", targetLanguageId: number, query: string): CrowdinSearchParametersBasic {
         const result = new CrowdinSearchParametersBasic(+params.get("value"), projectId, fileId, targetLanguageId, 1, query);
         result.search_scope = params.get("search_scope") as CrowdinSearchScope;
@@ -117,6 +128,10 @@ export class CrowdinSearchParametersBasic extends CrowdinSearchParameters {
         return result;
     }
 
+}
+
+export function booleanToInt(booleanValue: boolean): number {
+    return booleanValue ? 1 : 0;
 }
 
 type CrowdinTranslationFilter =
