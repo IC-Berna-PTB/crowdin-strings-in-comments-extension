@@ -196,6 +196,7 @@ async function reloadComments(): Promise<void> {
 }
 
 elementReady("#discussions_messages").then((element: HTMLElement) => {
+    void getCurrentLanguageId(); //preload the language id
     void reloadComments();
     new MutationObserver(() => {
         hookDeleteButtons(element);

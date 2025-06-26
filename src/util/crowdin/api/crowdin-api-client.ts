@@ -98,13 +98,26 @@ export function getSearchQuery(url: URL): string {
 }
 
 export async function getCurrentLanguageId(): Promise<number> {
-    //@ts-ignore
     const languages = window.location.pathname.split("/")[4];
-    return fetch(`${window.location.origin}/backend/editor/init?editor_mode=translate&project_id=${getCurrentProjectId()}&file_id=all&languages=${languages}`, getFetchParams())
-        .then(r => r.text())
-        .then(r => JSON.parse(r) as CrowdinInitResponse)
-        .then(r => r.data)
-        .then(r => r.init_editor)
-        .then(r => r.target_language ?? r.out_of_scope_target_lang)
-        .then(r => r.id)
+    if (languages != lastLanguages) {
+        return fetch(`${window.location.origin}/backend/editor/init?editor_mode=translate&project_id=${getCurrentProjectId()}&file_id=all&languages=${languages}`, getFetchParams())
+            .then(r => r.text())
+            .then(r => JSON.parse(r) as CrowdinInitResponse)
+            .then(r => r.data)
+            .then(r => r.init_editor)
+            .then(r => r.target_language ?? r.out_of_scope_target_lang)
+            .then(r => r.id)
+            .then(r => {
+                lastLanguageId = r;
+                lastLanguages = languages;
+                return;
+            })
+            .then(() => lastLanguageId)
+    } else {
+        return lastLanguageId;
+    }
+
 }
+
+let lastLanguages: string = "";
+let lastLanguageId: number = -1;
