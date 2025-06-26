@@ -20,9 +20,7 @@ function updateCommentElementTopDown(comment: CrowdinComment) {
     if (textElement === null) {
         return;
     }
-    let separator = document.createElement("hr");
-    separator.classList.add("csic-separator");
-    textElement.appendChild(separator);
+    textElement.querySelectorAll(".csic-loading").forEach(e => e.remove());
     textElement.appendChild(generateLinkList(comment));
 }
 
@@ -59,10 +57,10 @@ function isFirst(entry: ReferencedString, index: number, array: ReferencedString
     return true;
 }
 
-async function getLinks(comment: CrowdinComment): Promise<CrowdinComment> {
+function getLinks(comment: CrowdinComment, currentLanguageId: number): CrowdinComment {
     const urls = findUrlsInComment(comment);
     const exactReferences = getLinksWithExactId(urls);
-    const queryReferences = await getLinksWithCrowdinSearch(urls);
+    const queryReferences = getLinksWithCrowdinSearch(urls, currentLanguageId);
     return comment.withReplacedReferences(exactReferences.concat(queryReferences))
 }
 
@@ -73,18 +71,19 @@ function getLinksWithExactId(urls: URL[]): Reference[] {
         .filter((entry, index, array) => isFirst(entry, index, array))
 }
 
-async function getLinksWithCrowdinSearch(urls: URL[]): Promise<Reference[]> {
+function getLinksWithCrowdinSearch(urls: URL[], currentLanguageId: number): Reference[] {
     const references: ReferencedSearchQuery[] = []
-    const currentLanguageId = await getCurrentLanguageId();
-    await Promise.all(urls
+    urls
         .map(url => url)
         .filter(url => url.hash.match(/^#q=\S+$/) || urlIsForAdvancedOrCroQLFiltering(url))
-        .map(async url => ({
+        .map(url => ({
             url: url,
             params: CrowdinSearchParameters.fromUrl(url, currentLanguageId)
-        })).map(promise => promise.then(obj => references.push(
-            new ReferencedSearchQuery(getProjectId(new URL(obj.url)), obj.params, new URL(obj.url))))
-        ))
+        })).map(obj => references.push(
+            new ReferencedSearchQuery(getProjectId(new URL(obj.url)),
+                obj.params,
+                new URL(obj.url)))
+        )
     return references;
 }
 
@@ -142,7 +141,7 @@ function hookSaveEditButtons(element: HTMLElement) {
                 e.querySelector(swapClassSelector)?.parentElement?.remove();
                 e.querySelector(swapClassSelector)?.remove();
                 e.classList.remove(parsedClass);
-                reloadComments();
+                void reloadComments();
             })
         })
 }
@@ -167,23 +166,40 @@ function markAsParsed(e: HTMLElement): HTMLElement {
     return e;
 }
 
-function reloadComments() {
+function markAsLoading(comment: CrowdinComment): CrowdinComment {
+    const textElement = document.querySelector(comment.elementId).querySelector("span.comment-item-text")
+    if (textElement === null) {
+        return comment;
+    }
+    let separator = document.createElement("hr");
+    separator.classList.add("csic-separator");
+    textElement.appendChild(separator);
+    const loadingDiv = document.createElement("div");
+    loadingDiv.classList.add("csic-loading");
+    loadingDiv.append("Loading...");
+    textElement.appendChild(loadingDiv);
+    return comment;
+}
+
+async function reloadComments(): Promise<void> {
+    const currentLanguageId = await getCurrentLanguageId();
     getCommentElements()
         .map(e => cleanupElement(e))
         .filter(e => e !== undefined)
         .filter(e => notYetParsed(e))
         .map(e => markAsParsed(e))
         .map(e => new CrowdinComment(`#${e.id}`, e.querySelector(".comment-item-text")?.innerHTML))
-        .map(async comment => await getLinks(comment))
-        .map(commentPromise => commentPromise.then(p => getApprovedTranslations(p)))
+        .map(comment => getLinks(comment, currentLanguageId))
+        .map(comment => markAsLoading(comment))
+        .map(comment => getApprovedTranslations(comment))
         .map(commentPromise => commentPromise.then(setupCommentElementTopDown))
 }
 
 elementReady("#discussions_messages").then((element: HTMLElement) => {
-    reloadComments();
+    void reloadComments();
     new MutationObserver(() => {
         hookDeleteButtons(element);
         hookSaveEditButtons(element);
-        reloadComments();
+        void reloadComments();
     }).observe(element, {childList: true, subtree: true});
 });
