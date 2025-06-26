@@ -124,6 +124,14 @@ export class ReferencedStringActual implements ReferencedString {
         return this.id.getStringId();
     }
 
+    getFallbackFileId(): number | null {
+        return this.id.getFallbackFileId();
+    }
+
+    getFallbackKey(): string | null {
+        return this.id.getFallbackKey();
+    }
+
 }
 
 export function fromPhrasesResponseDataPhrase(phrase: CrowdinPhrasesResponseDataPhrase, query: ReferencedSearchQuery) {

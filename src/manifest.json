@@ -39,5 +39,11 @@
   "web_accessible_resources": [ {
     "matches": [ "\u003Call_urls>" ],
     "resources": [ "resource/*" ]
+  },{
+    "matches": [
+      "*://*.crowdin.com/*",
+      "*://crowdin.com/*"
+    ],
+    "resources": ["strings-in-comments-inject.js"]
   } ]
 }

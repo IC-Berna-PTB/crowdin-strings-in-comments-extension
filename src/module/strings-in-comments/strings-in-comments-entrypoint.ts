@@ -52,7 +52,8 @@ function getCommentElements(): HTMLElement[] {
 function isFirst(entry: ReferencedString, index: number, array: ReferencedString[]) {
     for (let i = 0; i < index; i++) {
         let curr = array[i];
-        if (curr.getProjectId() === entry.getProjectId() && curr.getStringId() === entry.getStringId()) {
+        if (curr.getProjectId() === entry.getProjectId()
+            && (curr.getStringId() === entry.getStringId() || curr.getFallbackKey() === entry.getFallbackKey())) {
             return false;
         }
     }
@@ -108,7 +109,7 @@ function findUrlsInComment(comment: CrowdinComment): URL[] {
         .map(url => new URL(url));
 }
 
-async function getApprovedTranslations(comment: CrowdinComment): Promise<CrowdinComment> {
+async function getTranslations(comment: CrowdinComment): Promise<CrowdinComment> {
     const references = comment.references
     const r_1 = await Promise.all(references
         .filter(r => r instanceof ReferencedStringActual || r instanceof ReferencedStringId)
@@ -199,7 +200,7 @@ async function reloadComments(): Promise<void> {
         .filter(comment => comment.elementId !== nonPersistedCommentId)
         .map(comment => getLinks(comment, currentLanguageId))
         .map(comment => markAsLoading(comment))
-        .map(comment => getApprovedTranslations(comment))
+        .map(comment => getTranslations(comment))
         .map(commentPromise => commentPromise.then(setupCommentElementTopDown))
 }
 
@@ -212,3 +213,18 @@ elementReady("#discussions_messages").then((element: HTMLElement) => {
         void reloadComments();
     }).observe(element, {childList: true, subtree: true});
 });
+
+function injectScript(file_path: string, tag: string) {
+    const node = document.getElementsByTagName(tag)[0];
+    const script = document.createElement('script');
+    script.setAttribute('type'
+        , 'text/javascript');
+    script.setAttribute('src'
+        , file_path);
+    node.appendChild(script);
+
+}
+injectScript(chrome.runtime.getURL('strings-in-comments-inject.js'), 'body');
+
+// //@ts-ignore
+// console.log(window.wrappedJSObject.crowdin.helpers.url.getEditorInfo())

@@ -1,5 +1,5 @@
 import {ReferencedString} from "../../../module/strings-in-comments/reference/string/referenced-string";
-import {getFetchParams} from "../../util";
+import {getCurrentLanguagePair, getFetchParams} from "../../util";
 import {CrowdinPhraseResponse} from "./phrase-response/crowdin-phrase-response";
 import {
     fromPhrasesResponseDataPhrase,
@@ -13,6 +13,7 @@ import {CrowdinPhrasesResponse} from "./phrases-request/crowdin-phrases-response
 import {
     ReferencedSearchQueryActual
 } from "../../../module/strings-in-comments/reference/search-query/referenced-search-query-actual";
+import {CrowdinSearchParametersBasic, CrowdinSearchQueryType} from "../crowdin-search-parameters";
 
 export async function getPhrase(referencedString: ReferencedString): Promise<ReferencedString> {
     return await fetch(getPhraseUrl(referencedString.getProjectId(), await getCurrentLanguageId(), referencedString.getStringId()), getFetchParams())
@@ -25,19 +26,37 @@ export async function getPhrase(referencedString: ReferencedString): Promise<Ref
         .then(r => r.text())
         .then(r => JSON.parse(r) as CrowdinPhraseResponse)
         .then(r => r.data)
-        .then(r => {
+        .then(async r => {
             if (r.success) {
-                return r;
+                return new ReferencedStringActual(referencedString.getProjectId(),
+                    referencedString.getStringId(),
+                    r.translation.text,
+                    r.top_suggestion,
+                    (r.translation_status.approved ? "approved" : (r.translation_status.translated ? "translated" : "not-translated")),
+                    r.translation.key,
+                    r.translation.file_path)
+            } else if (referencedString.getFallbackKey()) {
+                let searchParameters = new CrowdinSearchParametersBasic(CrowdinSearchQueryType.SHOW_ALL,
+                    referencedString.getProjectId(),
+                    referencedString.getFallbackFileId(),
+                    await getCurrentLanguageId(),
+                    1,
+                    referencedString.getFallbackKey());
+                searchParameters.search_scope = "key";
+                searchParameters.search_strict = true;
+                let url = new URL(window.location.origin);
+                url.pathname = `editor/${referencedString.getProjectId()}/${referencedString.getFallbackFileId()}/${(getCurrentLanguagePair())}`;
+                url.searchParams.append("search_strict", "1")
+                url.searchParams.append("search_scope", "key")
+                url.hash = `q=${referencedString.getFallbackKey()}`;
+                let fallbackResponse = await getPhrases(new ReferencedSearchQuery(referencedString.getProjectId(),
+                    searchParameters, url));
+                if (fallbackResponse.totalResults === 1) {
+                    return fallbackResponse.results[0];
+                }
             }
             throw new Error(`Could not retrieve translation for project ${referencedString.getProjectId()} and string ${referencedString.getStringId()}`)
         })
-        .then(r => new ReferencedStringActual(referencedString.getProjectId(),
-            referencedString.getStringId(),
-            r.translation.text,
-            r.top_suggestion,
-            (r.translation_status.approved ? "approved" : (r.translation_status.translated ? "translated" : "not-translated")),
-            r.translation.key,
-            r.translation.file_path))
         .catch(() => null)
 
 }
@@ -50,7 +69,7 @@ function append(body: URLSearchParams, entry: [string, any]) {
     body.append(entry[0], entry[1].toString());
 }
 
-export async function getPhrases(referencedSearchQuery: ReferencedSearchQuery): Promise<ReferencedSearchQuery> {
+export async function getPhrases(referencedSearchQuery: ReferencedSearchQuery): Promise<ReferencedSearchQueryActual> {
     let parameters = getFetchParams();
     const body = new URLSearchParams();
     Object.entries(referencedSearchQuery.getSearchParameters()).forEach(entry => append(body, entry))

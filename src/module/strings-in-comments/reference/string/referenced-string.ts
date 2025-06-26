@@ -5,4 +5,8 @@ export interface ReferencedString extends Reference {
 
     getStringId(): number;
 
+    getFallbackFileId(): number | null;
+
+    getFallbackKey(): string | null;
+
 }

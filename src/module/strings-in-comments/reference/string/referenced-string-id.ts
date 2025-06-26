@@ -1,12 +1,16 @@
 import {ReferencedString} from "./referenced-string";
 
 export class ReferencedStringId implements ReferencedString {
-    projectId: number;
-    stringId: number;
+    private readonly projectId: number;
+    private readonly stringId: number;
+    private readonly fallbackKey?: string
+    private fallbackFileId?: number;
 
-    constructor(projectId: number, stringId: number) {
+    constructor(projectId: number, stringId: number, fallbackFileId?: number, fallbackKey?: string) {
         this.projectId = projectId;
         this.stringId = stringId;
+        this.fallbackFileId = fallbackFileId;
+        this.fallbackKey = fallbackKey;
     }
 
     generateHtml(): HTMLElement | undefined {
@@ -20,9 +24,21 @@ export class ReferencedStringId implements ReferencedString {
         return this.stringId;
     }
 
-    static fromUrl(url: URL): ReferencedStringId {
-        const projectId = parseInt(url.pathname.split("/")[2]);
-        const stringId = parseInt(url.hash.replace("#", ""));
-        return new ReferencedStringId(projectId, stringId);
+    getFallbackFileId(): number | null {
+        return this.fallbackFileId;
     }
+
+    getFallbackKey(): string | null {
+        return this.fallbackKey;
+    }
+
+    static fromUrl(url: URL): ReferencedStringId {
+        let pathSplit = url.pathname.split("/");
+        const projectId = parseInt(pathSplit[2]);
+        const stringId = parseInt(url.hash.replace("#", ""));
+        const fallbackFileId = parseInt(pathSplit[3]);
+        const fallbackKey = url.searchParams.get("csic-key");
+        return new ReferencedStringId(projectId, stringId, fallbackFileId, fallbackKey);
+    }
+
 }
