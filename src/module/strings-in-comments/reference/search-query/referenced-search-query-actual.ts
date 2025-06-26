@@ -25,15 +25,19 @@ export class ReferencedSearchQueryActual extends ReferencedSearchQuery {
         div.classList.add("csic-search-query--container")
         const upperLabel = this.createUpperLabelElement();
         div.append(upperLabel);
-        const resultsContainer = document.createElement("div");
-        resultsContainer.classList.add("csic-search-query--results-container");
-        for (let i = 0; i < Math.min(this.results.length); i++) {
-            resultsContainer.append(this.results[i].generateHtml())
-            const separator = document.createElement("hr");
-            separator.classList.add("csic-separator");
-            resultsContainer.append(separator);
+        if (this.totalResults === 1 && this.results.length === 1) {
+            div.append(this.results[0].generateHtml());
+        } else {
+            const resultsContainer = document.createElement("div");
+            resultsContainer.classList.add("csic-search-query--results-container");
+            for (let i = 0; i < Math.min(this.results.length); i++) {
+                resultsContainer.append(this.results[i].generateHtml())
+                const separator = document.createElement("hr");
+                separator.classList.add("csic-separator");
+                resultsContainer.append(separator);
+            }
+            div.append(resultsContainer);
         }
-        div.append(resultsContainer);
         return div;
     }
 
@@ -51,10 +55,13 @@ export class ReferencedSearchQueryActual extends ReferencedSearchQuery {
 
     private createResultInfoElement() {
         let text;
-        if (this.totalResults > this.MAX_RESULTS) {
+        if (this.totalResults === 1) {
+            text = `(Only one result!)`
+        }
+        else if (this.totalResults > this.MAX_RESULTS) {
             text = `(Showing first 50 of ${this.totalResults} results, click here to view all)`
         } else {
-            text = `(Showing all ${this.totalResults} result(s), click here to open in another tab)`
+            text = `(Showing all ${this.totalResults} results, click here to open in another tab)`
         }
         const span = document.createElement("span");
         span.classList.add("csic-secondary");
