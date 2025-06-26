@@ -15,7 +15,7 @@ import {
 } from "../../../module/strings-in-comments/reference/search-query/referenced-search-query-actual";
 
 export async function getPhrase(referencedString: ReferencedString): Promise<ReferencedString> {
-    return await fetch(getPhraseUrl(referencedString.getProjectId(), await getCurrentLanguageId(getCurrentProjectId()), referencedString.getStringId()), getFetchParams())
+    return await fetch(getPhraseUrl(referencedString.getProjectId(), await getCurrentLanguageId(), referencedString.getStringId()), getFetchParams())
         .then(r => {
             if (r.status !== 200) {
                 throw new Error("User does not have access!")
@@ -97,10 +97,10 @@ export function getSearchQuery(url: URL): string {
     return url.hash.replace("#q=", "")
 }
 
-export async function getCurrentLanguageId(projectId: number): Promise<number> {
+export async function getCurrentLanguageId(): Promise<number> {
     //@ts-ignore
     const languages = window.location.pathname.split("/")[4];
-    return fetch(`${window.location.origin}/backend/editor/init?editor_mode=translate&project_id=${projectId}&file_id=all&languages=${languages}`, getFetchParams())
+    return fetch(`${window.location.origin}/backend/editor/init?editor_mode=translate&project_id=${getCurrentProjectId()}&file_id=all&languages=${languages}`, getFetchParams())
         .then(r => r.text())
         .then(r => JSON.parse(r) as CrowdinInitResponse)
         .then(r => r.data)

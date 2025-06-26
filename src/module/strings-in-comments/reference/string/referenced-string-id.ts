@@ -19,4 +19,10 @@ export class ReferencedStringId implements ReferencedString {
     getStringId(): number {
         return this.stringId;
     }
+
+    static fromUrl(url: URL): ReferencedStringId {
+        const projectId = parseInt(url.pathname.split("/")[2]);
+        const stringId = parseInt(url.hash.replace("#", ""));
+        return new ReferencedStringId(projectId, stringId);
+    }
 }

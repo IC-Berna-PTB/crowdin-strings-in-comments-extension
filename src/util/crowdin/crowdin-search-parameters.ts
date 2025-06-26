@@ -1,6 +1,5 @@
 import {
     getFileId,
-    getCurrentLanguageId,
     getProjectId,
     getSearchQuery
 } from "./api/crowdin-api-client";
@@ -80,21 +79,19 @@ export abstract class CrowdinSearchParameters {
         this.query = query;
     }
 
-    static async generateFromUrl(url: string): Promise<CrowdinSearchParameters> {
-        const parsedUrl = new URL(url);
-        const urlSearchParams = parsedUrl.searchParams;
-        const projectId = getProjectId(parsedUrl);
-        const fileId = getFileId(parsedUrl);
-        const targetLanguageId = await getCurrentLanguageId(projectId);
-        const query = getSearchQuery(parsedUrl);
+    static fromUrl(url: URL, currentLanguageId: number): CrowdinSearchParameters {
+        const urlSearchParams = url.searchParams;
+        const projectId = getProjectId(url);
+        const fileId = getFileId(url);
+        const query = getSearchQuery(url);
 
         switch (urlSearchParams.get("filter") as "basic" | "advanced" | "croql") {
             case "basic":
-                return CrowdinSearchParametersBasic.generateFromSearchParams(urlSearchParams, projectId, fileId, targetLanguageId, query);
+                return CrowdinSearchParametersBasic.generateFromSearchParams(urlSearchParams, projectId, fileId, currentLanguageId, query);
             case "advanced":
-                return CrowdinSearchParametersAdvanced.generateFromSearchParams(urlSearchParams, projectId, fileId, targetLanguageId, query);
+                return CrowdinSearchParametersAdvanced.generateFromSearchParams(urlSearchParams, projectId, fileId, currentLanguageId, query);
             case "croql":
-                return CrowdinSearchParametersCroQL.generateFromSearchParams(urlSearchParams, projectId, fileId, targetLanguageId, query);
+                return CrowdinSearchParametersCroQL.generateFromSearchParams(urlSearchParams, projectId, fileId, currentLanguageId, query);
         }
     }
 
