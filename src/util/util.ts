@@ -35,6 +35,10 @@ export function convertCrowdinTranslationStatus(status: CrowdinPhraseResponseTra
     return "not-translated";
 }
 
+export function getCurrentLanguagePair(): string {
+    return window.location.pathname.split("/")[4];
+}
+
 export function elementReady(selector: string) {
     return new Promise((resolve) => {
         const el = document.querySelector(selector);
@@ -53,4 +57,11 @@ export function elementReady(selector: string) {
                 subtree: true
             });
     });
+}
+
+export function convertUrlToCurrentLanguage(url: URL): string {
+    const pathSplit = url.pathname.split("/");
+    pathSplit[4] = getCurrentLanguagePair();
+    url.pathname = pathSplit.join("/");
+    return url.toString();
 }

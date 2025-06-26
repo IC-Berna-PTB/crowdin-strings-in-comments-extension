@@ -53,7 +53,7 @@ function append(body: URLSearchParams, entry: [string, any]) {
 export async function getPhrases(referencedSearchQuery: ReferencedSearchQuery): Promise<ReferencedSearchQuery> {
     let parameters = getFetchParams();
     const body = new URLSearchParams();
-    Object.entries(referencedSearchQuery.getQuery()).forEach(entry => append(body, entry))
+    Object.entries(referencedSearchQuery.getSearchParameters()).forEach(entry => append(body, entry))
     parameters.body = body.toString();
     (parameters.headers as Headers).append("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8")
     parameters.method = "POST";
@@ -67,8 +67,8 @@ export async function getPhrases(referencedSearchQuery: ReferencedSearchQuery): 
         .then(r => r.text())
         .then(r => JSON.parse(r) as CrowdinPhrasesResponse)
         .then(r => r.data)
-        .then(r => new ReferencedSearchQueryActual(referencedSearchQuery.getQuery().project_id,
-            referencedSearchQuery.getQuery(),
+        .then(r => new ReferencedSearchQueryActual(referencedSearchQuery.getSearchParameters().project_id,
+            referencedSearchQuery.getSearchParameters(), referencedSearchQuery.getOriginalUrl(),
             r.phrases.map(p => fromPhrasesResponseDataPhrase(p, referencedSearchQuery)), r.found))
 }
 

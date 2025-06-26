@@ -1,42 +1,74 @@
 import {ReferencedSearchQuery} from "./referenced-search-query";
 import {ReferencedStringActual} from "../string/referenced-string-actual";
 import {CrowdinSearchParameters} from "../../../../util/crowdin/crowdin-search-parameters";
+import {convertUrlToCurrentLanguage} from "../../../../util/util";
 
 export class ReferencedSearchQueryActual extends ReferencedSearchQuery {
     results: ReferencedStringActual[];
     totalResults: number;
 
 
-    constructor(projectId: number, query: CrowdinSearchParameters, results: ReferencedStringActual[],totalResults: number) {
-        super(projectId, query);
+    constructor(projectId: number,
+                query: CrowdinSearchParameters,
+                originalUrl: URL,
+                results: ReferencedStringActual[],
+                totalResults: number) {
+        super(projectId, query, originalUrl);
         this.results = results;
         this.totalResults = totalResults;
     }
 
+    private readonly MAX_RESULTS = 50;
+
     generateHtml(): HTMLElement | undefined {
         const div = document.createElement("div");
         div.classList.add("csic-search-query--container")
-        const upperLabel = document.createElement("div");
-        upperLabel.classList.add("csic-search-query--upper-label");
-        const textFirstLine = `Search for ${this.getQuery().query}`;
-        var textSecondLine;
-        if (this.totalResults > 50) {
-            textSecondLine = `(Showing 50 of ${this.totalResults})`
-        }
-        else {
-            textSecondLine = `(Showing all ${this.totalResults})`
-        }
-        upperLabel.textContent = [textFirstLine, textSecondLine].join("\n");
+        const upperLabel = this.createUpperLabelElement();
         div.append(upperLabel);
-        const innerDiv = document.createElement("div");
-        innerDiv.classList.add("csic-search-query--inner-container");
+        const resultsContainer = document.createElement("div");
+        resultsContainer.classList.add("csic-search-query--results-container");
         for (let i = 0; i < Math.min(this.results.length); i++) {
-            innerDiv.append(this.results[i].generateHtml())
+            resultsContainer.append(this.results[i].generateHtml())
             const separator = document.createElement("hr");
             separator.classList.add("csic-separator");
-            innerDiv.append(separator);
+            resultsContainer.append(separator);
         }
-        div.append(innerDiv);
+        div.append(resultsContainer);
         return div;
+    }
+
+    private createUpperLabelElement() {
+        const upperLabel = document.createElement("div");
+        upperLabel.classList.add("csic-search-query--upper-label");
+        const searchForPrefixElement = this.createSearchForPrefixElement();
+        upperLabel.append(searchForPrefixElement);
+        upperLabel.append(this.getSearchParameters().query);
+        const resultInfoElement = this.createResultInfoElement();
+        upperLabel.append(document.createElement("br"));
+        upperLabel.append(resultInfoElement);
+        return upperLabel;
+    }
+
+    private createResultInfoElement() {
+        let text;
+        if (this.totalResults > this.MAX_RESULTS) {
+            text = `(Showing first 50 of ${this.totalResults} results, click here to view all)`
+        } else {
+            text = `(Showing all ${this.totalResults} result(s), click here to open in another tab)`
+        }
+        const span = document.createElement("span");
+        span.classList.add("csic-secondary");
+        const anchor = document.createElement("a");
+        anchor.href = convertUrlToCurrentLanguage(this.getOriginalUrl())
+        anchor.textContent = text;
+        span.append(anchor);
+        return span;
+    }
+
+    private createSearchForPrefixElement() {
+        const firstLineSpan = document.createElement("span");
+        firstLineSpan.classList.add("csic-muted");
+        firstLineSpan.textContent = "Search for ";
+        return firstLineSpan;
     }
 }

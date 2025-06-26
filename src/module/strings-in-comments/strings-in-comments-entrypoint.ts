@@ -82,7 +82,7 @@ async function getLinksWithCrowdinSearch(comment: CrowdinComment): Promise<Crowd
             url: url,
             params: await CrowdinSearchParameters.generateFromUrl(url)
         })).map(promise => promise.then(obj => references.push(
-                new ReferencedSearchQuery(getProjectId(new URL(obj.url)), obj.params)))
+                new ReferencedSearchQuery(getProjectId(new URL(obj.url)), obj.params, new URL(obj.url))))
         ))
     return comment.withAppendedReferences(references)
 }
@@ -93,7 +93,7 @@ async function getApprovedTranslations(comment: CrowdinComment): Promise<Crowdin
         .filter(r => r instanceof ReferencedStringActual || r instanceof ReferencedStringId)
         .map(async (r) => getPhrase(r)))
         .then(promises => promises.filter(r => r !== null));
-    var partialComment = comment.withReplacedReferences(r_1);
+    const partialComment = comment.withReplacedReferences(r_1);
 
     const r_2 = await Promise.all(references
         .filter(r => r instanceof ReferencedSearchQuery || r instanceof ReferencedSearchQueryActual)

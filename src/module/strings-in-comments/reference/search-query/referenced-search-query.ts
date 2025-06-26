@@ -4,18 +4,24 @@ import {CrowdinSearchParameters} from "../../../../util/crowdin/crowdin-search-p
 export class ReferencedSearchQuery implements Reference {
     private readonly projectId: number;
     private readonly query: CrowdinSearchParameters;
+    private readonly originalUrl: URL;
 
-    constructor(projectId: number, query: CrowdinSearchParameters) {
+    constructor(projectId: number, query: CrowdinSearchParameters, originalUrl: URL) {
         this.projectId = projectId;
         this.query = query;
+        this.originalUrl = originalUrl;
     }
 
     getProjectId(): number {
         return this.projectId;
     }
 
-    getQuery(): CrowdinSearchParameters {
+    getSearchParameters(): CrowdinSearchParameters {
         return this.query;
+    }
+
+    getOriginalUrl(): URL {
+        return this.originalUrl;
     }
 
     generateHtml(): HTMLElement | undefined {
