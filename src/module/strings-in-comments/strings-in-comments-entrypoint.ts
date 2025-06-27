@@ -62,7 +62,12 @@ function isFirst(entry: ReferencedString, index: number, array: ReferencedString
     for (let i = 0; i < index; i++) {
         let curr = array[i];
         if (curr.getProjectId() === entry.getProjectId()
-            && (curr.getStringId() === entry.getStringId() || curr.getFallbackKey() === entry.getFallbackKey())) {
+            // If they have the same string ID, it's the same
+            && (curr.getStringId() === entry.getStringId()
+                // or, if the current one has a fallback key and file ID...
+                || ((curr.getFallbackKey() && curr.getFallbackFileId())
+                    // and they are equal to those in a previous reference, it's the same string
+                    && (curr.getFallbackKey() === entry.getFallbackKey() && curr.getFallbackFileId() === entry.getFallbackFileId())))) {
             return false;
         }
     }
