@@ -8,6 +8,7 @@ export class CrowdinPhrasesResponseDataPhrase {
     text!: string;
     translation_status!: CrowdinTranslationStatus;
     file_path?: string;
+    file_id?: number;
     top_suggestion_text!: string;
 
     convertToPhraseResponseData(): CrowdinPhraseResponseData {
