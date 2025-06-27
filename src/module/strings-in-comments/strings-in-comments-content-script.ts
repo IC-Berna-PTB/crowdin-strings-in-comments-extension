@@ -115,6 +115,7 @@ function urlIsForAdvancedOrCroQLFiltering(url: URL) {
 function findUrlsInComment(comment: CommentWithReferences): URL[] {
     const parsed = new DOMParser().parseFromString(comment.htmlContent, "text/html");
     return Array.from(parsed.querySelectorAll("a"))
+        .filter(element => !element.classList.contains("user-info"))
         .map((element) => element.href)
         .map(url => new URL(url));
 }
