@@ -1,6 +1,6 @@
 import {Reference} from "./reference/reference";
 
-export class CrowdinComment {
+export class CommentWithReferences {
     elementId: string;
     htmlContent: string;
     references: Reference[];
@@ -13,14 +13,14 @@ export class CrowdinComment {
         this.showingStrings = false;
     }
 
-    withReplacedReferences(references: Reference[]): CrowdinComment {
-        return new CrowdinComment(this.elementId, this.htmlContent, references);
+    withReplacedReferences(references: Reference[]): CommentWithReferences {
+        return new CommentWithReferences(this.elementId, this.htmlContent, references);
     }
 
-    withAppendedReferences(references: Reference[]): CrowdinComment {
+    withAppendedReferences(references: Reference[]): CommentWithReferences {
         const resultReferences: Reference[] = [];
         resultReferences.push(...this.references);
         resultReferences.push(...references);
-        return new CrowdinComment(this.elementId, this.htmlContent, resultReferences);
+        return new CommentWithReferences(this.elementId, this.htmlContent, resultReferences);
     }
 }

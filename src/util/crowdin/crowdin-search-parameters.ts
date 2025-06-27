@@ -2,9 +2,9 @@ import {
     getFileId,
     getProjectId,
     getSearchQuery
-} from "./api/crowdin-api-client";
-import {getCurrentLanguagePair} from "../util";
-import {ReferencedString} from "../../module/strings-in-comments/reference/string/referenced-string";
+} from "../../apis/crowdin/crowdin-main";
+import {ReferencedString} from "../../module/strings-in-comments/aux-objects/reference/string/referenced-string";
+import {getCurrentLanguagePair} from "../getFetchParams";
 
 export enum CrowdinSearchQueryType {
     ADVANCED_FILTERING = 12,
@@ -121,7 +121,7 @@ export class CrowdinSearchParametersBasic extends CrowdinSearchParameters {
     }
 
     static generateFromSearchParams(params: URLSearchParams, projectId: number, fileId: number | "all", targetLanguageId: number, query: string): CrowdinSearchParametersBasic {
-        const result = new CrowdinSearchParametersBasic(+params.get("value"), projectId, fileId, targetLanguageId, 1, query);
+        const result = new CrowdinSearchParametersBasic(+params.get("value"), projectId, fileId, targetLanguageId, 1, decodeURIComponent(query));
         result.search_scope = params.get("search_scope") as CrowdinSearchScope;
         result.case_sensitive = +params.get("case_sensitive") !== 0;
         result.search_full_match = +params.get("search_full_match") !== 0;

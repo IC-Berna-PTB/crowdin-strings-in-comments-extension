@@ -1,25 +1,24 @@
-import {CrowdinComment} from "./crowdin-comment";
-import {ReferencedString} from "./reference/string/referenced-string";
-import {ReferencedStringId} from "./reference/string/referenced-string-id";
-import {ReferencedStringActual} from "./reference/string/referenced-string-actual";
-import {elementReady, nonPersistedCommentId, parsedClass, swapClassSelector} from "../../util/util";
+import {CommentWithReferences} from "./aux-objects/comment-with-references";
+import {ReferencedString} from "./aux-objects/reference/string/referenced-string";
+import {ReferencedStringId} from "./aux-objects/reference/string/referenced-string-id";
+import {ReferencedStringActual} from "./aux-objects/reference/string/referenced-string-actual";
+import {elementReady} from "../../util/util";
 import {
     CrowdinSearchParameters,
-    CrowdinSearchParametersBasic,
     CrowdinSearchQueryType
 } from "../../util/crowdin/crowdin-search-parameters";
 import {
-    getCurrentLanguageId,
-    getFallback, getFileId,
-    getPhrase,
-    getPhrases,
     getProjectId
-} from "../../util/crowdin/api/crowdin-api-client";
-import {ReferencedSearchQuery} from "./reference/search-query/referenced-search-query";
-import {ReferencedSearchQueryActual} from "./reference/search-query/referenced-search-query-actual";
-import {Reference} from "./reference/reference";
+} from "../../apis/crowdin/crowdin-main";
+import {ReferencedSearchQuery} from "./aux-objects/reference/search-query/referenced-search-query";
+import {ReferencedSearchQueryActual} from "./aux-objects/reference/search-query/referenced-search-query-actual";
+import {isHtmleable, Reference} from "./aux-objects/reference/reference";
+import {getCurrentLanguageId} from "../../apis/crowdin/crowdin-aux-functions";
+import {nonPersistedCommentId, parsedClass} from "./constants";
+import {processReferencedString} from "./string/referenced-string-processing";
+import {processReferencedSearchQuery} from "./search-query/referenced-search-query-processing";
 
-function setupCommentElementTopDown(comment: CrowdinComment) {
+function setupCommentElementTopDown(comment: CommentWithReferences) {
     if (comment.references.length === 0) {
         const textElement = document.querySelector(comment.elementId).querySelector("span.comment-item-text");
         textElement.querySelectorAll(".csic-container").forEach(c => c.remove());
@@ -27,7 +26,7 @@ function setupCommentElementTopDown(comment: CrowdinComment) {
     }
     updateCommentElementTopDown(comment);
 }
-function updateCommentElementTopDown(comment: CrowdinComment) {
+function updateCommentElementTopDown(comment: CommentWithReferences) {
     const textElement = document.querySelector(comment.elementId).querySelector("span.comment-item-text")
     if (textElement === null) {
         return;
@@ -37,10 +36,10 @@ function updateCommentElementTopDown(comment: CrowdinComment) {
 }
 
 
-function  generateLinkList(comment: CrowdinComment): HTMLElement {
+function  generateLinkList(comment: CommentWithReferences): HTMLElement {
     return comment.references
+        .filter(r => isHtmleable(r))
         .map(r => r.generateHtml())
-        .filter(r => r !== undefined)
         .reduce((p, c) => {
             if (p.innerText.trim().length !== 0) {
                 p.appendChild(document.createElement("br"))
@@ -70,7 +69,7 @@ function isFirst(entry: ReferencedString, index: number, array: ReferencedString
     return true;
 }
 
-function getLinks(comment: CrowdinComment, currentLanguageId: number): CrowdinComment {
+function getLinks(comment: CommentWithReferences, currentLanguageId: number): CommentWithReferences {
     const urls = findUrlsInComment(comment);
     const exactReferences = getLinksWithExactId(urls);
     const queryReferences = getLinksWithCrowdinSearch(urls, currentLanguageId);
@@ -112,24 +111,24 @@ function urlIsForAdvancedOrCroQLFiltering(url: URL) {
     return value === CrowdinSearchQueryType.CROQL_FILTERING || value === CrowdinSearchQueryType.ADVANCED_FILTERING;
 }
 
-function findUrlsInComment(comment: CrowdinComment): URL[] {
+function findUrlsInComment(comment: CommentWithReferences): URL[] {
     const parsed = new DOMParser().parseFromString(comment.htmlContent, "text/html");
     return Array.from(parsed.querySelectorAll("a"))
         .map((element) => element.href)
         .map(url => new URL(url));
 }
 
-async function getTranslations(comment: CrowdinComment): Promise<CrowdinComment> {
+async function getTranslations(comment: CommentWithReferences): Promise<CommentWithReferences> {
     const references = comment.references
     const r_1 = await Promise.all(references
         .filter(r => r instanceof ReferencedStringActual || r instanceof ReferencedStringId)
-        .map(async (r) => getPhrase(r)))
+        .map(async (r) => processReferencedString(r)))
         .then(promises => promises.filter(r => r !== null));
     const partialComment = comment.withReplacedReferences(r_1);
 
     const r_2 = await Promise.all(references
         .filter(r => r instanceof ReferencedSearchQuery || r instanceof ReferencedSearchQueryActual)
-        .map(async (r) => getPhrases(r)))
+        .map(async (r) => processReferencedSearchQuery(r)))
         .then(promises => promises.filter(r => r !== null));
     return partialComment.withAppendedReferences(r_2);
 }
@@ -138,11 +137,6 @@ function hookDeleteButtons(element: HTMLElement) {
         .map(e => e.parentElement)
         .filter(e => !e.classList.contains("hooked"))
         .forEach(e => {
-            e.addEventListener("click", () => {
-                let li = document.querySelector(`#discussion${e.getAttribute("data-id")}`);
-                li?.querySelector(swapClassSelector).parentElement?.remove();
-                li?.querySelector(swapClassSelector)?.remove();
-            })
             e.classList.add("hooked")
         })
 }
@@ -151,8 +145,6 @@ function hookSaveEditButtons(element: HTMLElement) {
     element.querySelectorAll(".edit-comment-mode")
         .forEach(e => {
             e.querySelector("button.save_comment").addEventListener("click", () => {
-                e.querySelector(swapClassSelector)?.parentElement?.remove();
-                e.querySelector(swapClassSelector)?.remove();
                 e.classList.remove(parsedClass);
                 void reloadComments();
             })
@@ -161,7 +153,6 @@ function hookSaveEditButtons(element: HTMLElement) {
 
 function cleanupElement(e: HTMLElement): HTMLElement | undefined {
     if (e.querySelector(".deleted-comment") !== null) {
-        e.querySelector(swapClassSelector)?.remove();
         e.classList.remove(parsedClass);
         return undefined;
     }
@@ -179,7 +170,7 @@ function markAsParsed(e: HTMLElement): HTMLElement {
     return e;
 }
 
-function markAsLoading(comment: CrowdinComment): CrowdinComment {
+function markAsLoading(comment: CommentWithReferences): CommentWithReferences {
     let commentElement = document.querySelector(comment.elementId);
     const textElement = commentElement.querySelector("span.comment-item-text")
     if (textElement === null) {
@@ -206,7 +197,7 @@ async function reloadComments(): Promise<void> {
         .filter(e => e.id !== nonPersistedCommentId)
         .filter(e => notYetParsed(e))
         .map(e => markAsParsed(e))
-        .map(e => new CrowdinComment(`#${e.id}`, e.querySelector(".comment-item-text")?.innerHTML))
+        .map(e => new CommentWithReferences(`#${e.id}`, e.querySelector(".comment-item-text")?.innerHTML))
         .filter(comment => comment.elementId !== nonPersistedCommentId)
         .map(comment => getLinks(comment, currentLanguageId))
         .map(comment => markAsLoading(comment))
@@ -224,34 +215,34 @@ elementReady("#discussions_messages").then((element: HTMLElement) => {
     }).observe(element, {childList: true, subtree: true});
 });
 
-const originalUrl = new URL(window.location.toString());
+// const originalUrl = new URL(window.location.toString());
 
-if (window.location.pathname.split("/")[1] === "editor") {
-    elementReady("#jGrowl").then((element: HTMLElement) => {
-        if (element.textContent.includes("The string is unavailable for the current language, was deleted, or doesn't exist")) {
-            let csicKey = originalUrl.searchParams.get("csic-key");
-            let fileId =  getFileId(originalUrl);
-            if (csicKey && fileId !== "all") {
-                const ref = new ReferencedStringId(getProjectId(originalUrl),
-                    parseInt(originalUrl.hash.replace("#", "")),
-                    getFileId(originalUrl) as number,
-                    csicKey);
-
-                getCurrentLanguageId()
-                    .then(l => CrowdinSearchParametersBasic.generateFromReferencedString(ref, l))
-                    .then(param => getFallback(param))
-                    .then(result => {
-                        if (result) {
-                            const newUrl = new URL(originalUrl);
-                            newUrl.hash = result.getStringId().toString();
-                            window.location.href = newUrl.href;
-                        }
-                    })
-            }
-        }
-    })
-
-}
+// if (window.location.pathname.split("/")[1] === "editor") {
+//     elementReady("#jGrowl").then((element: HTMLElement) => {
+//         if (element.textContent.includes("The string is unavailable for the current language, was deleted, or doesn't exist")) {
+//             let csicKey = originalUrl.searchParams.get("csic-key");
+//             let fileId =  getFileId(originalUrl);
+//             if (csicKey && fileId !== "all") {
+//                 const ref = new ReferencedStringId(getProjectId(originalUrl),
+//                     parseInt(originalUrl.hash.replace("#", "")),
+//                     getFileId(originalUrl) as number,
+//                     csicKey);
+//
+//                 getCurrentLanguageId()
+//                     .then(l => CrowdinSearchParametersBasic.generateFromReferencedString(ref, l))
+//                     .then(param => getFallback(param))
+//                     .then(result => {
+//                         if (result) {
+//                             const newUrl = new URL(originalUrl);
+//                             newUrl.hash = result.getStringId().toString();
+//                             window.location.href = newUrl.href;
+//                         }
+//                     })
+//             }
+//         }
+//     })
+//
+// }
 
 function injectScript(file_path: string, tag: string) {
     const node = document.getElementsByTagName(tag)[0];

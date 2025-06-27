@@ -1,4 +1,4 @@
-import {CrowdinSearchParameters, CrowdinSearchScope} from "../../crowdin-search-parameters";
+import {CrowdinSearchParameters} from "../../../util/crowdin/crowdin-search-parameters";
 
 export class CrowdinPhrasesRequest {
     project_id: number

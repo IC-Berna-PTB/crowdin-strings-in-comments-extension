@@ -1,4 +1,4 @@
-export class CrowdinPhraseResponseTranslationStatus {
+export class CrowdinTranslationStatus {
     translated!: boolean;
     partially_translated!: boolean;
     approved!: boolean;

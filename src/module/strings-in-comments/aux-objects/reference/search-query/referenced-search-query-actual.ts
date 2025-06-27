@@ -1,9 +1,10 @@
 import {ReferencedSearchQuery} from "./referenced-search-query";
 import {ReferencedStringActual} from "../string/referenced-string-actual";
-import {CrowdinSearchParameters, CrowdinSearchQueryType} from "../../../../util/crowdin/crowdin-search-parameters";
-import {convertUrlToCurrentLanguage} from "../../../../util/util";
+import {CrowdinSearchParameters, CrowdinSearchQueryType} from "../../../../../util/crowdin/crowdin-search-parameters";
+import {convertUrlToCurrentLanguage} from "../../../../../util/util";
+import {Htmleable} from "../../../../../util/html-eable";
 
-export class ReferencedSearchQueryActual extends ReferencedSearchQuery {
+export class ReferencedSearchQueryActual extends ReferencedSearchQuery implements Htmleable {
     results: ReferencedStringActual[];
     totalResults: number;
 
@@ -79,15 +80,15 @@ export class ReferencedSearchQueryActual extends ReferencedSearchQuery {
     }
 
     private createSearchTargetElement() {
-        if (this.getSearchParameters().query && this.getSearchParameters().query.trim() !== "") {
-            return this.getSearchParameters().query.trim();
+        if (this.toCrowdinSearchParameters().query && this.toCrowdinSearchParameters().query.trim() !== "") {
+            return this.toCrowdinSearchParameters().query.trim();
         }
         const span = document.createElement("span");
         span.classList.add("csic-muted");
-        if (this.getSearchParameters().filter === CrowdinSearchQueryType.CROQL_FILTERING) {
+        if (this.toCrowdinSearchParameters().filter === CrowdinSearchQueryType.CROQL_FILTERING) {
             span.textContent = "CroQL query";
         }
-        if (this.getSearchParameters().filter === CrowdinSearchQueryType.ADVANCED_FILTERING) {
+        if (this.toCrowdinSearchParameters().filter === CrowdinSearchQueryType.ADVANCED_FILTERING) {
             span.textContent = "advanced filters";
         }
         return span;

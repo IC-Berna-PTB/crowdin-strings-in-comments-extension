@@ -1,12 +1,13 @@
 import {ReferencedString} from "./referenced-string";
 
-export class ReferencedStringId implements ReferencedString {
+export class ReferencedStringId extends ReferencedString {
     private readonly projectId: number;
     private readonly stringId: number;
     private readonly fallbackKey?: string
-    private fallbackFileId?: number;
+    private readonly fallbackFileId?: number;
 
     constructor(projectId: number, stringId: number, fallbackFileId?: number, fallbackKey?: string) {
+        super();
         this.projectId = projectId;
         this.stringId = stringId;
         this.fallbackFileId = fallbackFileId;

@@ -1,6 +1,6 @@
-import {getFetchParams} from "../../../util";
 import {CrowdinUserProject} from "./crowdin-user-project";
 import {CrowdinUserProjectsResponse} from "./crowdin-user-projects-response";
+import {getFetchParams} from "../../../getFetchParams";
 
 export class CrowdinUserProjects {
     private static userProjects: CrowdinUserProject[] = [];

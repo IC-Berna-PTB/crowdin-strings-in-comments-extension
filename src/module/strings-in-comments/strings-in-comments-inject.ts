@@ -1,6 +1,7 @@
 const updateStringUrlInterval = setInterval(() => {
     //@ts-ignore
     if (window.crowdin && window.crowdin.helpers && window.crowdin.helpers.translation) {
+        clearInterval(updateStringUrlInterval);
         //@ts-ignore
         const originalGetStringUrl = window.crowdin.helpers.translation.getStringUrl;
         //@ts-ignore

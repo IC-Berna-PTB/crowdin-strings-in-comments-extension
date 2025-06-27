@@ -1,12 +1,12 @@
-import {CrowdinPhraseResponseTranslationStatus} from "../phrase-response/crowdin-phrase-response-translation-status";
-import {CrowdinPhraseResponseData} from "../phrase-response/crowdin-phrase-response-data";
-import {CrowdinPhraseResponseTranslation} from "../phrase-response/crowdin-phrase-response-translation";
+import {CrowdinTranslationStatus} from "../../../util/crowdin/api/common/crowdin-translation-status";
+import {CrowdinPhraseResponseData} from "../single-phrase/crowdin-phrase-response-data";
+import {CrowdinPhraseResponseTranslation} from "../single-phrase/crowdin-phrase-response-translation";
 
 export class CrowdinPhrasesResponseDataPhrase {
     id!: number;
     key?: string;
     text!: string;
-    translation_status!: CrowdinPhraseResponseTranslationStatus;
+    translation_status!: CrowdinTranslationStatus;
     file_path?: string;
     top_suggestion_text!: string;
 

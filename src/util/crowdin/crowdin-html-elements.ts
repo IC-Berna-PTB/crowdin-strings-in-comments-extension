@@ -1,4 +1,4 @@
-import {TranslationStatus} from "../util";
+import {TranslationStatus} from "../getFetchParams";
 
 export function crowdinTranslationStatusIcon(status: TranslationStatus): HTMLElement {
     const element = document.createElement("div");

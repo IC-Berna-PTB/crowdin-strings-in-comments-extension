@@ -1,12 +1,13 @@
 import {ReferencedString} from "./referenced-string";
 import {ReferencedStringId} from "./referenced-string-id";
-import {convertCrowdinTranslationStatus, TranslationStatus} from "../../../../util/util";
-import {crowdinTranslationStatusIcon} from "../../../../util/crowdin/crowdin-html-elements";
-import {CrowdinUserProjects} from "../../../../util/crowdin/api/user-projects-response/crowdin-user-projects";
+import {crowdinTranslationStatusIcon} from "../../../../../util/crowdin/crowdin-html-elements";
+import {CrowdinUserProjects} from "../../../../../util/crowdin/api/user-projects/crowdin-user-projects";
 import {
     CrowdinPhrasesResponseDataPhrase
-} from "../../../../util/crowdin/api/phrases-request/crowdin-phrases-response-data-phrase";
+} from "../../../../../apis/crowdin/multiple-phrases/crowdin-phrases-response-data-phrase";
 import {ReferencedSearchQuery} from "../search-query/referenced-search-query";
+import {Htmleable} from "../../../../../util/html-eable";
+import {convertCrowdinTranslationStatus, TranslationStatus} from "../../../../../util/getFetchParams";
 
 
 function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HTMLElement {
@@ -32,7 +33,7 @@ function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HT
     return wrappingElement;
 }
 
-export class ReferencedStringActual implements ReferencedString {
+export class ReferencedStringActual extends ReferencedString implements Htmleable {
     source: string;
     translation?: string;
     translationStatus: TranslationStatus;
@@ -41,6 +42,7 @@ export class ReferencedStringActual implements ReferencedString {
     filePath?: string;
 
     constructor(projectId: number, stringId: number, source: string, translation?: string, translationStatus?: TranslationStatus, key?: string, filePath?: string) {
+        super();
         this.source = source;
         this.translation = translation;
         this.translationStatus = translationStatus;

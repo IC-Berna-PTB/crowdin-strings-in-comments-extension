@@ -1,5 +1,5 @@
 import {Reference} from "../reference";
-import {CrowdinSearchParameters} from "../../../../util/crowdin/crowdin-search-parameters";
+import {CrowdinSearchParameters} from "../../../../../util/crowdin/crowdin-search-parameters";
 
 export class ReferencedSearchQuery implements Reference {
     private readonly projectId: number;
@@ -16,16 +16,12 @@ export class ReferencedSearchQuery implements Reference {
         return this.projectId;
     }
 
-    getSearchParameters(): CrowdinSearchParameters {
+    toCrowdinSearchParameters(): CrowdinSearchParameters {
         return this.query;
     }
 
     getOriginalUrl(): URL {
         return this.originalUrl;
-    }
-
-    generateHtml(): HTMLElement | undefined {
-        return undefined;
     }
 }
 
