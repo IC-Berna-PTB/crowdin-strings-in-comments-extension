@@ -2,21 +2,17 @@ import {CommentWithReferences} from "./aux-objects/comment-with-references";
 import {ReferencedString} from "./aux-objects/reference/string/referenced-string";
 import {ReferencedStringId} from "./aux-objects/reference/string/referenced-string-id";
 import {ReferencedStringActual} from "./aux-objects/reference/string/referenced-string-actual";
-import {elementReady} from "../../util/util";
-import {
-    CrowdinSearchParameters,
-    CrowdinSearchQueryType
-} from "../../util/crowdin/crowdin-search-parameters";
-import {
-    getProjectId
-} from "../../apis/crowdin/crowdin-main";
+import {observeElementEvenIfNotReady} from "../../util/util";
+import {CrowdinSearchParameters, CrowdinSearchQueryType} from "../../util/crowdin/crowdin-search-parameters";
+import {getFileId, getProjectId} from "../../apis/crowdin/crowdin-main";
 import {ReferencedSearchQuery} from "./aux-objects/reference/search-query/referenced-search-query";
 import {ReferencedSearchQueryActual} from "./aux-objects/reference/search-query/referenced-search-query-actual";
 import {isHtmleable, Reference} from "./aux-objects/reference/reference";
 import {getCurrentLanguageId} from "../../apis/crowdin/crowdin-aux-functions";
 import {nonPersistedCommentId, parsedClass} from "./constants";
-import {processReferencedString} from "./string/referenced-string-processing";
+import {getFallback, processReferencedString} from "./string/referenced-string-processing";
 import {processReferencedSearchQuery} from "./search-query/referenced-search-query-processing";
+import {ExtensionMessage, ExtensionMessageId} from "./aux-objects/extension-message";
 
 function setupCommentElementTopDown(comment: CommentWithReferences) {
     if (comment.references.length === 0) {
@@ -210,7 +206,7 @@ async function reloadComments(): Promise<void> {
         .map(commentPromise => commentPromise.then(setupCommentElementTopDown))
 }
 
-elementReady("#discussions_messages").then((element: HTMLElement) => {
+observeElementEvenIfNotReady("#discussions_messages", (element: HTMLElement) => {
     void getCurrentLanguageId(); //preload the language id
     void reloadComments();
     new MutationObserver(() => {
@@ -220,34 +216,43 @@ elementReady("#discussions_messages").then((element: HTMLElement) => {
     }).observe(element, {childList: true, subtree: true});
 });
 
-// const originalUrl = new URL(window.location.toString());
+const originalUrl = new URL(window.location.toString());
 
-// if (window.location.pathname.split("/")[1] === "editor") {
-//     elementReady("#jGrowl").then((element: HTMLElement) => {
-//         if (element.textContent.includes("The string is unavailable for the current language, was deleted, or doesn't exist")) {
-//             let csicKey = originalUrl.searchParams.get("csic-key");
-//             let fileId =  getFileId(originalUrl);
-//             if (csicKey && fileId !== "all") {
-//                 const ref = new ReferencedStringId(getProjectId(originalUrl),
-//                     parseInt(originalUrl.hash.replace("#", "")),
-//                     getFileId(originalUrl) as number,
-//                     csicKey);
-//
-//                 getCurrentLanguageId()
-//                     .then(l => CrowdinSearchParametersBasic.generateFromReferencedString(ref, l))
-//                     .then(param => getFallback(param))
-//                     .then(result => {
-//                         if (result) {
-//                             const newUrl = new URL(originalUrl);
-//                             newUrl.hash = result.getStringId().toString();
-//                             window.location.href = newUrl.href;
-//                         }
-//                     })
-//             }
-//         }
-//     })
-//
-// }
+function checkIfThereIsFallbackForUrl(disconnectObserver: () => void) {
+    disconnectObserver();
+    let csicKey = originalUrl.searchParams.get("csic-key");
+    let fileId = getFileId(originalUrl);
+    if (csicKey && fileId !== "all") {
+        const ref = new ReferencedStringId(getProjectId(originalUrl),
+            parseInt(originalUrl.hash.replace("#", "")),
+            getFileId(originalUrl) as number,
+            csicKey);
+
+        getCurrentLanguageId()
+            .then(l => ref.toCrowdinSearchParametersBasic(l))
+            .then(param => getFallback(param))
+            .then(result => {
+                if (result) {
+                    const newUrl = new URL(originalUrl);
+                    newUrl.hash = result.getStringId().toString();
+                    window.postMessage({
+                        identifier: ExtensionMessageId.NOTIFICATION_SUCCESS,
+                        message: `Found exact string using token ${ref.getFallbackKey()} in URL. Redirecting...`,
+                    } as ExtensionMessage<string>)
+                    setTimeout(() => window.location.href = newUrl.href, 2000);
+                }
+            })
+    }
+}
+
+if (window.location.pathname.split("/")[1] === "editor") {
+    observeElementEvenIfNotReady("#jGrowl", (element: HTMLElement, disconnectObserver: () => void) => {
+        if (element.textContent.includes("The string is unavailable for the current language, was deleted, or doesn't exist")) {
+            checkIfThereIsFallbackForUrl(disconnectObserver);
+        }
+    })
+
+}
 
 function injectScript(file_path: string, tag: string) {
     const node = document.getElementsByTagName(tag)[0];
@@ -260,3 +265,10 @@ function injectScript(file_path: string, tag: string) {
 
 }
 injectScript(chrome.runtime.getURL('strings-in-comments-inject.js'), 'body');
+
+window.addEventListener('message', e => {
+    if (e.data.identifier === ExtensionMessageId.LANGUAGE_ID && typeof e.data.message === "number") {
+        console.log(e.data.message);
+        console.log(`pegamos o idioma, e ele é ID: ${e.data.message}`)
+    }
+})

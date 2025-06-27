@@ -1,3 +1,6 @@
+import {CrowdinInitResponse} from "../../apis/crowdin/init/crowdin-init-response";
+import {ExtensionMessage, ExtensionMessageId} from "./aux-objects/extension-message";
+
 const updateStringUrlInterval = setInterval(() => {
     //@ts-ignore
     if (window.crowdin && window.crowdin.helpers && window.crowdin.helpers.translation) {
@@ -19,9 +22,25 @@ const updateStringUrlInterval = setInterval(() => {
     }
 }, 500);
 
-//@ts-ignore
 $(document).ajaxSuccess((e:  JQuery.TriggeredEvent, xhr: JQuery.jqXHR, options: JQuery.AjaxSettings, data: JQuery.PlainObject) => {
     if (options.url.startsWith("/backend/phrases")){
         console.log(data);
     }
 });
+
+$(document).ajaxSuccess((e:  JQuery.TriggeredEvent, xhr: JQuery.jqXHR, options: JQuery.AjaxSettings, data: JQuery.PlainObject) => {
+    if (options.url.startsWith("/backend/editor/init")){
+        const response = data as CrowdinInitResponse;
+        window.postMessage({
+            identifier: ExtensionMessageId.LANGUAGE_ID,
+            message: response
+        } as ExtensionMessage<CrowdinInitResponse>);
+    }
+});
+
+window.addEventListener("message", e => {
+    if (e.data.identifier === ExtensionMessageId.NOTIFICATION_SUCCESS){
+        // @ts-ignore
+        $.jGrowl(e.data.message, {theme: "jGrowl-success"})
+    }
+})

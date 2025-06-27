@@ -3,7 +3,6 @@ import {
     getProjectId,
     getSearchQuery
 } from "../../apis/crowdin/crowdin-main";
-import {ReferencedString} from "../../module/strings-in-comments/aux-objects/reference/string/referenced-string";
 import {getCurrentLanguagePair} from "../getFetchParams";
 
 export enum CrowdinSearchQueryType {
@@ -128,16 +127,6 @@ export class CrowdinSearchParametersBasic extends CrowdinSearchParameters {
         result.search_strict = +params.get("search_strict") !== 0;
         return result;
     }
-
-    static generateFromReferencedString(referencedString: ReferencedString, languageId: number) {
-        return new CrowdinSearchParametersBasic(CrowdinSearchQueryType.SHOW_ALL,
-            referencedString.getProjectId(),
-            referencedString.getFallbackFileId(),
-            languageId,
-            1,
-            referencedString.getFallbackKey());
-    }
-
 }
 
 export function booleanToInt(booleanValue: boolean): number {

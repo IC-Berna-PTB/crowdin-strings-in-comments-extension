@@ -37,23 +37,8 @@ async function ifExactIdDoesntExist(referencedString: ReferencedString): Promise
     }
     throw new Error("The referenced string does not have a fallback key");
 }
-// .then(r => r.data)
-//     .then(async r => {
-//         if (r.success) {
-//             return new ReferencedStringActual(referencedString.getProjectId(),
-//                 referencedString.getStringId(),
-//                 r.translation.text,
-//                 r.top_suggestion,
-//                 (r.translation_status.approved ? "approved" : (r.translation_status.translated ? "translated" : "not-translated")),
-//                 r.translation.key,
-//                 r.translation.file_path)
-//         } else if (referencedString.getFallbackKey()) {
-//             const fallbackResult = await getFallback(CrowdinSearchParametersBasic.generateFromReferencedString(referencedString, await getCurrentLanguageId()));
-//             if (fallbackResult) {
-//                 return fallbackResult;
-//             }
 
-async function getFallback(searchParameters: CrowdinSearchParametersBasic): Promise<ReferencedStringActual> {
+export async function getFallback(searchParameters: CrowdinSearchParametersBasic): Promise<ReferencedStringActual> {
     let fallbackResponse = await processReferencedSearchQuery(new ReferencedSearchQuery(searchParameters.project_id,
         searchParameters,
         searchParameters.url));

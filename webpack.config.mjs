@@ -25,7 +25,7 @@ export default {
         // new UserscriptPlugin({headers: {include: ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"], version: "1.3.0"}})
     ],
     entry: {
-        'strings-in-comments': './src/module/strings-in-comments/strings-in-comments-entrypoint.ts',
+        'strings-in-comments': './src/module/strings-in-comments/strings-in-comments-content-script.ts',
         'strings-in-comments-inject': './src/module/strings-in-comments/strings-in-comments-inject.ts',
         'show-full-file-name': './src/module/show-full-file-name/full-file-name-entrypoint.ts',
         'source-2-plural-gender': './src/module/source-2-plural-gender/source-2-plural-gender-entrypoint.ts',

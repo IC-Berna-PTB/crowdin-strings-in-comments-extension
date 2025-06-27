@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "3.1.0",
+  "version": "3.2.0",
   "name": "Crowdin Strings in Comments",
   "icons": {
     "128": "icon/128.png"
@@ -47,6 +47,6 @@
     "resources": ["strings-in-comments-inject.js"]
   } ],
   "permissions": [
-    "webRequest"
+    "storage"
   ]
 }
