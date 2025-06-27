@@ -1,5 +1,5 @@
 import {ReferencedString} from "../../../module/strings-in-comments/reference/string/referenced-string";
-import {getCurrentLanguagePair, getFetchParams} from "../../util";
+import {getFetchParams} from "../../util";
 import {CrowdinPhraseResponse} from "./phrase-response/crowdin-phrase-response";
 import {
     fromPhrasesResponseDataPhrase,
@@ -13,7 +13,9 @@ import {CrowdinPhrasesResponse} from "./phrases-request/crowdin-phrases-response
 import {
     ReferencedSearchQueryActual
 } from "../../../module/strings-in-comments/reference/search-query/referenced-search-query-actual";
-import {CrowdinSearchParametersBasic, CrowdinSearchQueryType} from "../crowdin-search-parameters";
+import {
+    CrowdinSearchParametersBasic
+} from "../crowdin-search-parameters";
 
 export async function getPhrase(referencedString: ReferencedString): Promise<ReferencedString> {
     return await fetch(getPhraseUrl(referencedString.getProjectId(), await getCurrentLanguageId(), referencedString.getStringId()), getFetchParams())
@@ -36,24 +38,27 @@ export async function getPhrase(referencedString: ReferencedString): Promise<Ref
                     r.translation.key,
                     r.translation.file_path)
             } else if (referencedString.getFallbackKey()) {
-                let searchParameters = new CrowdinSearchParametersBasic(CrowdinSearchQueryType.SHOW_ALL,
-                    referencedString.getProjectId(),
-                    referencedString.getFallbackFileId(),
-                    await getCurrentLanguageId(),
-                    1,
-                    referencedString.getFallbackKey());
-                searchParameters.search_scope = "key";
-                searchParameters.search_strict = true;
-                let fallbackResponse = await getPhrases(new ReferencedSearchQuery(referencedString.getProjectId(),
-                    searchParameters, searchParameters.url));
-                if (fallbackResponse.totalResults === 1) {
-                    return fallbackResponse.results[0];
+                const fallbackResult = await getFallback(CrowdinSearchParametersBasic.generateFromReferencedString(referencedString, await getCurrentLanguageId()));
+                if (fallbackResult) {
+                    return fallbackResult;
                 }
             }
             throw new Error(`Could not retrieve translation for project ${referencedString.getProjectId()} and string ${referencedString.getStringId()}`)
         })
         .catch(() => null)
 
+}
+
+
+export async function getFallback(searchParameters: CrowdinSearchParametersBasic): Promise<ReferencedStringActual> {
+    searchParameters.search_scope = "key";
+    searchParameters.search_strict = true;
+    let fallbackResponse = await getPhrases(new ReferencedSearchQuery(searchParameters.project_id,
+        searchParameters, searchParameters.url));
+    if (fallbackResponse.totalResults === 1) {
+        return fallbackResponse.results[0];
+    }
+    return null;
 }
 
 function getPhrasesUrl() {

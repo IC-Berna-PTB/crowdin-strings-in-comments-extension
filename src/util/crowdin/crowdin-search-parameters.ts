@@ -4,6 +4,7 @@ import {
     getSearchQuery
 } from "./api/crowdin-api-client";
 import {getCurrentLanguagePair} from "../util";
+import {ReferencedString} from "../../module/strings-in-comments/reference/string/referenced-string";
 
 export enum CrowdinSearchQueryType {
     ADVANCED_FILTERING = 12,
@@ -126,6 +127,15 @@ export class CrowdinSearchParametersBasic extends CrowdinSearchParameters {
         result.search_full_match = +params.get("search_full_match") !== 0;
         result.search_strict = +params.get("search_strict") !== 0;
         return result;
+    }
+
+    static generateFromReferencedString(referencedString: ReferencedString, languageId: number) {
+        return new CrowdinSearchParametersBasic(CrowdinSearchQueryType.SHOW_ALL,
+            referencedString.getProjectId(),
+            referencedString.getFallbackFileId(),
+            languageId,
+            1,
+            referencedString.getFallbackKey());
     }
 
 }

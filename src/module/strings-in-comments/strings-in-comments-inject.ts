@@ -1,9 +1,3 @@
-class Test {
-
-
-
-}
-
 const updateStringUrlInterval = setInterval(() => {
     //@ts-ignore
     if (window.crowdin && window.crowdin.helpers && window.crowdin.helpers.translation) {
@@ -24,7 +18,9 @@ const updateStringUrlInterval = setInterval(() => {
     }
 }, 500);
 
-function getFileUrl() {
-    //@ts-ignore
-    return window.crowdin.helpers.translation.getFileUrl()
-}
+//@ts-ignore
+$(document).ajaxSuccess((e:  JQuery.TriggeredEvent, xhr: JQuery.jqXHR, options: JQuery.AjaxSettings, data: JQuery.PlainObject) => {
+    if (options.url.startsWith("/backend/phrases")){
+        console.log(data);
+    }
+});

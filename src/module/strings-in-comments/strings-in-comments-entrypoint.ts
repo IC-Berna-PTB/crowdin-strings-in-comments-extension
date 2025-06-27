@@ -3,8 +3,18 @@ import {ReferencedString} from "./reference/string/referenced-string";
 import {ReferencedStringId} from "./reference/string/referenced-string-id";
 import {ReferencedStringActual} from "./reference/string/referenced-string-actual";
 import {elementReady, nonPersistedCommentId, parsedClass, swapClassSelector} from "../../util/util";
-import {CrowdinSearchParameters, CrowdinSearchQueryType} from "../../util/crowdin/crowdin-search-parameters";
-import {getCurrentLanguageId, getPhrase, getPhrases, getProjectId} from "../../util/crowdin/api/crowdin-api-client";
+import {
+    CrowdinSearchParameters,
+    CrowdinSearchParametersBasic,
+    CrowdinSearchQueryType
+} from "../../util/crowdin/crowdin-search-parameters";
+import {
+    getCurrentLanguageId,
+    getFallback, getFileId,
+    getPhrase,
+    getPhrases,
+    getProjectId
+} from "../../util/crowdin/api/crowdin-api-client";
 import {ReferencedSearchQuery} from "./reference/search-query/referenced-search-query";
 import {ReferencedSearchQueryActual} from "./reference/search-query/referenced-search-query-actual";
 import {Reference} from "./reference/reference";
@@ -214,6 +224,35 @@ elementReady("#discussions_messages").then((element: HTMLElement) => {
     }).observe(element, {childList: true, subtree: true});
 });
 
+const originalUrl = new URL(window.location.toString());
+
+if (window.location.pathname.split("/")[1] === "editor") {
+    elementReady("#jGrowl").then((element: HTMLElement) => {
+        if (element.textContent.includes("The string is unavailable for the current language, was deleted, or doesn't exist")) {
+            let csicKey = originalUrl.searchParams.get("csic-key");
+            let fileId =  getFileId(originalUrl);
+            if (csicKey && fileId !== "all") {
+                const ref = new ReferencedStringId(getProjectId(originalUrl),
+                    parseInt(originalUrl.hash.replace("#", "")),
+                    getFileId(originalUrl) as number,
+                    csicKey);
+
+                getCurrentLanguageId()
+                    .then(l => CrowdinSearchParametersBasic.generateFromReferencedString(ref, l))
+                    .then(param => getFallback(param))
+                    .then(result => {
+                        if (result) {
+                            const newUrl = new URL(originalUrl);
+                            newUrl.hash = result.getStringId().toString();
+                            window.location.href = newUrl.href;
+                        }
+                    })
+            }
+        }
+    })
+
+}
+
 function injectScript(file_path: string, tag: string) {
     const node = document.getElementsByTagName(tag)[0];
     const script = document.createElement('script');
@@ -225,6 +264,3 @@ function injectScript(file_path: string, tag: string) {
 
 }
 injectScript(chrome.runtime.getURL('strings-in-comments-inject.js'), 'body');
-
-// //@ts-ignore
-// console.log(window.wrappedJSObject.crowdin.helpers.url.getEditorInfo())
