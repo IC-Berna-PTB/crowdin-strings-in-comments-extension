@@ -80,9 +80,9 @@ export abstract class CrowdinSearchParameters {
         this.query = query;
     }
 
-    static fromUrl(url: URL, currentLanguageId: number): CrowdinSearchParameters {
+    static async fromUrl(url: URL, currentLanguageId: number): Promise<CrowdinSearchParameters> {
         const urlSearchParams = url.searchParams;
-        const projectId = getProjectId(url);
+        const projectId = await getProjectId(url);
         const fileId = getFileId(url);
         const query = getSearchQuery(url);
 
@@ -121,7 +121,7 @@ export class CrowdinSearchParametersBasic extends CrowdinSearchParameters {
 
     static generateFromSearchParams(params: URLSearchParams, projectId: number, fileId: number | "all", targetLanguageId: number, query: string): CrowdinSearchParametersBasic {
         const result = new CrowdinSearchParametersBasic(+params.get("value"), projectId, fileId, targetLanguageId, 1, decodeURIComponent(query));
-        result.search_scope = params.get("search_scope") as CrowdinSearchScope;
+        result.search_scope = params.get("search_scope") as CrowdinSearchScope ?? "everything";
         result.case_sensitive = +params.get("case_sensitive") !== 0;
         result.search_full_match = +params.get("search_full_match") !== 0;
         result.search_strict = +params.get("search_strict") !== 0;

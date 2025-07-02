@@ -8,7 +8,7 @@ import {getFetchParams} from "../../../util/getFetchParams";
  * @param languagePair the language pair of the current editor.
  */
 export async function getInit(languagePair: string) {
-    const r = await fetch(`${window.location.origin}/backend/editor/init?editor_mode=translate&project_id=${getCurrentProjectId()}&file_id=all&languages=${languagePair}`, getFetchParams());
+    const r = await fetch(`${window.location.origin}/backend/editor/init?editor_mode=translate&project_id=${await getCurrentProjectId()}&file_id=all&languages=${languagePair}`, getFetchParams());
     const r_1 = await r.text();
     return JSON.parse(r_1) as CrowdinInitResponse;
 }

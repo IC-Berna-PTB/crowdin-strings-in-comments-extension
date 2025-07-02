@@ -13,6 +13,7 @@ import {nonPersistedCommentId, parsedClass} from "./constants";
 import {getFallback, processReferencedString} from "./string/referenced-string-processing";
 import {processReferencedSearchQuery} from "./search-query/referenced-search-query-processing";
 import {ExtensionMessage, ExtensionMessageId} from "./aux-objects/extension-message";
+import {CrowdinUserProjects} from "../../util/crowdin/api/user-projects/crowdin-user-projects";
 
 function setupCommentElementTopDown(comment: CommentWithReferences) {
     if (comment.references.length === 0) {
@@ -72,10 +73,10 @@ function isFirst(entry: ReferencedString, index: number, array: ReferencedString
     return true;
 }
 
-function getLinks(comment: CommentWithReferences, currentLanguageId: number): CommentWithReferences {
+async function getLinks(comment: CommentWithReferences, currentLanguageId: number): Promise<CommentWithReferences> {
     const urls = findUrlsInComment(comment);
     const exactReferences = getLinksWithExactId(urls);
-    const queryReferences = getLinksWithCrowdinSearch(urls, currentLanguageId);
+    const queryReferences = await getLinksWithCrowdinSearch(urls, currentLanguageId);
     return comment.withReplacedReferences(exactReferences.concat(queryReferences))
 }
 
@@ -86,20 +87,18 @@ function getLinksWithExactId(urls: URL[]): Reference[] {
         .filter((entry, index, array) => isFirst(entry, index, array))
 }
 
-function getLinksWithCrowdinSearch(urls: URL[], currentLanguageId: number): Reference[] {
-    const references: ReferencedSearchQuery[] = []
-    urls
+async function getLinksWithCrowdinSearch(urls: URL[], currentLanguageId: number): Promise<Reference[]> {
+    const parameters = urls
         .map(url => url)
         .filter(url => url.hash.match(/^#q=\S+$/) || urlIsForAdvancedOrCroQLFiltering(url))
-        .map(url => ({
+        .map(async url => ({
             url: url,
-            params: CrowdinSearchParameters.fromUrl(url, currentLanguageId)
-        })).map(obj => references.push(
-            new ReferencedSearchQuery(getProjectId(new URL(obj.url)),
-                obj.params,
-                new URL(obj.url)))
-        )
-    return references;
+            params: await CrowdinSearchParameters.fromUrl(url, currentLanguageId)
+        }))
+    const realizedParameters = await Promise.all(parameters);
+    return realizedParameters
+        .filter(p => p.params.project_id)
+        .map(p => new ReferencedSearchQuery(p.params.project_id, p.params, p.url));
 }
 
 function urlHasExactStringId(url: URL) {
@@ -203,14 +202,15 @@ async function reloadComments(): Promise<void> {
         .map(e => markAsParsed(e))
         .map(e => new CommentWithReferences(`#${e.id}`, e.querySelector(".comment-item-text")?.innerHTML))
         .filter(comment => comment.elementId !== nonPersistedCommentId)
-        .map(comment => getLinks(comment, currentLanguageId))
-        .map(comment => markAsLoading(comment))
-        .map(comment => getTranslations(comment))
+        .map(async comment => await getLinks(comment, currentLanguageId))
+        .map(commentPromise => commentPromise.then(c => markAsLoading(c)))
+        .map(commentPromise => commentPromise.then(c => getTranslations(c)))
         .map(commentPromise => commentPromise.then(setupCommentElementTopDown))
 }
 
 observeElementEvenIfNotReady("#discussions_messages", (element: HTMLElement) => {
     void getCurrentLanguageId(); //preload the language id
+    void CrowdinUserProjects.reloadUserProjects(); // preload user projects
     void reloadComments();
     new MutationObserver(() => {
         hookDeleteButtons(element);
@@ -221,12 +221,12 @@ observeElementEvenIfNotReady("#discussions_messages", (element: HTMLElement) => 
 
 const originalUrl = new URL(window.location.toString());
 
-function checkIfThereIsFallbackForUrl(disconnectObserver: () => void) {
+async function checkIfThereIsFallbackForUrl(disconnectObserver: () => void) {
     disconnectObserver();
     let csicKey = originalUrl.searchParams.get("csic-key");
     let fileId = getFileId(originalUrl);
     if (csicKey && fileId !== "all") {
-        const ref = new ReferencedStringId(getProjectId(originalUrl),
+        const ref = new ReferencedStringId(await getProjectId(originalUrl),
             parseInt(originalUrl.hash.replace("#", "")),
             getFileId(originalUrl) as number,
             csicKey);
@@ -251,7 +251,7 @@ function checkIfThereIsFallbackForUrl(disconnectObserver: () => void) {
 if (window.location.pathname.split("/")[1] === "editor") {
     observeElementEvenIfNotReady("#jGrowl", (element: HTMLElement, disconnectObserver: () => void) => {
         if (element.textContent.includes("The string is unavailable for the current language, was deleted, or doesn't exist")) {
-            checkIfThereIsFallbackForUrl(disconnectObserver);
+            checkIfThereIsFallbackForUrl(disconnectObserver).then(() => {});
         }
     })
 

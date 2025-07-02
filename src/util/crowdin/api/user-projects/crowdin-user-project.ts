@@ -1,10 +1,5 @@
 export class CrowdinUserProject {
     id: number;
+    identifier: string;
     name: string;
-
-
-    constructor(id: number, name: string) {
-        this.id = id;
-        this.name = name;
-    }
 }
