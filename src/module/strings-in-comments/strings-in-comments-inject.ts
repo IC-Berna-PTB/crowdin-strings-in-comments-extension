@@ -15,11 +15,13 @@ const updateStringUrlInterval = setInterval(() => {
             //@ts-ignore
             const url = new URL(originalGetStringUrl.apply(window.crowdin.helpers.translation, [id]));
             const stringId = parseInt(url.hash.replace("#", ""));
-            const stringData = phrases.data.phrases.find(p => p.id === stringId);
-            if (stringData && stringData.key) {
-                url.searchParams.append("csic-key", stringData.key);
-                if (url.pathname.split("/").length === 3 && stringData.file_id) {
-                    url.pathname = url.pathname + `/${stringData.file_id}`
+            if (phrases) {
+                const stringData = phrases.data.phrases.find(p => p.id === stringId);
+                if (stringData && stringData.key) {
+                    url.searchParams.append("csic-key", stringData.key);
+                    if (url.pathname.split("/").length === 3 && stringData.file_id) {
+                        url.pathname = url.pathname + `/${stringData.file_id}`
+                    }
                 }
             }
             return url.toString();
@@ -31,8 +33,8 @@ const updateStringUrlInterval = setInterval(() => {
 
 let phrases: CrowdinPhrasesResponse = null;
 
-$(document).ajaxSuccess((e:  JQuery.TriggeredEvent, xhr: JQuery.jqXHR, options: JQuery.AjaxSettings, data: JQuery.PlainObject) => {
-    if (options.url.startsWith("/backend/phrases")){
+$(document).ajaxSuccess((_e:  JQuery.TriggeredEvent, _xhr: JQuery.jqXHR, options: JQuery.AjaxSettings, data: JQuery.PlainObject) => {
+    if (options.url === ("/backend/phrases") && options.method === "POST") {
         phrases = data as CrowdinPhrasesResponse;
     }
 });
