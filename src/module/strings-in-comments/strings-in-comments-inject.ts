@@ -34,7 +34,7 @@ const updateStringUrlInterval = setInterval(() => {
 let phrases: CrowdinPhrasesResponse = null;
 
 $(document).ajaxSuccess((_e:  JQuery.TriggeredEvent, _xhr: JQuery.jqXHR, options: JQuery.AjaxSettings, data: JQuery.PlainObject) => {
-    if (options.url === ("/backend/phrases") && options.method === "POST") {
+    if (options.url === ("/backend/phrases") && (options.type === "POST" || options.method === "POST")) {
         phrases = data as CrowdinPhrasesResponse;
     }
 });
