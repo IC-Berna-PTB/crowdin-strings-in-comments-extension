@@ -51,7 +51,9 @@ function getCommentElements(): HTMLElement[] {
     if (discussionsMessages === null) {
         return [];
     }
-    return Array.prototype.slice.call(discussionsMessages.querySelectorAll("li"));
+    return Array.from(discussionsMessages.querySelectorAll("li"))
+        .filter(node => node.hasAttribute("id"))
+        .filter(node => node.id.startsWith("discussion"));
 }
 
 function isFirst(entry: ReferencedString, index: number, array: ReferencedString[]) {

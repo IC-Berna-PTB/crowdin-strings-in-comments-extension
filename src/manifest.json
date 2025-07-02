@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "3.3.2",
+  "version": "3.3.3",
   "name": "Crowdin Strings in Comments",
   "icons": {
     "128": "icon/128.png"
