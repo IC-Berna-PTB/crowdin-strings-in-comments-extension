@@ -120,7 +120,7 @@ export class CrowdinSearchParametersBasic extends CrowdinSearchParameters {
     }
 
     static generateFromSearchParams(params: URLSearchParams, projectId: number, fileId: number | "all", targetLanguageId: number, query: string): CrowdinSearchParametersBasic {
-        const result = new CrowdinSearchParametersBasic(+params.get("value"), projectId, fileId, targetLanguageId, 1, decodeURIComponent(query));
+        const result = new CrowdinSearchParametersBasic(+params.get("value"), projectId, fileId, targetLanguageId, 1, query);
         result.search_scope = params.get("search_scope") as CrowdinSearchScope ?? "everything";
         result.case_sensitive = +params.get("case_sensitive") !== 0;
         result.search_full_match = +params.get("search_full_match") !== 0;
