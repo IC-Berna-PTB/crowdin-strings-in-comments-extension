@@ -1,5 +1,8 @@
 import {injectScript, observeElementEvenIfNotReady} from "../../util/util";
 import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {SavedSettings} from "../../common/saved-settings";
+import {plainToInstance} from "class-transformer";
+import {ClickBehaviorOption} from "../strings-in-comments/settings/click-behavior-option";
 
 class CommonMenu {
 
@@ -10,7 +13,13 @@ class CommonMenu {
             disconnect();
             const button = CommonMenu.createButtonElement();
             const dialog = CommonMenu.createSettingsDialog();
-            CommonMenu.test(dialog.querySelector("#csic-settings-dialog-body"));
+
+            let dialogBody = dialog.querySelector("#csic-settings-dialog-body");
+            const clickBehavior = CommonMenu.createClickBehaviorSetting();
+
+            dialogBody.appendChild(clickBehavior);
+
+
             document.body.append(dialog);
             // const menu = this.createSettingsMenu();
             // this.test(menu, "Test");
@@ -81,7 +90,6 @@ class CommonMenu {
         body.id = "csic-settings-dialog-body";
         body.classList.add(..."ui-dialog-content ui-widget-content csic-dialog-body".split(" "));
 
-
         return dialog;
     }
 
@@ -95,15 +103,24 @@ class CommonMenu {
         }
     }
 
-    private static test(dialogBody: HTMLDivElement): void {
+    private static createFixCrowdinApplyingFiltersAutomatically(): HTMLElement {
         const controlGroup = document.createElement("div");
-        dialogBody.append(controlGroup);
+        controlGroup.classList.add("control-group", "margin-top");
+
+        const label = document.createElement("label");
+        controlGroup.append(label);
+
+        return controlGroup;
+    }
+
+    private static createClickBehaviorSetting(): HTMLElement {
+        const controlGroup = document.createElement("div");
         controlGroup.classList.add("control-group");
         controlGroup.id = "csic-test-section";
 
         const label = document.createElement("label");
         controlGroup.append(label);
-        label.textContent = "Default language";
+        label.textContent = "Clicking on a translation in a comment...";
         label.htmlFor = "csic-test-section-select";
 
         const select = document.createElement("select");
@@ -112,23 +129,37 @@ class CommonMenu {
         select.name = select.id;
         select.classList.add("full-width");
 
-        const optionMap = new Map<string, string>();
-        optionMap.set("test", "Test");
-        optionMap.set("test-2", "Test 2");
-
-        optionMap.entries()
+        Object.values(ClickBehaviorOption.VALUES)
             .map(o => {
             const option = document.createElement("option");
-            option.value = o[0];
-            option.text = o[1];
+            option.value = o.id.toString();
+            option.text = o.display;
             return option;
         })
             .forEach(o => select.append(o))
 
-        const hint = document.createElement("div");
-        controlGroup.append(hint);
-        hint.classList.add(..."help-block small no-margin".split(" "));
-        hint.textContent = "Select the default language lorem ipsum";
+        select.addEventListener("change", async e => {
+            const selectedOption = parseInt((e.target as HTMLSelectElement).value);
+            const selectedOptionValue = ClickBehaviorOption.fromId(selectedOption);
+            if (!selectedOption) {
+                return;
+            }
+            const response = await chrome.storage.sync.get(null);
+            const settings = plainToInstance(SavedSettings, response);
+            console.log("===================")
+            console.log(settings);
+            settings.clickBehavior = selectedOptionValue.id;
+            console.log("----------------")
+            console.log(settings);
+            await chrome.storage.sync.set(settings);
+        })
+
+        // const hint = document.createElement("div");
+        // controlGroup.append(hint);
+        // hint.classList.add(..."help-block small no-margin".split(" "));
+        // hint.textContent = "Select the default language lorem ipsum";
+
+        return controlGroup;
     }
 
     /*
