@@ -58,3 +58,10 @@ window.addEventListener("message", e => {
         $.jGrowl(e.data.message, {theme: "jGrowl-success"})
     }
 })
+
+window.addEventListener("message", (e: MessageEvent<ExtensionMessage<string>>) => {
+    if (e.data.identifier === ExtensionMessageId.REPLACE_TEXT_IN_CARET){
+        // @ts-ignore
+        crowdin.translation.insertValue(e.data.message)
+    }
+})

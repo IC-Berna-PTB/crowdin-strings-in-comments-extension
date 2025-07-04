@@ -1,6 +1,6 @@
 import {injectScript, observeElementEvenIfNotReady} from "../../util/util";
 import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
-import {SavedSettings} from "../../common/saved-settings";
+import {clickBehavior, SavedSettings} from "../../common/settings/saved-settings";
 import {plainToInstance} from "class-transformer";
 import {ClickBehaviorOption} from "../strings-in-comments/settings/click-behavior-option";
 
@@ -134,6 +134,7 @@ class CommonMenu {
             const option = document.createElement("option");
             option.value = o.id.toString();
             option.text = o.display;
+            option.selected = o === clickBehavior;
             return option;
         })
             .forEach(o => select.append(o))
@@ -146,12 +147,12 @@ class CommonMenu {
             }
             const response = await chrome.storage.sync.get(null);
             const settings = plainToInstance(SavedSettings, response);
-            console.log("===================")
-            console.log(settings);
             settings.clickBehavior = selectedOptionValue.id;
-            console.log("----------------")
-            console.log(settings);
             await chrome.storage.sync.set(settings);
+            postMessage({
+                identifier: ExtensionMessageId.SETTINGS_CLICK_BEHAVIOR_CHANGED,
+                message: selectedOptionValue.id
+            } as ExtensionMessage<number>)
         })
 
         // const hint = document.createElement("div");

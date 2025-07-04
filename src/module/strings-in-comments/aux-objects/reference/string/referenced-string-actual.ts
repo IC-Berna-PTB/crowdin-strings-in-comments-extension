@@ -8,6 +8,9 @@ import {
 import {ReferencedSearchQuery} from "../search-query/referenced-search-query";
 import {Htmleable} from "../../../../../util/html-eable";
 import {convertCrowdinTranslationStatus, TranslationStatus} from "../../../../../util/getFetchParams";
+import {ClickBehaviorOption} from "../../../settings/click-behavior-option";
+import {ExtensionMessage, ExtensionMessageId} from "../../extension-message";
+import {clickBehavior} from "../../../../../common/settings/saved-settings";
 
 
 function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HTMLElement {
@@ -94,7 +97,17 @@ export class ReferencedStringActual extends ReferencedString implements Htmleabl
             translationText.innerText = "<no suggestion available>"
         } else {
             translationText.classList.add("term_item");
-            translationText.addEventListener("click", () => navigator.clipboard.writeText(this.translation))
+            translationText.addEventListener("click", () => {
+                switch(clickBehavior.id) {
+                    case ClickBehaviorOption.INSERT_CARET.id:
+                        postMessage({identifier: ExtensionMessageId.REPLACE_TEXT_IN_CARET, message: this.translation} as ExtensionMessage<string>);
+                        break;
+                    case ClickBehaviorOption.COPY_TO_CLIPBOARD.id:
+                    default:
+                        navigator.clipboard.writeText(this.translation);
+
+                }
+            })
             translationText.innerText = this.translation;
             translationText.title = "Click to copy to clipboard";
             translationText = applyCollapseIfLong(translationText, this.MAX_TEXT_LENGTH);
