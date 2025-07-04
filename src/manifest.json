@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "3.3.6",
+  "version": "3.4.0",
   "name": "Crowdin Strings in Comments",
   "icons": {
     "128": "icon/128.png"
@@ -12,11 +12,13 @@
         "*://crowdin.com/*"
       ],
       "css": [
+        "css/common-menu.css",
         "css/strings-in-comments.css"
       ],
       "js": [
         "strings-in-comments.js",
-        "show-full-file-name.js"
+        "show-full-file-name.js",
+        "common-menu.js"
       ]
     },
     {
