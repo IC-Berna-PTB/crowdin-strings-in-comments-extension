@@ -33,3 +33,13 @@ export function convertUrlToCurrentLanguage(url: URL): string {
     url.pathname = pathSplit.join("/");
     return url.toString();
 }
+
+export function injectScript(file_path: string, tag: string) {
+    const node = document.getElementsByTagName(tag)[0];
+    const script = document.createElement('script');
+    script.setAttribute('type'
+        , 'text/javascript');
+    script.setAttribute('src'
+        , file_path);
+    node.appendChild(script);
+}

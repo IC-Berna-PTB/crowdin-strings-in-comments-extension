@@ -6,3 +6,22 @@
   background: var(--crowdin-icons-color);
   mask-image: var(--csic-puzzle-piece);
 }
+
+.csic-dialog-body {
+  width: auto;
+  min-height: 19px;
+  height: auto;
+  max-height: 640px;
+}
+
+.ui-dialog.csic-dialog-hidden {
+  display: none;
+}
+
+.ui-dialog:not(.csic-dialog-hidden) {
+  z-index: 1000;
+}
+
+#csic-settings-dialog {
+  min-width: 500px;
+}

@@ -2,7 +2,7 @@ import {CommentWithReferences} from "./aux-objects/comment-with-references";
 import {ReferencedString} from "./aux-objects/reference/string/referenced-string";
 import {ReferencedStringId} from "./aux-objects/reference/string/referenced-string-id";
 import {ReferencedStringActual} from "./aux-objects/reference/string/referenced-string-actual";
-import {observeElementEvenIfNotReady} from "../../util/util";
+import {injectScript, observeElementEvenIfNotReady} from "../../util/util";
 import {CrowdinSearchParameters, CrowdinSearchQueryType} from "../../util/crowdin/crowdin-search-parameters";
 import {getFileId, getProjectId} from "../../apis/crowdin/crowdin-main";
 import {ReferencedSearchQuery} from "./aux-objects/reference/search-query/referenced-search-query";
@@ -208,10 +208,11 @@ async function reloadComments(): Promise<void> {
         .map(commentPromise => commentPromise.then(setupCommentElementTopDown))
 }
 
-observeElementEvenIfNotReady("#discussions_messages", (element: HTMLElement) => {
+observeElementEvenIfNotReady("#discussions_messages", (element: HTMLElement, disconnect) => {
     void getCurrentLanguageId(); //preload the language id
     void CrowdinUserProjects.reloadUserProjects(); // preload user projects
     void reloadComments();
+    disconnect();
     new MutationObserver(() => {
         hookDeleteButtons(element);
         hookSaveEditButtons(element);
@@ -257,16 +258,7 @@ if (window.location.pathname.split("/")[1] === "editor") {
 
 }
 
-function injectScript(file_path: string, tag: string) {
-    const node = document.getElementsByTagName(tag)[0];
-    const script = document.createElement('script');
-    script.setAttribute('type'
-        , 'text/javascript');
-    script.setAttribute('src'
-        , file_path);
-    node.appendChild(script);
 
-}
 injectScript(chrome.runtime.getURL('strings-in-comments-inject.js'), 'body');
 
 window.addEventListener('message', e => {
