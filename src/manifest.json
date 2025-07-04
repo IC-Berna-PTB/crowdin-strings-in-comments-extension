@@ -38,16 +38,26 @@
       "id": "{8d65cd1e-0d9d-4e86-a688-ae8d40a88e83}"
     }
   },
-  "web_accessible_resources": [ {
-    "matches": [ "<all_urls>" ],
-    "resources": [ "resource/*" ]
-  },{
-    "matches": [
-      "*://*.crowdin.com/*",
-      "*://crowdin.com/*"
-    ],
-    "resources": ["strings-in-comments-inject.js"]
-  } ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "resource/*"
+      ]
+    },
+    {
+      "matches": [
+        "*://*.crowdin.com/*",
+        "*://crowdin.com/*"
+      ],
+      "resources": [
+        "strings-in-comments-inject.js",
+        "common-menu-inject.js"
+      ]
+    }
+  ],
   "permissions": [
     "storage"
   ]
