@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@types/jquery": "^3.5.32",
+    "class-transformer": "^0.5.1",
     "jquery": "^3.7.1",
     "query-string": "^9.1.1"
   }
