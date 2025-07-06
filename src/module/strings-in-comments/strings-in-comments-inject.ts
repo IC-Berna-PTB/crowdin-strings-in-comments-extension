@@ -45,8 +45,9 @@ $(document).ajaxSuccess((e:  JQuery.TriggeredEvent, xhr: JQuery.jqXHR, options: 
     if (options.url.startsWith("/backend/editor/init")){
         const response = data as CrowdinInitResponse;
         init = response;
+        console.log("vou postar")
         window.postMessage({
-            identifier: ExtensionMessageId.LANGUAGE_ID,
+            identifier: ExtensionMessageId.CROWDIN_INIT,
             message: response
         } as ExtensionMessage<CrowdinInitResponse>);
     }
