@@ -2,7 +2,7 @@ import {CommentWithReferences} from "./aux-objects/comment-with-references";
 import {ReferencedString} from "./aux-objects/reference/string/referenced-string";
 import {ReferencedStringId} from "./aux-objects/reference/string/referenced-string-id";
 import {ReferencedStringActual} from "./aux-objects/reference/string/referenced-string-actual";
-import {injectScript, observeElementEvenIfNotReady} from "../../util/util";
+import {injectExtensionScript, observeElementEvenIfNotReady} from "../../util/util";
 import {CrowdinSearchParameters, CrowdinSearchQueryType} from "../../util/crowdin/crowdin-search-parameters";
 import {getFileId, getProjectId} from "../../apis/crowdin/crowdin-main";
 import {ReferencedSearchQuery} from "./aux-objects/reference/search-query/referenced-search-query";
@@ -259,10 +259,10 @@ if (window.location.pathname.split("/")[1] === "editor") {
 }
 
 
-injectScript(chrome.runtime.getURL('strings-in-comments-inject.js'), 'body');
+injectExtensionScript('strings-in-comments-inject.js');
 
 window.addEventListener('message', e => {
-    if (e.data.identifier === ExtensionMessageId.LANGUAGE_ID && typeof e.data.message === "number") {
+    if (e.data.identifier === ExtensionMessageId.CROWDIN_INIT && typeof e.data.message === "number") {
         console.log(e.data.message);
         console.log(`pegamos o idioma, e ele é ID: ${e.data.message}`)
     }

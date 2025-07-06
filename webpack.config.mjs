@@ -33,6 +33,9 @@ export default {
         'common-menu': './src/module/common-menu/common-menu-content-script.ts',
         'common-menu-inject': './src/module/common-menu/common-menu-inject.ts',
 
+        'pcfaftuwf': './src/module/prevent-crowdin-from-applying-filter-to-url-without-filters/pcfaftuwf-content-script.ts',
+        'pcfaftuwf-inject': './src/module/prevent-crowdin-from-applying-filter-to-url-without-filters/pcfaftuwf-inject.ts',
+
         'source-2-plural-gender': './src/module/source-2-plural-gender/source-2-plural-gender-entrypoint.ts',
     },
     module: {

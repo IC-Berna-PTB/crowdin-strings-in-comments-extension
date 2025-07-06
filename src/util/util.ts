@@ -34,12 +34,12 @@ export function convertUrlToCurrentLanguage(url: URL): string {
     return url.toString();
 }
 
-export function injectScript(file_path: string, tag: string) {
+export function injectExtensionScript(internalFilePath: string, tag: string = "head") {
     const node = document.getElementsByTagName(tag)[0];
     const script = document.createElement('script');
     script.setAttribute('type'
         , 'text/javascript');
     script.setAttribute('src'
-        , file_path);
+        , chrome.runtime.getURL(internalFilePath));
     node.appendChild(script);
 }

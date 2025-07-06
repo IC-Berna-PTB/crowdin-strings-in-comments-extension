@@ -23,6 +23,15 @@
     },
     {
       "matches": [
+        "*://*.crowdin.com/*",
+        "*://crowdin.com/*"
+      ],
+      "js": [
+        "pcfaftuwf.js"
+      ]
+    },
+    {
+      "matches": [
         "*://valve.crowdin.com/*"
       ],
       "css": [
@@ -54,7 +63,8 @@
       ],
       "resources": [
         "strings-in-comments-inject.js",
-        "common-menu-inject.js"
+        "common-menu-inject.js",
+        "pcfaftuwf-inject.js"
       ]
     }
   ],

@@ -1,6 +1,6 @@
-import {injectScript, observeElementEvenIfNotReady} from "../../util/util";
+import {injectExtensionScript, observeElementEvenIfNotReady} from "../../util/util";
 import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
-import {clickBehavior, SavedSettings} from "../../common/settings/saved-settings";
+import {BooleanishNumber, ExtensionSettings, getSettings} from "../../common/settings/extension-settings";
 import {plainToInstance} from "class-transformer";
 import {ClickBehaviorOption} from "../strings-in-comments/settings/click-behavior-option";
 
@@ -16,9 +16,10 @@ class CommonMenu {
 
             let dialogBody = dialog.querySelector("#csic-settings-dialog-body");
             const clickBehavior = CommonMenu.createClickBehaviorSetting();
-
             dialogBody.appendChild(clickBehavior);
 
+            const preventPreFilter = CommonMenu.createPreventPreFilterSetting();
+            dialogBody.appendChild(preventPreFilter);
 
             document.body.append(dialog);
             // const menu = this.createSettingsMenu();
@@ -103,16 +104,6 @@ class CommonMenu {
         }
     }
 
-    private static createFixCrowdinApplyingFiltersAutomatically(): HTMLElement {
-        const controlGroup = document.createElement("div");
-        controlGroup.classList.add("control-group", "margin-top");
-
-        const label = document.createElement("label");
-        controlGroup.append(label);
-
-        return controlGroup;
-    }
-
     private static createClickBehaviorSetting(): HTMLElement {
         const controlGroup = document.createElement("div");
         controlGroup.classList.add("control-group");
@@ -130,14 +121,14 @@ class CommonMenu {
         select.classList.add("full-width");
 
         Object.values(ClickBehaviorOption.VALUES)
-            .map(o => {
+            .map(async o => {
             const option = document.createElement("option");
             option.value = o.id.toString();
             option.text = o.display;
-            option.selected = o === clickBehavior;
+            option.selected = o.id === (await getSettings()).clickBehavior;
             return option;
         })
-            .forEach(o => select.append(o))
+            .forEach(optionPromise => optionPromise.then(o => select.append(o)))
 
         select.addEventListener("change", async e => {
             const selectedOption = parseInt((e.target as HTMLSelectElement).value);
@@ -145,10 +136,6 @@ class CommonMenu {
             if (!selectedOption) {
                 return;
             }
-            const response = await chrome.storage.sync.get(null);
-            const settings = plainToInstance(SavedSettings, response);
-            settings.clickBehavior = selectedOptionValue.id;
-            await chrome.storage.sync.set(settings);
             postMessage({
                 identifier: ExtensionMessageId.SETTINGS_CLICK_BEHAVIOR_CHANGED,
                 message: selectedOptionValue.id
@@ -160,6 +147,35 @@ class CommonMenu {
         // hint.classList.add(..."help-block small no-margin".split(" "));
         // hint.textContent = "Select the default language lorem ipsum";
 
+        return controlGroup;
+    }
+
+    private static createPreventPreFilterSetting(): HTMLElement {
+        const controlGroup = document.createElement("div");
+        controlGroup.classList.add("control-group", "margin-top");
+
+        const label = document.createElement("label");
+        controlGroup.append(label);
+        label.textContent = `Always open URLs without filters in  "Show All" mode`
+        label.classList.add("checkbox");
+
+        const input = document.createElement("input");
+        label.append(input);
+        input.id = "csic-setting-prevent-pre-filter";
+        input.type = "checkbox";
+        input.name = "csic-setting-prevent-pre-filter";
+        getSettings().then(s => input.checked = !!s.preventPreFilter);
+
+        const helpBlock = document.createElement("div");
+        controlGroup.append(helpBlock);
+        helpBlock.classList.add("help-block", "small", "no-margin");
+        helpBlock.textContent = "When opening an URL without filter parameters, prevent Crowdin " +
+            "from applying your latest used filter (e.g. CroQL) automatically."
+
+        input.addEventListener("change", e => {
+            const enabled = input.checked;
+            postMessage({identifier: ExtensionMessageId.SETTINGS_PREVENT_PRE_FILTERS_CHANGED, message: enabled ? 1 : 0} as ExtensionMessage<BooleanishNumber>)
+        })
         return controlGroup;
     }
 
@@ -195,4 +211,4 @@ class CommonMenu {
     }
 }
 
-injectScript(chrome.runtime.getURL('common-menu-inject.js'), 'body');
+injectExtensionScript('common-menu-inject.js');

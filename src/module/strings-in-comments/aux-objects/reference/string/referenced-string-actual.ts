@@ -10,7 +10,7 @@ import {Htmleable} from "../../../../../util/html-eable";
 import {convertCrowdinTranslationStatus, TranslationStatus} from "../../../../../util/getFetchParams";
 import {ClickBehaviorOption} from "../../../settings/click-behavior-option";
 import {ExtensionMessage, ExtensionMessageId} from "../../extension-message";
-import {clickBehavior} from "../../../../../common/settings/saved-settings";
+import {getSettings} from "../../../../../common/settings/extension-settings";
 
 
 function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HTMLElement {
@@ -97,14 +97,14 @@ export class ReferencedStringActual extends ReferencedString implements Htmleabl
             translationText.innerText = "<no suggestion available>"
         } else {
             translationText.classList.add("term_item");
-            translationText.addEventListener("click", () => {
-                switch(clickBehavior.id) {
+            translationText.addEventListener("click", async () => {
+                switch((await getSettings()).clickBehavior) {
                     case ClickBehaviorOption.INSERT_CARET.id:
                         postMessage({identifier: ExtensionMessageId.REPLACE_TEXT_IN_CARET, message: this.translation} as ExtensionMessage<string>);
                         break;
                     case ClickBehaviorOption.COPY_TO_CLIPBOARD.id:
                     default:
-                        navigator.clipboard.writeText(this.translation);
+                        void navigator.clipboard.writeText(this.translation);
 
                 }
             })
