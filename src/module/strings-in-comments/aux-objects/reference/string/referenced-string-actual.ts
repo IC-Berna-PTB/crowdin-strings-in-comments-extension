@@ -14,11 +14,11 @@ import {getSettings} from "../../../../../common/settings/extension-settings";
 
 
 function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HTMLElement {
-    let fullText = element.innerHTML;
+    let fullText = element.querySelector("span").innerHTML;
     if (fullText.length <= lengthToCollapse) {
         return element;
     }
-    let truncatedText = element.innerHTML.substring(0, lengthToCollapse) + "…";
+    let truncatedText = element.textContent.substring(0, lengthToCollapse) + "…";
     let wrappingElement = document.createElement("div");
     wrappingElement.classList.add("csic-collapsible");
     const arrowElement = document.createElement("a");
@@ -26,14 +26,25 @@ function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HT
     arrowElement.addEventListener("click", () => {
         wrappingElement.classList.toggle("csic-expanded");
         if (wrappingElement.classList.contains("csic-expanded")) {
-            element.innerHTML = fullText;
+            element.replaceChildren(textToHtml(fullText));
         } else {
-            element.innerHTML = truncatedText;
+            element.replaceChildren(truncatedText);
         }
     })
-    element.innerHTML = truncatedText;
+    element.replaceChildren(truncatedText);
     wrappingElement.replaceChildren(arrowElement, element);
     return wrappingElement;
+}
+
+function textToHtml(text: string): HTMLElement {
+    const lineByLine = text.replaceAll(/\r\n|\n\r/g, "\n").split(/[\n\r]|<br>/);
+    let result = document.createElement("span");
+    for (let string of lineByLine) {
+        result.append(string);
+        result.appendChild(document.createElement("br"));
+    }
+    result.removeChild(result.lastChild);
+    return result;
 }
 
 export class ReferencedStringActual extends ReferencedString implements Htmleable {
@@ -108,7 +119,7 @@ export class ReferencedStringActual extends ReferencedString implements Htmleabl
 
                 }
             })
-            translationText.innerText = this.translation;
+            translationText.replaceChildren(textToHtml(this.translation));
             translationText.title = "Click to copy to clipboard";
             translationText = applyCollapseIfLong(translationText, this.MAX_TEXT_LENGTH);
         }
@@ -121,7 +132,7 @@ export class ReferencedStringActual extends ReferencedString implements Htmleabl
         sourceTextWrapper.classList.add("csic-source-text-wrapper");
         let sourceText = document.createElement("span");
         sourceText.classList.add("suggestion_tm_source", "csic-source-text");
-        sourceText.innerText = this.source;
+        sourceText.replaceChildren(textToHtml(this.source));
         sourceTextWrapper.appendChild(applyCollapseIfLong(sourceText, this.MAX_TEXT_LENGTH));
 
         const container = document.createElement("div");
