@@ -9,7 +9,9 @@ export class ExtensionMessage<T> {
 
 export enum ExtensionMessageId {
     CROWDIN_INIT = "csic-language-id",
+    SET_SEARCH_FIELD_VALUE = "csic-set-search-field-value",
     NOTIFICATION_SUCCESS = "csic-notification-success",
+    NOTIFICATION_NOTICE = "csic-notification-warning",
     SETTINGS_DIALOG_OPENED = "csic-settings-dialog-opened",
     REPLACE_TEXT_IN_CARET = "csic-replace-text-in-caret",
     SETTINGS_CLICK_BEHAVIOR_CHANGED = "csic-settings-click-behavior-changed",

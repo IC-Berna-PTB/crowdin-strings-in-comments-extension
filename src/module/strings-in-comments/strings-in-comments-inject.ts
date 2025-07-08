@@ -45,13 +45,19 @@ $(document).ajaxSuccess((e:  JQuery.TriggeredEvent, xhr: JQuery.jqXHR, options: 
     if (options.url.startsWith("/backend/editor/init")){
         const response = data as CrowdinInitResponse;
         init = response;
-        console.log("vou postar")
         window.postMessage({
             identifier: ExtensionMessageId.CROWDIN_INIT,
             message: response
         } as ExtensionMessage<CrowdinInitResponse>);
     }
 });
+
+window.addEventListener("message", (e: MessageEvent<ExtensionMessage<string>>) => {
+    if (e.data.identifier === ExtensionMessageId.NOTIFICATION_NOTICE){
+        // @ts-ignore
+        $.jGrowl(e.data.message, {theme: "jGrowl-notice"})
+    }
+})
 
 window.addEventListener("message", e => {
     if (e.data.identifier === ExtensionMessageId.NOTIFICATION_SUCCESS){
@@ -64,5 +70,16 @@ window.addEventListener("message", (e: MessageEvent<ExtensionMessage<string>>) =
     if (e.data.identifier === ExtensionMessageId.REPLACE_TEXT_IN_CARET){
         // @ts-ignore
         crowdin.translation.insertValue(e.data.message)
+    }
+})
+
+window.addEventListener("message", (e: MessageEvent<ExtensionMessage<string>>) => {
+    if (e.data.identifier === ExtensionMessageId.SET_SEARCH_FIELD_VALUE){
+        // @ts-ignore
+        crowdin.phrases.search(e.data.message);
+        let searchBar = document.querySelector("#editor_search_bar") as HTMLInputElement;
+        if (searchBar) {
+            searchBar.value = e.data.message;
+        }
     }
 })
