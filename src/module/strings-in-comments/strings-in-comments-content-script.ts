@@ -227,6 +227,7 @@ async function checkIfThereIsFallbackForUrl(disconnectObserver: () => void) {
     let csicKey = originalUrl.searchParams.get("csic-key");
     let fileId = getFileId(originalUrl);
     if (csicKey && fileId !== "all") {
+        postMessage({identifier: ExtensionMessageId.NOTIFICATION_NOTICE, message: `Checking if there's still a string with token ${csicKey}`} as ExtensionMessage<string>);
         const ref = new ReferencedStringId(await getProjectId(originalUrl),
             parseInt(originalUrl.hash.replace("#", "")),
             getFileId(originalUrl) as number,
@@ -237,13 +238,14 @@ async function checkIfThereIsFallbackForUrl(disconnectObserver: () => void) {
             .then(param => getFallback(param))
             .then(result => {
                 if (result) {
-                    const newUrl = new URL(originalUrl);
-                    newUrl.hash = result.getStringId().toString();
                     window.postMessage({
                         identifier: ExtensionMessageId.NOTIFICATION_SUCCESS,
-                        message: `Found exact string using token ${ref.getFallbackKey()} in URL. Redirecting...`,
+                        message: `Found exact string using token ${ref.getFallbackKey()} in URL! Search updated with new ID.`,
+                    } as ExtensionMessage<string>);
+                    window.postMessage({
+                        identifier: ExtensionMessageId.SET_SEARCH_FIELD_VALUE,
+                        message: result.getStringId().toString()
                     } as ExtensionMessage<string>)
-                    setTimeout(() => window.location.href = newUrl.href, 2000);
                 }
             })
     }

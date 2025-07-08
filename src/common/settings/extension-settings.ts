@@ -49,7 +49,6 @@ window.addEventListener('message', (e: MessageEvent<ExtensionMessage<number>>) =
 
 window.addEventListener('message', (e: MessageEvent<ExtensionMessage<number>>) => {
     if (e.data.identifier === ExtensionMessageId.SETTINGS_PREVENT_PRE_FILTERS_CHANGED) {
-        console.log(e);
         const newOption = e.data.message as BooleanishNumber;
         if (isBooleanishNumber(newOption)) {
             extensionSettings.preventPreFilter = newOption;
