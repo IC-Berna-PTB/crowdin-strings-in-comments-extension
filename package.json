@@ -1,7 +1,7 @@
 {
   "name": "crowdin-strings-in-comments",
   "private": true,
-  "version": "3.3.6",
+  "version": "3.5.1",
   "author": "Bernardo Lopes (Berna)",
   "scripts": {
     "compile-csic-css": "npx sass src/module/strings-in-comments/style.scss dist/css/strings-in-comments.css",
@@ -14,20 +14,20 @@
     "package": "rm -rf dist/** && npm run build && cp src/manifest.json dist/manifest.json && zip -j dist/extension.zip dist/**"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.326",
-    "copy-webpack-plugin": "^12.0.2",
-    "sass": "^1.80.4",
-    "ts-loader": "^9.5.1",
-    "typescript": "^5.6.3",
-    "web-ext-plugin": "^2.10.0",
-    "webpack": "^5.95.0",
-    "webpack-cli": "^5.1.4",
-    "webpack-userscript": "^3.2.2"
+    "@types/chrome": "^0.0.332",
+    "copy-webpack-plugin": "^13.0.0",
+    "sass": "^1.89.2",
+    "ts-loader": "^9.5.2",
+    "typescript": "^5.8.3",
+    "web-ext-plugin": "^2.11.0",
+    "webpack": "^5.100.0",
+    "webpack-cli": "^6.0.1",
+    "webpack-userscript": "^3.2.3"
   },
   "dependencies": {
     "@types/jquery": "^3.5.32",
     "class-transformer": "^0.5.1",
     "jquery": "^3.7.1",
-    "query-string": "^9.1.1"
+    "query-string": "^9.2.2"
   }
 }
