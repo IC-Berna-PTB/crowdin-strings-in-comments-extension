@@ -1,7 +1,7 @@
 import {
     getFileId,
     getProjectId,
-    getSearchQuery
+    getDecodedSearchQuery
 } from "../../apis/crowdin/crowdin-main";
 import {getCurrentLanguagePair} from "../getFetchParams";
 
@@ -84,7 +84,7 @@ export abstract class CrowdinSearchParameters {
         const urlSearchParams = url.searchParams;
         const projectId = await getProjectId(url);
         const fileId = getFileId(url);
-        const query = getSearchQuery(url);
+        const query = getDecodedSearchQuery(url);
 
         switch (urlSearchParams.get("filter") as "basic" | "advanced" | "croql") {
             case "basic":

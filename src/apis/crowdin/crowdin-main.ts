@@ -24,6 +24,6 @@ export function getFileId(url: URL): number | "all" {
     const fileId = url.pathname.split("/")[3];
     return fileId === "all" ? fileId : parseInt(fileId);
 }
-export function getSearchQuery(url: URL): string {
-    return url.hash.replace("#q=", "")
+export function getDecodedSearchQuery(url: URL): string {
+    return decodeURIComponent(url.hash.replace("#q=", ""));
 }
