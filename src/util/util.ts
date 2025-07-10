@@ -1,4 +1,5 @@
 import {getCurrentLanguagePair} from "./getFetchParams";
+import {ExtensionMessage, ExtensionMessageId} from "../module/strings-in-comments/aux-objects/extension-message";
 
 export function elementReady(selector: string) {
     return new Promise((resolve) => {
@@ -42,4 +43,12 @@ export function injectExtensionScript(internalFilePath: string, tag: string = "h
     script.setAttribute('src'
         , chrome.runtime.getURL(internalFilePath));
     node.appendChild(script);
+}
+
+export function listenToExtensionMessage<T>(id: ExtensionMessageId, listener: (message: T) => void) {
+    window.addEventListener("message", (e: MessageEvent<ExtensionMessage<T>>) => {
+        if (e.data.identifier === id) {
+            listener(e.data.message);
+        }
+    })
 }

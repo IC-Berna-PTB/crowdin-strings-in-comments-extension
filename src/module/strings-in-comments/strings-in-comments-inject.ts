@@ -1,6 +1,6 @@
-import {CrowdinInitResponse} from "../../apis/crowdin/init/crowdin-init-response";
-import {ExtensionMessage, ExtensionMessageId} from "./aux-objects/extension-message";
+import {ExtensionMessageId} from "./aux-objects/extension-message";
 import {CrowdinPhrasesResponse} from "../../apis/crowdin/multiple-phrases/crowdin-phrases-response";
+import {listenToExtensionMessage} from "../../util/util";
 
 const updateStringUrlInterval = setInterval(() => {
     //@ts-ignore
@@ -33,53 +33,22 @@ const updateStringUrlInterval = setInterval(() => {
 
 let phrases: CrowdinPhrasesResponse = null;
 
-$(document).ajaxSuccess((_e:  JQuery.TriggeredEvent, _xhr: JQuery.jqXHR, options: JQuery.AjaxSettings, data: JQuery.PlainObject) => {
+$(document).ajaxSuccess((_e: JQuery.TriggeredEvent, _xhr: JQuery.jqXHR, options: JQuery.AjaxSettings, data: JQuery.PlainObject) => {
     if (options.url === ("/backend/phrases") && (options.type === "POST" || options.method === "POST")) {
         phrases = data as CrowdinPhrasesResponse;
     }
 });
 
-let init: CrowdinInitResponse = null;
-
-$(document).ajaxSuccess((e:  JQuery.TriggeredEvent, xhr: JQuery.jqXHR, options: JQuery.AjaxSettings, data: JQuery.PlainObject) => {
-    if (options.url.startsWith("/backend/editor/init")){
-        const response = data as CrowdinInitResponse;
-        init = response;
-        window.postMessage({
-            identifier: ExtensionMessageId.CROWDIN_INIT,
-            message: response
-        } as ExtensionMessage<CrowdinInitResponse>);
-    }
-});
-
-window.addEventListener("message", (e: MessageEvent<ExtensionMessage<string>>) => {
-    if (e.data.identifier === ExtensionMessageId.NOTIFICATION_NOTICE){
-        // @ts-ignore
-        $.jGrowl(e.data.message, {theme: "jGrowl-notice"})
-    }
+listenToExtensionMessage<string>(ExtensionMessageId.REPLACE_TEXT_IN_CARET, m => {
+    // @ts-ignore
+    crowdin.translation.insertValue(m);
 })
 
-window.addEventListener("message", e => {
-    if (e.data.identifier === ExtensionMessageId.NOTIFICATION_SUCCESS){
-        // @ts-ignore
-        $.jGrowl(e.data.message, {theme: "jGrowl-success"})
-    }
-})
-
-window.addEventListener("message", (e: MessageEvent<ExtensionMessage<string>>) => {
-    if (e.data.identifier === ExtensionMessageId.REPLACE_TEXT_IN_CARET){
-        // @ts-ignore
-        crowdin.translation.insertValue(e.data.message)
-    }
-})
-
-window.addEventListener("message", (e: MessageEvent<ExtensionMessage<string>>) => {
-    if (e.data.identifier === ExtensionMessageId.SET_SEARCH_FIELD_VALUE){
-        // @ts-ignore
-        crowdin.phrases.search(e.data.message);
-        let searchBar = document.querySelector("#editor_search_bar") as HTMLInputElement;
-        if (searchBar) {
-            searchBar.value = e.data.message;
-        }
+listenToExtensionMessage<string>(ExtensionMessageId.SET_SEARCH_FIELD_VALUE, m => {
+    // @ts-ignore
+    crowdin.phrases.search(m);
+    let searchBar = document.querySelector("#editor_search_bar") as HTMLInputElement;
+    if (searchBar) {
+        searchBar.value = m;
     }
 })

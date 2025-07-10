@@ -1,7 +1,6 @@
 import {injectExtensionScript, observeElementEvenIfNotReady} from "../../util/util";
 import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
-import {BooleanishNumber, ExtensionSettings, getSettings} from "../../common/settings/extension-settings";
-import {plainToInstance} from "class-transformer";
+import {BooleanishNumber, getSettings} from "../../common/settings/extension-settings";
 import {ClickBehaviorOption} from "../strings-in-comments/settings/click-behavior-option";
 
 class CommonMenu {
@@ -20,6 +19,8 @@ class CommonMenu {
 
             const preventPreFilter = CommonMenu.createPreventPreFilterSetting();
             dialogBody.appendChild(preventPreFilter);
+
+            const defaultLanguage = CommonMenu.createDefaultLanguageSetting();
 
             document.body.append(dialog);
             // const menu = this.createSettingsMenu();
@@ -172,32 +173,55 @@ class CommonMenu {
         helpBlock.textContent = "When opening an URL without filter parameters, prevent Crowdin " +
             "from applying your latest used filter (e.g. CroQL) automatically."
 
-        input.addEventListener("change", e => {
+        input.addEventListener("change", () => {
             const enabled = input.checked;
             postMessage({identifier: ExtensionMessageId.SETTINGS_PREVENT_PRE_FILTERS_CHANGED, message: enabled ? 1 : 0} as ExtensionMessage<BooleanishNumber>)
         })
         return controlGroup;
     }
 
-    /*
-    <div class="control-group" id="default_editor_view_section">
-          <label class="disabled" for="default_editor_view">
-            Default Editor View
-          </label>
-          <select id="default_editor_view" name="default_editor_view" class="full-width">
+    private static createDefaultLanguageSetting() {
+        const controlGroup = document.createElement("div");
+        controlGroup.classList.add("control-group");
 
-        <option value="from_account_defaults">Side-by-side (organization default)</option>
+        controlGroup.id = "csic-setting-default-language";
 
-            <option value="side-by-side">Side-by-side</option>
-            <option value="comfortable">Comfortable</option>
-            <option value="multilingual">Multilingual</option>
-            <option value="multilingual_grid">Multilingual (Grid)</option>
-          </select>
-          <div class="help-block small no-margin">
-            When view is specified in the URL, the Editor will display that view instead.
-          </div>
-        </div>
-     */
+        const label = document.createElement("label");
+        controlGroup.append(label);
+        label.textContent = "Default language";
+        label.htmlFor = "csic-settings-default-language-select";
+
+        const select = document.createElement("select");
+        controlGroup.append(select);
+        select.id = label.htmlFor;
+        select.name = select.id;
+        select.classList.add("full-width");
+
+        Object.values(ClickBehaviorOption.VALUES)
+            .map(async o => {
+                const option = document.createElement("option");
+                option.value = o.id.toString();
+                option.text = o.display;
+                option.selected = o.id === (await getSettings()).clickBehavior;
+                return option;
+            })
+            .forEach(optionPromise => optionPromise.then(o => select.append(o)))
+
+        select.addEventListener("change", async e => {
+            const selectedOption = parseInt((e.target as HTMLSelectElement).value);
+            const selectedOptionValue = ClickBehaviorOption.fromId(selectedOption);
+            if (!selectedOption) {
+                return;
+            }
+            postMessage({
+                identifier: ExtensionMessageId.SETTINGS_CLICK_BEHAVIOR_CHANGED,
+                message: selectedOptionValue.id
+            } as ExtensionMessage<number>)
+        })
+
+    }
+
+
 
     createSettingsMenu(): HTMLUListElement {
         const listElement = document.createElement("ul");
@@ -209,6 +233,7 @@ class CommonMenu {
     private static divElementListener(divElement: HTMLDivElement): void {
         divElement.classList.toggle("open");
     }
+
 }
 
 injectExtensionScript('common-menu-inject.js');

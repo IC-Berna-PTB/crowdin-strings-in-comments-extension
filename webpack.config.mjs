@@ -25,6 +25,9 @@ export default {
         // new UserscriptPlugin({headers: {include: ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"], version: "1.3.0"}})
     ],
     entry: {
+        'common': './src/common/common-content-script.ts',
+        'common-inject': './src/common/common-inject.ts',
+
         'strings-in-comments': './src/module/strings-in-comments/strings-in-comments-content-script.ts',
         'strings-in-comments-inject': './src/module/strings-in-comments/strings-in-comments-inject.ts',
 
@@ -35,6 +38,8 @@ export default {
 
         'pcfaftuwf': './src/module/prevent-crowdin-from-applying-filter-to-url-without-filters/pcfaftuwf-content-script.ts',
         'pcfaftuwf-inject': './src/module/prevent-crowdin-from-applying-filter-to-url-without-filters/pcfaftuwf-inject.ts',
+
+        'defailt-language': './src/module/default-language/default-language-content-script.ts',
 
         'source-2-plural-gender': './src/module/source-2-plural-gender/source-2-plural-gender-entrypoint.ts',
     },

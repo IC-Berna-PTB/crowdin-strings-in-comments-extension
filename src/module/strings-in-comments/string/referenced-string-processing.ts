@@ -12,7 +12,7 @@ export async function processReferencedString(referencedString: ReferencedString
         .then(r => processExactIdResponse(r, referencedString))
         .catch(() => ifExactIdDoesntExist(referencedString))
         .then(r => r)
-        .catch((): any => null)
+        .catch((): undefined => undefined)
 }
 
 

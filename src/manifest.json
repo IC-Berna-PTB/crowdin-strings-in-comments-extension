@@ -16,6 +16,8 @@
         "css/strings-in-comments.css"
       ],
       "js": [
+        "common.js",
+        "default-language.js",
         "strings-in-comments.js",
         "show-full-file-name.js",
         "common-menu.js"
@@ -62,6 +64,8 @@
         "*://crowdin.com/*"
       ],
       "resources": [
+        "common-inject.js",
+        "default-language-inject.js",
         "strings-in-comments-inject.js",
         "common-menu-inject.js",
         "pcfaftuwf-inject.js"

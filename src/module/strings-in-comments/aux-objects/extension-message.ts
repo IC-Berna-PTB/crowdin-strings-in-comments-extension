@@ -16,6 +16,8 @@ export enum ExtensionMessageId {
     REPLACE_TEXT_IN_CARET = "csic-replace-text-in-caret",
     SETTINGS_CLICK_BEHAVIOR_CHANGED = "csic-settings-click-behavior-changed",
     SETTINGS_PREVENT_PRE_FILTERS_CHANGED = "csic-settings-prevent-pre-filters-changed",
+    SETTINGS_DOMAIN_DEFAULT_LANGUAGE_CHANGED = "csic-settings-domain-default-language-changed",
+    SETTINGS_PROJECT_DEFAULT_LANGUAGE_CHANGED = "csic-settings-project-default-language-changed",
     SETTINGS_RETRIEVED = "csic-settings-retrieved",
     SETTINGS_ACK = "csic-settings-ack"
 }

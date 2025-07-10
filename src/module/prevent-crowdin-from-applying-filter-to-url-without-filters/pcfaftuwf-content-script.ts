@@ -1,4 +1,4 @@
-import {injectExtensionScript} from "../../util/util";
+import {injectExtensionScript, listenToExtensionMessage} from "../../util/util";
 import {ExtensionSettings, getSettings} from "../../common/settings/extension-settings";
 import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
 
@@ -10,10 +10,4 @@ function settingsInterval() {
     getSettings().then(settings => postMessage({identifier: ExtensionMessageId.SETTINGS_RETRIEVED, message: settings} as ExtensionMessage<ExtensionSettings>))
 }
 
-
-window.addEventListener('message', (e: MessageEvent<ExtensionMessage<number>>) => {
-    if (e.data.identifier === ExtensionMessageId.SETTINGS_ACK) {
-        clearInterval(postSettingsInterval);
-    }
-})
-
+listenToExtensionMessage(ExtensionMessageId.SETTINGS_ACK, () => clearInterval(postSettingsInterval));

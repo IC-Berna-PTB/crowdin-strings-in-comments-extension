@@ -1,11 +1,11 @@
-import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {listenToExtensionMessage} from "../../util/util";
 
-window.addEventListener("message", (e: MessageEvent<ExtensionMessage<string>>) => {
-    if (e.data.identifier === ExtensionMessageId.SETTINGS_DIALOG_OPENED){
-        let targetElement = $(e.data.message);
-        // @ts-ignore
-        targetElement.draggable();
-        // @ts-ignore
-        targetElement.position({of: document});
-    }
+
+listenToExtensionMessage<string>(ExtensionMessageId.SETTINGS_DIALOG_OPENED, m => {
+    let targetElement = $(m);
+    // @ts-ignore
+    targetElement.draggable();
+    // @ts-ignore
+    targetElement.position({of: document});
 })

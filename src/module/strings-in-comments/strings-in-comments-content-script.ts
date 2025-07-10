@@ -126,13 +126,13 @@ async function getTranslations(comment: CommentWithReferences): Promise<CommentW
     const r_1 = await Promise.all(references
         .filter(r => r instanceof ReferencedStringActual || r instanceof ReferencedStringId)
         .map(async (r) => processReferencedString(r)))
-        .then(promises => promises.filter(r => r !== null));
+        .then(promises => promises.filter(r => r));
     const partialComment = comment.withReplacedReferences(r_1);
 
     const r_2 = await Promise.all(references
         .filter(r => r instanceof ReferencedSearchQuery || r instanceof ReferencedSearchQueryActual)
         .map(async (r) => processReferencedSearchQuery(r)))
-        .then(promises => promises.filter(r => r !== null));
+        .then(promises => promises.filter(r => r));
     return partialComment.withAppendedReferences(r_2);
 }
 function hookDeleteButtons(element: HTMLElement) {
@@ -262,10 +262,3 @@ if (window.location.pathname.split("/")[1] === "editor") {
 
 
 injectExtensionScript('strings-in-comments-inject.js');
-
-window.addEventListener('message', e => {
-    if (e.data.identifier === ExtensionMessageId.CROWDIN_INIT && typeof e.data.message === "number") {
-        console.log(e.data.message);
-        console.log(`pegamos o idioma, e ele é ID: ${e.data.message}`)
-    }
-})
