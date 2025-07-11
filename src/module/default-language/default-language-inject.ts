@@ -40,15 +40,19 @@ function showNonDefaultLanguageMessage(currentLanguage: number, defaultLanguage:
     // @ts-ignore
     $.jGrowl(`
 <p class="notification-body">The link you opened is for <b>${currentName}</b>, but your default language is <b>${defaultName}</b>.</p>
-<p class="notification-body">Want to change to <b>${defaultName}</b>?</p>
+<p class="notification-body">Want to swap to <b>${defaultName}</b>?</p>
+<p class="notification-body text-small"><i>To change or disable the default language, open the settings below.</i></p>
 <div class="notification-actions clearfix ">
     <div class="pull-left btn-toolbar no-margin">
         <button onclick="crowdin.editor.updateLanguage(${defaultLanguage}, true)" class="btn btn-small csic-change-notification">
-        🔁 Change
+        🔁 Swap
         </button>
         <button class="btn btn-small cancel-notification">
-        ❌ Keep 
+        ❌ Stay here
         </button>
+    </div>
+    <div class="pull-right btn-toolbar no-margin">
+        <button onclick="document.querySelector('#csic-settings-btn').dispatchEvent(new MouseEvent('click'))" class="btn btn-small csic-open-settings cancel-notification">⚙️ Settings</button>
     </div>
 </div>
 `, {theme: "jGrowl-notice", sticky: true});
