@@ -39,7 +39,8 @@ export default {
         'pcfaftuwf': './src/module/prevent-crowdin-from-applying-filter-to-url-without-filters/pcfaftuwf-content-script.ts',
         'pcfaftuwf-inject': './src/module/prevent-crowdin-from-applying-filter-to-url-without-filters/pcfaftuwf-inject.ts',
 
-        'defailt-language': './src/module/default-language/default-language-content-script.ts',
+        'default-language': './src/module/default-language/default-language-content-script.ts',
+        'default-language-inject': './src/module/default-language/default-language-inject.ts',
 
         'source-2-plural-gender': './src/module/source-2-plural-gender/source-2-plural-gender-entrypoint.ts',
     },

@@ -1,4 +1,5 @@
 export class TargetLanguage {
-    id: number;
+    id: string;
     internal_code: string;
+    name: string;
 }

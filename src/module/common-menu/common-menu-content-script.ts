@@ -1,7 +1,15 @@
 import {injectExtensionScript, observeElementEvenIfNotReady} from "../../util/util";
 import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
-import {BooleanishNumber, getSettings} from "../../common/settings/extension-settings";
+import {
+    BooleanishNumber, getSettings
+} from "../../common/settings/extension-settings";
 import {ClickBehaviorOption} from "../strings-in-comments/settings/click-behavior-option";
+import {CommonContentScriptHelper} from "../../common/common-content-script-helper";
+import {
+    DomainLanguage,
+    getDefaultLanguageForDomain,
+    INVALID_LANGUAGE
+} from "../default-language/default-language-helper";
 
 class CommonMenu {
 
@@ -20,7 +28,8 @@ class CommonMenu {
             const preventPreFilter = CommonMenu.createPreventPreFilterSetting();
             dialogBody.appendChild(preventPreFilter);
 
-            const defaultLanguage = CommonMenu.createDefaultLanguageSetting();
+            CommonMenu.createDefaultLanguageSetting()
+                .then(l => dialogBody.appendChild(l))
 
             document.body.append(dialog);
             // const menu = this.createSettingsMenu();
@@ -167,11 +176,9 @@ class CommonMenu {
         input.name = "csic-setting-prevent-pre-filter";
         getSettings().then(s => input.checked = !!s.preventPreFilter);
 
-        const helpBlock = document.createElement("div");
+        const helpBlock = this.createHelpBlock("When opening an URL without filter parameters, prevent Crowdin " +
+            "from applying your latest used filter (e.g. CroQL) automatically.");
         controlGroup.append(helpBlock);
-        helpBlock.classList.add("help-block", "small", "no-margin");
-        helpBlock.textContent = "When opening an URL without filter parameters, prevent Crowdin " +
-            "from applying your latest used filter (e.g. CroQL) automatically."
 
         input.addEventListener("change", () => {
             const enabled = input.checked;
@@ -180,7 +187,7 @@ class CommonMenu {
         return controlGroup;
     }
 
-    private static createDefaultLanguageSetting() {
+    private static async createDefaultLanguageSetting() {
         const controlGroup = document.createElement("div");
         controlGroup.classList.add("control-group");
 
@@ -197,31 +204,53 @@ class CommonMenu {
         select.name = select.id;
         select.classList.add("full-width");
 
-        Object.values(ClickBehaviorOption.VALUES)
-            .map(async o => {
+        const currentDomain = await CommonContentScriptHelper.getCurrentInit().then(i => i.data.auth.domain);
+        const currentDefault = await getDefaultLanguageForDomain(currentDomain);
+
+
+        const noneOption = document.createElement("option");
+        noneOption.value = String(INVALID_LANGUAGE);
+        noneOption.text = "None";
+        noneOption.selected = INVALID_LANGUAGE === currentDefault;
+        select.append(noneOption);
+
+        for (const l1 of (await CommonContentScriptHelper.getCurrentInit())
+            .data.init_editor.project.target_languages
+            .map(async l => {
                 const option = document.createElement("option");
-                option.value = o.id.toString();
-                option.text = o.display;
-                option.selected = o.id === (await getSettings()).clickBehavior;
+                option.value = l.id;
+                option.text = l.name;
+                option.selected = parseInt(l.id) === currentDefault;
                 return option;
-            })
-            .forEach(optionPromise => optionPromise.then(o => select.append(o)))
+            })) {
+            l1.then(o => select.append(o));
+        }
+
+        let helpBlockText = "This will apply to all projects hosted in https://crowdin.com.";
+
+        if (currentDomain) {
+            helpBlockText = `This will apply to all projects hosted in the current Crowdin Enterprise instance (${currentDomain}).`;
+        }
+
+        const helpBlock = this.createHelpBlock(helpBlockText);
+        controlGroup.append(helpBlock);
 
         select.addEventListener("change", async e => {
-            const selectedOption = parseInt((e.target as HTMLSelectElement).value);
-            const selectedOptionValue = ClickBehaviorOption.fromId(selectedOption);
-            if (!selectedOption) {
-                return;
-            }
             postMessage({
-                identifier: ExtensionMessageId.SETTINGS_CLICK_BEHAVIOR_CHANGED,
-                message: selectedOptionValue.id
-            } as ExtensionMessage<number>)
+                identifier: ExtensionMessageId.SETTINGS_DOMAIN_DEFAULT_LANGUAGE_CHANGED,
+                message: new DomainLanguage(currentDomain, parseInt(select.value))
+            } as ExtensionMessage<DomainLanguage>)
         })
+        return controlGroup;
 
     }
 
-
+    private static createHelpBlock(text: string): HTMLDivElement {
+        const helpBlock = document.createElement("div");
+        helpBlock.classList.add("help-block", "small", "no-margin");
+        helpBlock.textContent = text;
+        return helpBlock;
+    }
 
     createSettingsMenu(): HTMLUListElement {
         const listElement = document.createElement("ul");

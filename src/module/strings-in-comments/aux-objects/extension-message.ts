@@ -12,6 +12,7 @@ export enum ExtensionMessageId {
     SET_SEARCH_FIELD_VALUE = "csic-set-search-field-value",
     NOTIFICATION_SUCCESS = "csic-notification-success",
     NOTIFICATION_NOTICE = "csic-notification-warning",
+    NOTIFICATION_NON_DEFAULT_LANGUAGE = "csic-notification-non-default-language",
     SETTINGS_DIALOG_OPENED = "csic-settings-dialog-opened",
     REPLACE_TEXT_IN_CARET = "csic-replace-text-in-caret",
     SETTINGS_CLICK_BEHAVIOR_CHANGED = "csic-settings-click-behavior-changed",

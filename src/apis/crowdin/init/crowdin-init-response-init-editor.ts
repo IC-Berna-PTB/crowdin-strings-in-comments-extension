@@ -4,5 +4,5 @@ import {CrowdinUserProject} from "../../../util/crowdin/api/user-projects/crowdi
 export class CrowdinInitResponseInitEditor {
     target_language?: TargetLanguage;
     out_of_scope_target_lang?: TargetLanguage;
-    project?: CrowdinUserProject
+    project?: CrowdinUserProject;
 }
