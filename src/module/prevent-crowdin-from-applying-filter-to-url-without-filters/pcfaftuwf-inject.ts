@@ -15,7 +15,7 @@ window.addEventListener("message", (e: MessageEvent<ExtensionMessage<ExtensionSe
 
 const interval = setInterval(() => {
     // @ts-ignore
-    if (!document.querySelector("#master-loader") && settings) {
+    if (!document.querySelector("#master-loader") && settings && hasTargetLanguage()) {
         if (settings.preventPreFilter) {
             const currentSearchParameters = new URLSearchParams(window.location.search);
             if (originalSearchParameters.get("value") !== currentSearchParameters.get("value")) {
@@ -26,3 +26,8 @@ const interval = setInterval(() => {
         clearInterval(interval);
     }
 }, 500)
+
+function hasTargetLanguage() {
+    // @ts-ignore
+    return crowdin.editor.target_language || crowdin.editor.target_language.length > 0
+}

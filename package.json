@@ -1,7 +1,7 @@
 {
   "name": "crowdin-strings-in-comments",
   "private": true,
-  "version": "3.5.1",
+  "version": "3.5.2",
   "author": "Bernardo Lopes (Berna)",
   "scripts": {
     "compile-csic-css": "npx sass src/module/strings-in-comments/style.scss dist/css/strings-in-comments.css",
