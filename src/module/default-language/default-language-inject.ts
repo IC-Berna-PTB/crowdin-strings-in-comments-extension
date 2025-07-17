@@ -23,8 +23,11 @@ const interval = setInterval(() => {
         const defaultLanguage = getDefaultLanguageForDomainInSettings(settings, init.data.auth.domain);
         // @ts-ignore
         const currentLanguage = crowdin?.editor?.target_language?.id ?? null;
-        if (hasTargetLanguage() && defaultLanguage !== INVALID_LANGUAGE && currentLanguage !== defaultLanguage) {
-            setTimeout(() => showNonDefaultLanguageMessage(currentLanguage, defaultLanguage), 2000);
+        if (hasTargetLanguage())  {
+            if (defaultLanguage !== INVALID_LANGUAGE && currentLanguage !== defaultLanguage)
+            {
+                setTimeout(() => showNonDefaultLanguageMessage(currentLanguage, defaultLanguage), 2000);
+            }
         } else {
             // @ts-ignore
             crowdin.editor.updateLanguage(defaultLanguage, true);
