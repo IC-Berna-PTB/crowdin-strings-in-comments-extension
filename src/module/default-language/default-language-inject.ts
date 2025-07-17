@@ -2,7 +2,7 @@ import {listenToExtensionMessage} from "../../util/util";
 import {ExtensionSettings} from "../../common/settings/extension-settings";
 import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
 import {CrowdinInitResponse} from "../../apis/crowdin/init/crowdin-init-response";
-import {getDefaultLanguageForDomainInSettings} from "./default-language-helper";
+import {getDefaultLanguageForDomainInSettings, INVALID_LANGUAGE} from "./default-language-helper";
 
 let settings: ExtensionSettings | undefined = undefined;
 let init: CrowdinInitResponse | undefined = undefined;
@@ -23,7 +23,7 @@ const interval = setInterval(() => {
         const defaultLanguage = getDefaultLanguageForDomainInSettings(settings, init.data.auth.domain);
         // @ts-ignore
         const currentLanguage = crowdin?.editor?.target_language?.id ?? null;
-        if (hasTargetLanguage() && currentLanguage !== defaultLanguage) {
+        if (hasTargetLanguage() && defaultLanguage !== INVALID_LANGUAGE && currentLanguage !== defaultLanguage) {
             setTimeout(() => showNonDefaultLanguageMessage(currentLanguage, defaultLanguage), 2000);
         } else {
             // @ts-ignore
