@@ -20,20 +20,22 @@ listenToExtensionMessage<CrowdinInitResponse>(ExtensionMessageId.CROWDIN_INIT, m
 const interval = setInterval(() => {
     // @ts-ignore
     if (!document.querySelector("#master-loader") && settings) {
+        clearInterval(interval);
         const defaultLanguage = getDefaultLanguageForDomainInSettings(settings, init.data.auth.domain);
         // @ts-ignore
         const currentLanguage = crowdin?.editor?.target_language?.id ?? null;
-        if (hasTargetLanguage())  {
-            if (defaultLanguage !== INVALID_LANGUAGE && currentLanguage !== defaultLanguage)
-            {
+        if (defaultLanguage !== INVALID_LANGUAGE && currentLanguage !== defaultLanguage) {
+            if (hasTargetLanguage()) {
                 setTimeout(() => showNonDefaultLanguageMessage(currentLanguage, defaultLanguage), 2000);
+            } else {
+                // @ts-ignore
+                crowdin.editor.updateLanguage(defaultLanguage, true);
+                postMessage({
+                    identifier: ExtensionMessageId.NOTIFICATION_SUCCESS,
+                    message: "Redirected URL without language to your default"
+                } as ExtensionMessage<string>)
             }
-        } else {
-            // @ts-ignore
-            crowdin.editor.updateLanguage(defaultLanguage, true);
-            postMessage({identifier: ExtensionMessageId.NOTIFICATION_SUCCESS, message: "Redirected URL without language to your default"} as ExtensionMessage<string>)
         }
-        clearInterval(interval);
     }
 }, 500)
 
