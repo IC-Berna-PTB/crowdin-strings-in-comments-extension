@@ -1,5 +1,6 @@
 import {getCurrentLanguagePair} from "./getFetchParams";
 import {ExtensionMessage, ExtensionMessageId} from "../module/strings-in-comments/aux-objects/extension-message";
+import {ClassConstructor, plainToInstance} from "class-transformer";
 
 export function elementReady(selector: string) {
     return new Promise((resolve) => {
@@ -45,10 +46,25 @@ export function injectExtensionScript(internalFilePath: string, tag: string = "h
     node.appendChild(script);
 }
 
+export function postExtensionMessage<T>(id: ExtensionMessageId, message: T) {
+    postMessage({
+        identifier: id,
+        message: message
+    } as ExtensionMessage<T>)
+}
+
 export function listenToExtensionMessage<T>(id: ExtensionMessageId, listener: (message: T) => void) {
     window.addEventListener("message", (e: MessageEvent<ExtensionMessage<T>>) => {
         if (e.data.identifier === id) {
             listener(e.data.message);
         }
     })
+}
+
+export function objectToBase64(object: unknown): string {
+    return btoa(JSON.stringify(object));
+}
+
+export function base64ToObject<T>(base64: string, clazz: ClassConstructor<T>): T {
+    return plainToInstance<T, unknown>(clazz, JSON.parse(atob(base64)));
 }

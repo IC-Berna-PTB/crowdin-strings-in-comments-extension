@@ -1,19 +1,19 @@
 import {ClickBehaviorOption} from "../../module/strings-in-comments/settings/click-behavior-option";
 import {ExtensionMessageId} from "../../module/strings-in-comments/aux-objects/extension-message";
-import {listenToExtensionMessage} from "../../util/util";
+import {base64ToObject, listenToExtensionMessage, objectToBase64, postExtensionMessage} from "../../util/util";
 import {
     DomainLanguage,
     ProjectLanguage,
-    setDefaultLanguageForDomain, setDefaultLanguageForProject
+    setDefaultLanguageForDomain,
+    setDefaultLanguageForProject
 } from "../../module/default-language/default-language-helper";
-
 
 export class ExtensionSettings {
 
-    loaded: number = 1;
+    version: number = 1;
     clickBehavior: number = 1;
     preventPreFilter: BooleanishNumber = 1;
-    defaultLanguage: string = "W10=";
+    defaultLanguage: string = "W10="; // empty array
 
 }
 
@@ -31,7 +31,7 @@ export async function getSettings(): Promise<ExtensionSettings> {
             return await chrome.storage.sync.get(null)
                 .then(data => data as ExtensionSettings)
                 .then(async savedSettings => {
-                    if (savedSettings.loaded) {
+                    if (savedSettings) {
                         extensionSettings = savedSettings;
                     } else {
                         extensionSettings = new ExtensionSettings();
@@ -48,6 +48,21 @@ export async function getSettings(): Promise<ExtensionSettings> {
 }
 
 void getSettings();
+
+export async function importSettings(base64: string): Promise<boolean> {
+    const instance = base64ToObject(base64, ExtensionSettings);
+    if (instance instanceof ExtensionSettings) {
+        extensionSettings = instance;
+        await chrome.storage.sync.set(extensionSettings);
+        postExtensionMessage(ExtensionMessageId.SETTINGS_IMPORTED, extensionSettings);
+        return true;
+    }
+    return false;
+}
+
+export async function exportSettings(): Promise<string> {
+    return await getSettings().then(s => objectToBase64(s))
+}
 
 
 listenToExtensionMessage<number>(ExtensionMessageId.SETTINGS_CLICK_BEHAVIOR_CHANGED, m => {

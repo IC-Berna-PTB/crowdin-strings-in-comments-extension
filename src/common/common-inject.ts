@@ -25,3 +25,8 @@ listenToExtensionMessage<string>(ExtensionMessageId.NOTIFICATION_SUCCESS, m => {
     $.jGrowl(m, {theme: "jGrowl-success"});
 })
 
+listenToExtensionMessage<string>(ExtensionMessageId.NOTIFICATION_ERROR, m => {
+    // @ts-ignore
+    $.jGrowl(m, {theme: "jGrowl-error"});
+})
+
