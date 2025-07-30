@@ -22,10 +22,13 @@ export function elementReady(selector: string) {
     });
 }
 
-export function observeElementEvenIfNotReady(selector: string, observer: (element: HTMLElement, disconnect: () => void) => void): void {
+export function observeElementEvenIfNotReady(selector: string, observer: (element: HTMLElement, disconnect: () => void) => void, callImmediately: boolean = false): void {
     elementReady(selector).then((element: HTMLElement) => {
         const mutationObserver = new MutationObserver(() => observer(element, () => mutationObserver.disconnect()));
         mutationObserver.observe(element, { childList: true, subtree: true })
+        if (callImmediately) {
+            observer(element, () => mutationObserver.disconnect());
+        }
     })
 }
 

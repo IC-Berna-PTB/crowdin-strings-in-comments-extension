@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "3.8.0",
+  "version": "3.9.0",
   "name": "Crowdin Strings in Comments",
   "icons": {
     "128": "icon/128.png"
@@ -13,12 +13,14 @@
       ],
       "css": [
         "css/common-menu.css",
-        "css/strings-in-comments.css"
+        "css/strings-in-comments.css",
+        "css/prevent-key-copy.css"
       ],
       "js": [
         "default-language.js",
         "strings-in-comments.js",
         "show-full-file-name.js",
+        "prevent-key-copy.js",
         "common-menu.js",
         "common.js"
       ]

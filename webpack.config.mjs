@@ -42,6 +42,8 @@ export default {
         'default-language': './src/module/default-language/default-language-content-script.ts',
         'default-language-inject': './src/module/default-language/default-language-inject.ts',
 
+        'prevent-key-copy': './src/module/prevent-key-copy/prevent-key-copy-content-script.ts',
+
         'source-2-plural-gender': './src/module/source-2-plural-gender/source-2-plural-gender-entrypoint.ts',
     },
     module: {
