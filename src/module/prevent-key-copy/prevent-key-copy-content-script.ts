@@ -1,5 +1,16 @@
 import {observeElementEvenIfNotReady} from "../../util/util";
 
+
+function preventCopyTooltip() {
+    let tooltipContent: HTMLDivElement = document.querySelector("div.TooltipContent");
+    if (tooltipContent) {
+        let shortcutInfo: HTMLDivElement = tooltipContent.querySelector("div.shortcut-info");
+        if (shortcutInfo && shortcutInfo.innerText.trim() === "Click to copy") {
+            tooltipContent.hidden = true;
+        }
+    }
+}
+
 observeElementEvenIfNotReady(".string-key-container--text", (e, disconnect) => {
     if (e.style.cursor !== "pointer") {
         return;
@@ -8,9 +19,9 @@ observeElementEvenIfNotReady(".string-key-container--text", (e, disconnect) => {
     disconnect();
     e.style.cursor = "text";
     e.addEventListener("click", e => e.stopPropagation());
-    e.addEventListener("mouseenter", e => e.stopPropagation());
+    e.addEventListener("mouseenter", preventCopyTooltip);
     e.addEventListener("focus", e => e.stopPropagation());
-    e.addEventListener("mousemove", e => e.stopPropagation());
+    e.addEventListener("mousemove", preventCopyTooltip);
     e.style.marginTop = "auto";
     e.style.marginBottom = "auto";
 
@@ -24,6 +35,7 @@ observeElementEvenIfNotReady(".string-key-container--text", (e, disconnect) => {
     copyButton.classList.add(..."btn btn-icon".split(" "));
 
     const copyButtonIcon = document.createElement("i");
+    copyButtonIcon.title = "Click to copy key to clipboard";
     copyButtonIcon.classList.add("static-icon-csic-copy");
 
     copyButton.appendChild(copyButtonIcon);
