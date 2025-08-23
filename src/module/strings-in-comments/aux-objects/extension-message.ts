@@ -14,6 +14,7 @@ export enum ExtensionMessageId {
     NOTIFICATION_NOTICE = "csic-notification-notice",
     NOTIFICATION_ERROR = "csic-notification-error",
     NOTIFICATION_NON_DEFAULT_LANGUAGE = "csic-notification-non-default-language",
+    HTML_PREVIEW_UPDATED = "csic-html-preview-updated",
     SETTINGS_DIALOG_OPENED = "csic-settings-dialog-opened",
     SETTINGS_IMPORTED = "csic-settings-imported",
     REPLACE_TEXT_IN_CARET = "csic-replace-text-in-caret",
@@ -21,6 +22,7 @@ export enum ExtensionMessageId {
     SETTINGS_PREVENT_PRE_FILTERS_CHANGED = "csic-settings-prevent-pre-filters-changed",
     SETTINGS_DOMAIN_DEFAULT_LANGUAGE_CHANGED = "csic-settings-domain-default-language-changed",
     SETTINGS_PROJECT_DEFAULT_LANGUAGE_CHANGED = "csic-settings-project-default-language-changed",
+    SETTINGS_DARK_THEME_HTML_PREVIEW_CHANGED = "csic-settings-dark-theme-html-preview-changed",
     SETTINGS_RETRIEVED = "csic-settings-retrieved",
     SETTINGS_ACK = "csic-settings-ack"
 }

@@ -38,6 +38,9 @@ class CommonMenu {
             const preventPreFilter = CommonMenu.createPreventPreFilterSetting();
             dialogBody.appendChild(preventPreFilter);
 
+            const darkThemeHtmlPreview = CommonMenu.createDarkThemeHtmlPreviewSetting();
+            dialogBody.appendChild(darkThemeHtmlPreview);
+
             CommonMenu.createDefaultLanguageSetting()
                 .then(l => dialogBody.appendChild(l))
 
@@ -209,6 +212,38 @@ class CommonMenu {
         })
         return controlGroup;
     }
+
+    private static createDarkThemeHtmlPreviewSetting(): HTMLElement {
+        const controlGroup = document.createElement("div");
+        controlGroup.classList.add("control-group", "margin-top");
+
+        const label = document.createElement("label");
+        controlGroup.append(label);
+        label.textContent = `Force HTML preview in dark when using Crowdin in dark mode`
+        label.classList.add("checkbox");
+
+        const input = document.createElement("input");
+        label.append(input);
+        input.id = "csic-setting-dark-theme-html-preview";
+        input.type = "checkbox";
+        input.name = "csic-setting-dark-theme-html-preview";
+        getSettings().then(s => input.checked = !!s.darkThemeHtml);
+
+        const helpBlock = this.createHelpBlock("When opening a HTML file, " +
+            "forces it to be in dark mode when Crowdin is also in dark mode");
+        controlGroup.append(helpBlock);
+
+        input.addEventListener("change", () => {
+            const enabled = input.checked;
+            postMessage({identifier: ExtensionMessageId.SETTINGS_DARK_THEME_HTML_PREVIEW_CHANGED, message: enabled ? 1 : 0} as ExtensionMessage<BooleanishNumber>)
+        })
+
+        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORTED, es => {
+            input.checked = !!es.darkThemeHtml;
+        })
+        return controlGroup;
+    }
+
 
     private static async createDefaultLanguageSetting() {
         const controlGroup = document.createElement("div");

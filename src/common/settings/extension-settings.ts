@@ -7,6 +7,7 @@ import {
     setDefaultLanguageForDomain,
     setDefaultLanguageForProject
 } from "../../module/default-language/default-language-helper";
+import {plainToInstance} from "class-transformer";
 
 export class ExtensionSettings {
 
@@ -14,7 +15,7 @@ export class ExtensionSettings {
     clickBehavior: number = 1;
     preventPreFilter: BooleanishNumber = 1;
     defaultLanguage: string = "W10="; // empty array
-
+    darkThemeHtml: BooleanishNumber = 0;
 }
 
 export type BooleanishNumber = 0 | 1;
@@ -27,12 +28,13 @@ let extensionSettings: ExtensionSettings | undefined = undefined;
 
 export async function getSettings(): Promise<ExtensionSettings> {
     if (!extensionSettings) {
-        if (chrome && chrome.storage && chrome.storage.sync){
+        if (typeof chrome !== 'undefined' && chrome && chrome.storage && chrome.storage.sync){
             return await chrome.storage.sync.get(null)
                 .then(data => data as ExtensionSettings)
                 .then(async savedSettings => {
                     if (savedSettings) {
-                        extensionSettings = savedSettings;
+                        extensionSettings = plainToInstance<ExtensionSettings, unknown>(ExtensionSettings, savedSettings);
+                        await chrome.storage.sync.set(extensionSettings);
                     } else {
                         extensionSettings = new ExtensionSettings();
                         await chrome.storage.sync.set(extensionSettings);
@@ -84,6 +86,17 @@ listenToExtensionMessage<number>(ExtensionMessageId.SETTINGS_PREVENT_PRE_FILTERS
         });
     }
 })
+
+listenToExtensionMessage<number>(ExtensionMessageId.SETTINGS_DARK_THEME_HTML_PREVIEW_CHANGED, m => {
+    const newOption = m as BooleanishNumber;
+    if (isBooleanishNumber(newOption)) {
+        getSettings().then(s => {
+            s.darkThemeHtml = newOption;
+            void chrome.storage.sync.set(s);
+        });
+    }
+})
+
 
 listenToExtensionMessage<DomainLanguage>(ExtensionMessageId.SETTINGS_DOMAIN_DEFAULT_LANGUAGE_CHANGED, m => {
     if (m) {
