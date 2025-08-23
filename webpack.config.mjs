@@ -44,6 +44,9 @@ export default {
 
         'prevent-key-copy': './src/module/prevent-key-copy/prevent-key-copy-content-script.ts',
 
+        'dark-theme-html-preview': './src/module/dark-theme-html-preview/dark-theme-html-preview-content-script.ts',
+        'dark-theme-html-preview-inject': './src/module/dark-theme-html-preview/dark-theme-html-preview-inject.ts',
+
         'source-2-plural-gender': './src/module/source-2-plural-gender/source-2-plural-gender-entrypoint.ts',
     },
     module: {
