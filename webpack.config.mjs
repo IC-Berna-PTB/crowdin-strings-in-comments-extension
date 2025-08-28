@@ -47,6 +47,9 @@ export default {
         'dark-theme-html-preview': './src/module/dark-theme-html-preview/dark-theme-html-preview-content-script.ts',
         'dark-theme-html-preview-inject': './src/module/dark-theme-html-preview/dark-theme-html-preview-inject.ts',
 
+        'all-content-redirect': './src/module/all-content-redirect/all-content-redirect-content-script.ts',
+        'all-content-redirect-inject': './src/module/all-content-redirect/all-content-redirect-inject.ts',
+
         'source-2-plural-gender': './src/module/source-2-plural-gender/source-2-plural-gender-entrypoint.ts',
     },
     module: {

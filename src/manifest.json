@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "3.10.0",
+  "version": "3.11.0",
   "name": "Crowdin Strings in Comments",
   "icons": {
     "128": "icon/128.png"
@@ -22,6 +22,7 @@
         "show-full-file-name.js",
         "prevent-key-copy.js",
         "dark-theme-html-preview.js",
+        "all-content-redirect.js",
         "common-menu.js",
         "common.js"
       ]
@@ -72,6 +73,7 @@
         "common-menu-inject.js",
         "pcfaftuwf-inject.js",
         "dark-theme-html-preview-inject.js",
+        "all-content-redirect-inject.js",
         "common-inject.js"
       ]
     }

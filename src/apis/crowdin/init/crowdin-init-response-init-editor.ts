@@ -5,4 +5,5 @@ export class CrowdinInitResponseInitEditor {
     target_language?: TargetLanguage;
     out_of_scope_target_lang?: TargetLanguage;
     project?: CrowdinUserProject;
+    has_access_in_out_of_workflow?: boolean = false;
 }

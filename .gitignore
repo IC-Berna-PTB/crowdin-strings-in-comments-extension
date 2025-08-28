@@ -26,5 +26,5 @@ dist-ssr
 # Config files
 .webextrc
 .webextrc.*
-/src/*.css
-/src/*.css.map
+src/**/style.css
+src/**/style.css.map
