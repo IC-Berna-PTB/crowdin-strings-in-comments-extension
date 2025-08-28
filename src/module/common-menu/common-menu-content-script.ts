@@ -15,11 +15,20 @@ import {
 import {ClickBehaviorOption} from "../strings-in-comments/settings/click-behavior-option";
 import {CommonContentScriptHelper} from "../../common/common-content-script-helper";
 import {
-    DomainLanguage, getDefaultLanguageForCurrentDomain, getDefaultLanguageForCurrentDomainInSettings,
+    DomainLanguage,
+    getDefaultLanguageForCurrentDomainInSettings,
     getDefaultLanguageForDomain,
     INVALID_LANGUAGE
 } from "../default-language/default-language-helper";
 
+
+class SettingParameters {
+    id: string
+    label: string
+    helpText?: string
+    setting: (settings: ExtensionSettings) => boolean;
+    messageId: ExtensionMessageId;
+}
 
 class CommonMenu {
 
@@ -38,8 +47,22 @@ class CommonMenu {
             const preventPreFilter = CommonMenu.createPreventPreFilterSetting();
             dialogBody.appendChild(preventPreFilter);
 
-            const darkThemeHtmlPreview = CommonMenu.createDarkThemeHtmlPreviewSetting();
+            const darkThemeHtmlPreview = CommonMenu.createCheckboxSetting({
+                id: "csic-setting-dark-theme-html-preview",
+                label: "Force HTML preview in dark when using Crowdin in dark mode",
+                helpText: "When opening a HTML file, forces it to be in dark mode when Crowdin is also in dark mode",
+                messageId: ExtensionMessageId.SETTINGS_DARK_THEME_HTML_PREVIEW_CHANGED,
+                setting: (settings: ExtensionSettings) => !!settings.darkThemeHtml
+            });
             dialogBody.appendChild(darkThemeHtmlPreview);
+
+            const allContentRedirect = CommonMenu.createCheckboxSetting({
+                id: "csic-setting-all-content-redirect",
+                label: "Autoredirect to \"All Content\" workflow if available",
+                messageId: ExtensionMessageId.SETTINGS_ALL_CONTENT_REDIRECT_CHANGED,
+                setting: (es) => !!es.allContentRedirect
+            });
+            dialogBody.appendChild(allContentRedirect);
 
             CommonMenu.createDefaultLanguageSetting()
                 .then(l => dialogBody.appendChild(l))
@@ -56,8 +79,6 @@ class CommonMenu {
             openMenuButtonDiv.title = 'Open "Crowdin Strings in Comments" extension settings'
 
             openMenuButtonDiv.append(openMenuButton);
-            // openMenuButtonDiv.append(menu);
-            // openMenuButtonDiv.addEventListener("click", () => this.divElementListener(openMenuButtonDiv));
             openMenuButtonDiv.addEventListener("click", () => CommonMenu.toggleDialog(dialog))
 
             element.after(openMenuButtonDiv);
@@ -118,6 +139,40 @@ class CommonMenu {
         body.classList.add(..."ui-dialog-content ui-widget-content csic-dialog-body".split(" "));
 
         return dialog;
+    }
+
+    private static createCheckboxSetting(settingParameters: SettingParameters) {
+        const controlGroup = document.createElement("div");
+        controlGroup.classList.add("control-group", "margin-top");
+
+        const label = document.createElement("label");
+        controlGroup.append(label);
+        label.textContent = settingParameters.label;
+        label.classList.add("checkbox");
+
+        const input = document.createElement("input");
+        label.append(input);
+        input.id = settingParameters.id;
+        input.type = "checkbox";
+        input.name = settingParameters.id;
+
+        getSettings().then(s => input.checked = settingParameters.setting(s));
+
+        if (settingParameters.helpText) {
+            const helpBlock = this.createHelpBlock(settingParameters.helpText)
+            controlGroup.append(helpBlock);
+        }
+
+        input.addEventListener("change", () => {
+            const enabled = input.checked;
+            postExtensionMessage<BooleanishNumber>(settingParameters.messageId, enabled ? 1 : 0);
+        })
+
+        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORTED, es => {
+            input.checked = !!settingParameters.setting(es);
+        });
+
+        return controlGroup;
     }
 
     private static toggleDialog(dialog: HTMLDivElement): void {
@@ -213,38 +268,6 @@ class CommonMenu {
         return controlGroup;
     }
 
-    private static createDarkThemeHtmlPreviewSetting(): HTMLElement {
-        const controlGroup = document.createElement("div");
-        controlGroup.classList.add("control-group", "margin-top");
-
-        const label = document.createElement("label");
-        controlGroup.append(label);
-        label.textContent = `Force HTML preview in dark when using Crowdin in dark mode`
-        label.classList.add("checkbox");
-
-        const input = document.createElement("input");
-        label.append(input);
-        input.id = "csic-setting-dark-theme-html-preview";
-        input.type = "checkbox";
-        input.name = "csic-setting-dark-theme-html-preview";
-        getSettings().then(s => input.checked = !!s.darkThemeHtml);
-
-        const helpBlock = this.createHelpBlock("When opening a HTML file, " +
-            "forces it to be in dark mode when Crowdin is also in dark mode");
-        controlGroup.append(helpBlock);
-
-        input.addEventListener("change", () => {
-            const enabled = input.checked;
-            postMessage({identifier: ExtensionMessageId.SETTINGS_DARK_THEME_HTML_PREVIEW_CHANGED, message: enabled ? 1 : 0} as ExtensionMessage<BooleanishNumber>)
-        })
-
-        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORTED, es => {
-            input.checked = !!es.darkThemeHtml;
-        })
-        return controlGroup;
-    }
-
-
     private static async createDefaultLanguageSetting() {
         const controlGroup = document.createElement("div");
         controlGroup.classList.add("control-group");
@@ -293,7 +316,7 @@ class CommonMenu {
         const helpBlock = this.createHelpBlock(helpBlockText);
         controlGroup.append(helpBlock);
 
-        select.addEventListener("change", async e => {
+        select.addEventListener("change", async () => {
             postMessage({
                 identifier: ExtensionMessageId.SETTINGS_DOMAIN_DEFAULT_LANGUAGE_CHANGED,
                 message: new DomainLanguage(currentDomain, parseInt(select.value))

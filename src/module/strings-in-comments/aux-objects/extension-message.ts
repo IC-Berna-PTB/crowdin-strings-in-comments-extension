@@ -23,6 +23,7 @@ export enum ExtensionMessageId {
     SETTINGS_DOMAIN_DEFAULT_LANGUAGE_CHANGED = "csic-settings-domain-default-language-changed",
     SETTINGS_PROJECT_DEFAULT_LANGUAGE_CHANGED = "csic-settings-project-default-language-changed",
     SETTINGS_DARK_THEME_HTML_PREVIEW_CHANGED = "csic-settings-dark-theme-html-preview-changed",
+    SETTINGS_ALL_CONTENT_REDIRECT_CHANGED = "csic-settings-all-content-redirect-changed",
     SETTINGS_RETRIEVED = "csic-settings-retrieved",
     SETTINGS_ACK = "csic-settings-ack"
 }

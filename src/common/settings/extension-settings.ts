@@ -9,6 +9,7 @@ import {
 } from "../../module/default-language/default-language-helper";
 import {plainToInstance} from "class-transformer";
 
+
 export class ExtensionSettings {
 
     version: number = 1;
@@ -16,6 +17,7 @@ export class ExtensionSettings {
     preventPreFilter: BooleanishNumber = 1;
     defaultLanguage: string = "W10="; // empty array
     darkThemeHtml: BooleanishNumber = 0;
+    allContentRedirect: BooleanishNumber = 1;
 }
 
 export type BooleanishNumber = 0 | 1;
@@ -97,6 +99,22 @@ listenToExtensionMessage<number>(ExtensionMessageId.SETTINGS_DARK_THEME_HTML_PRE
     }
 })
 
+listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_ALL_CONTENT_REDIRECT_CHANGED, (no, s) => {
+    s.allContentRedirect = no;
+    return s;
+})
+
+function listenToBooleanSettingChange(messageId: ExtensionMessageId, apply: (newOption: BooleanishNumber, settings: ExtensionSettings) => ExtensionSettings) {
+    listenToExtensionMessage<number>(messageId, m => {
+        const newOption = m as BooleanishNumber;
+        if (!isBooleanishNumber(newOption)) {
+            return;
+        }
+        getSettings()
+            .then(s => apply(newOption, s))
+            .then(s => chrome.storage.sync.set(s))
+    })
+}
 
 listenToExtensionMessage<DomainLanguage>(ExtensionMessageId.SETTINGS_DOMAIN_DEFAULT_LANGUAGE_CHANGED, m => {
     if (m) {
