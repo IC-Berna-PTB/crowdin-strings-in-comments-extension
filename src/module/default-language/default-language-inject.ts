@@ -1,8 +1,9 @@
-import {listenToExtensionMessage} from "../../util/util";
+import {listenToExtensionMessage, observeElementEvenIfNotReady, postExtensionMessage} from "../../util/util";
 import {ExtensionSettings} from "../../common/extension-settings";
 import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
 import {CrowdinInitResponse} from "../../apis/crowdin/init/crowdin-init-response";
 import {getDefaultLanguageForDomainInSettings, INVALID_LANGUAGE} from "./default-language-helper";
+import {requestSettings} from "../../common/extension-settings-client";
 
 let settings: ExtensionSettings | undefined = undefined;
 let init: CrowdinInitResponse | undefined = undefined;
@@ -35,6 +36,21 @@ const interval = setInterval(() => {
                     message: "Redirected URL without language to your default"
                 } as ExtensionMessage<string>)
             }
+        } else if (!hasTargetLanguage()) {
+            requestSettings().then(settings => {
+                if (settings.naggedAboutDefaultLanguage) {
+                    return;
+                }
+                const interval = setInterval(() => {
+                    if (!hasTargetLanguage()) {
+                        return;
+                    }
+                    clearInterval(interval);
+                    // @ts-ignore
+                    setTimeout(() => offerDefaultLanguageSetup(crowdin?.editor?.target_language?.id), 5000);
+                    postExtensionMessage<boolean>(ExtensionMessageId.SETTINGS_NAGGED_ABOUT_DEFAULT_LANGUAGE, true);
+                }, 100)
+            })
         }
     }
 }, 500)
@@ -62,9 +78,42 @@ function showNonDefaultLanguageMessage(currentLanguage: number, defaultLanguage:
 </div>
 `, {theme: "jGrowl-notice", sticky: true});
 }
+function setDefaultLanguage(language: number) {
+    postExtensionMessage(ExtensionMessageId.SETTINGS_DOMAIN_DEFAULT_LANGUAGE_SET_BY_NOTIFICATION, language);
+}
+
+function offerDefaultLanguageSetup(currentLanguage: number) {
+    const currentName = getDescriptionForLanguageId(currentLanguage);
+    // @ts-ignore
+    $.jGrowl(`
+    <p class="notification-body">The Crowdin Extension can automatically redirect links without a set language to your default language,
+    plus warn you if you opened a link for another language.</p>
+    <p class="notification-body">Do you want to set your default language as <b>${currentName}</b>?</p>
+    <p class="notification-body text-small">This notification won't be shown again.<p>
+    <p class="notification-body text-small">To change this later, click on the puzzle piece on the top right.</p>
+    <div class="notification-actions clearfix ">
+    <div class="pull-left btn-toolbar no-margin">
+        <button id="csic-apply-default-language-button" class="btn btn-small cancel-notification">
+        ✅ Yes
+        </button>
+        <button class="btn btn-small cancel-notification">
+        ❌ No
+        </button>
+    </div>
+    <div class="pull-right btn-toolbar no-margin">
+        <button onclick="document.querySelector('#csic-settings-btn').dispatchEvent(new MouseEvent('click'))" class="btn btn-small csic-open-settings cancel-notification">⚙️ Settings</button>
+    </div>
+</div>
+    `, {theme: "jGrowl-notice", sticky: true})
+    observeElementEvenIfNotReady("#csic-apply-default-language-button", (e, d) => {
+        e.addEventListener("click", () => setDefaultLanguage(currentLanguage))
+        d();
+    }, true);
+}
 
 function getDescriptionForLanguageId(id: number): string {
-    return init?.data?.init_editor?.project?.target_languages?.find(l => parseInt(l.id) === id)?.name ?? `Language ID ${id}`;
+    return (init?.data?.init_editor?.project?.target_languages?.find(l => parseInt(l.id) === id)?.name ?? `Language ID ${id}`)
+        .replaceAll(" ", `\xa0`);
 }
 
 function hasTargetLanguage() {

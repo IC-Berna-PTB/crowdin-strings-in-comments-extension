@@ -6,6 +6,7 @@ export class ExtensionSettings {
     defaultLanguage: string = "W10="; // empty array
     darkThemeHtml: BooleanishNumber = 0;
     allContentRedirect: BooleanishNumber = 1;
+    naggedAboutDefaultLanguage: BooleanishNumber = 0;
 }
 
 export type BooleanishNumber = 0 | 1;

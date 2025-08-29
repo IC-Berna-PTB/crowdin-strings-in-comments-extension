@@ -287,17 +287,26 @@ class CommonMenu {
             } as ExtensionMessage<DomainLanguage>)
         })
 
-        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, es => {
-            getDefaultLanguageForCurrentDomainInSettings(es)
-                .then(l => {
-                    for (let option of select.options) {
-                        option.selected = option.value === l.toString();
-                    }
-                });
-        })
+        listenToExtensionMessage<number>(ExtensionMessageId.SETTINGS_DOMAIN_DEFAULT_LANGUAGE_SET_BY_NOTIFICATION, l => {
+            for (let option of select.options) {
+                option.selected = option.value === l.toString();
+            }
+            postExtensionMessage<DomainLanguage>(ExtensionMessageId.SETTINGS_DOMAIN_DEFAULT_LANGUAGE_CHANGED, new DomainLanguage(currentDomain, l));
+        });
+
+        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, es => this.whenDomainLanguageChanged(es, select));
 
         return controlGroup;
 
+    }
+
+    private static whenDomainLanguageChanged(es: ExtensionSettings, select: HTMLSelectElement) {
+        getDefaultLanguageForCurrentDomainInSettings(es)
+            .then(l => {
+                for (let option of select.options) {
+                    option.selected = option.value === l.toString();
+                }
+            });
     }
 
     private static createHelpBlock(text: string): HTMLDivElement {

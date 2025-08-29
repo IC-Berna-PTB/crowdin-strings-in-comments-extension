@@ -6,7 +6,8 @@ import {ClickBehaviorOption} from "../strings-in-comments/settings/click-behavio
 import {
     DomainLanguage,
     ProjectLanguage,
-    setDefaultLanguageForDomain, setDefaultLanguageForProject
+    setDefaultLanguageForDomain,
+    setDefaultLanguageForProject
 } from "../default-language/default-language-helper";
 
 listenToExtensionMessage<unknown>(ExtensionMessageId.SETTINGS_REQUESTED_BY_MODULE, () => {
@@ -93,6 +94,15 @@ listenToExtensionMessage<ProjectLanguage>(ExtensionMessageId.SETTINGS_PROJECT_DE
     if (m) {
         getSettings().then(s => {
             setDefaultLanguageForProject(s, m.d, m.p, m.l);
+        })
+    }
+})
+
+listenToExtensionMessage(ExtensionMessageId.SETTINGS_NAGGED_ABOUT_DEFAULT_LANGUAGE, didIt => {
+    if (didIt) {
+        getSettings().then(s => {
+            s.naggedAboutDefaultLanguage = 1;
+            void chrome.storage.sync.set(s);
         })
     }
 })
