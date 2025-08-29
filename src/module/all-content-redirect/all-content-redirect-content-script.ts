@@ -1,13 +1,13 @@
 import {listenToExtensionMessage} from "../../util/util";
 import {ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
 import {CrowdinInitResponse} from "../../apis/crowdin/init/crowdin-init-response";
-import {getSettings} from "../../common/settings/extension-settings";
+import {requestSettings} from "../../common/extension-settings-client";
 
 listenToExtensionMessage(ExtensionMessageId.CROWDIN_INIT, whenInitRetrieved);
 
 async function whenInitRetrieved(init: CrowdinInitResponse) {
     const pathSplit = window.location.pathname.split("/");
-    if (!(await getSettings()).allContentRedirect) {
+    if (!(await requestSettings()).allContentRedirect) {
         return;
     }
     if (pathSplit.length <= 5) {

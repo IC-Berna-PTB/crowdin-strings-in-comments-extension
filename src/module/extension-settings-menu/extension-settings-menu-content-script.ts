@@ -5,21 +5,16 @@ import {
     postExtensionMessage
 } from "../../util/util";
 import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
-import {
-    BooleanishNumber,
-    exportSettings,
-    ExtensionSettings,
-    getSettings,
-    importSettings
-} from "../../common/settings/extension-settings";
+import {BooleanishNumber, ExtensionSettings,} from "../../common/extension-settings";
 import {ClickBehaviorOption} from "../strings-in-comments/settings/click-behavior-option";
-import {CommonContentScriptHelper} from "../../common/common-content-script-helper";
+import {CommonContentScriptHelper} from "../common/common-content-script-helper";
 import {
     DomainLanguage,
     getDefaultLanguageForCurrentDomainInSettings,
     getDefaultLanguageForDomain,
     INVALID_LANGUAGE
 } from "../default-language/default-language-helper";
+import {exportSettings, requestSettings, requestSettingsImport} from "../../common/extension-settings-client";
 
 
 class SettingParameters {
@@ -44,7 +39,14 @@ class CommonMenu {
             const clickBehavior = CommonMenu.createClickBehaviorSetting();
             dialogBody.appendChild(clickBehavior);
 
-            const preventPreFilter = CommonMenu.createPreventPreFilterSetting();
+            const preventPreFilter = CommonMenu.createCheckboxSetting({
+                id: "csic-setting-prevent-pre-filter",
+                label: "Always open URLs without filters in  \"Show All\" mode",
+                helpText: "When opening an URL without filter parameters, prevent Crowdin " +
+                    "from applying your latest used filter (e.g. CroQL) automatically",
+                messageId: ExtensionMessageId.SETTINGS_PREVENT_PRE_FILTERS_CHANGED,
+                setting: (settings: ExtensionSettings) => !!settings.preventPreFilter
+            });
             dialogBody.appendChild(preventPreFilter);
 
             const darkThemeHtmlPreview = CommonMenu.createCheckboxSetting({
@@ -156,7 +158,7 @@ class CommonMenu {
         input.type = "checkbox";
         input.name = settingParameters.id;
 
-        getSettings().then(s => input.checked = settingParameters.setting(s));
+        requestSettings().then(s => input.checked = settingParameters.setting(s));
 
         if (settingParameters.helpText) {
             const helpBlock = this.createHelpBlock(settingParameters.helpText)
@@ -168,7 +170,7 @@ class CommonMenu {
             postExtensionMessage<BooleanishNumber>(settingParameters.messageId, enabled ? 1 : 0);
         })
 
-        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORTED, es => {
+        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, es => {
             input.checked = !!settingParameters.setting(es);
         });
 
@@ -206,7 +208,7 @@ class CommonMenu {
             const option = document.createElement("option");
             option.value = o.id.toString();
             option.text = o.display;
-            option.selected = o.id === (await getSettings()).clickBehavior;
+            option.selected = o.id === (await requestSettings()).clickBehavior;
             return option;
         })
             .forEach(optionPromise => optionPromise.then(o => select.append(o)))
@@ -223,51 +225,13 @@ class CommonMenu {
             } as ExtensionMessage<number>)
         })
 
-        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORTED, es => {
+        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, es => {
             for (let option of select.options) {
                 option.selected = option.value === es.clickBehavior.toString();
             }
         })
-
-        // const hint = document.createElement("div");
-        // controlGroup.append(hint);
-        // hint.classList.add(..."help-block small no-margin".split(" "));
-        // hint.textContent = "Select the default language lorem ipsum";
-
         return controlGroup;
     }
-
-    private static createPreventPreFilterSetting(): HTMLElement {
-        const controlGroup = document.createElement("div");
-        controlGroup.classList.add("control-group", "margin-top");
-
-        const label = document.createElement("label");
-        controlGroup.append(label);
-        label.textContent = `Always open URLs without filters in  "Show All" mode`
-        label.classList.add("checkbox");
-
-        const input = document.createElement("input");
-        label.append(input);
-        input.id = "csic-setting-prevent-pre-filter";
-        input.type = "checkbox";
-        input.name = "csic-setting-prevent-pre-filter";
-        getSettings().then(s => input.checked = !!s.preventPreFilter);
-
-        const helpBlock = this.createHelpBlock("When opening an URL without filter parameters, prevent Crowdin " +
-            "from applying your latest used filter (e.g. CroQL) automatically.");
-        controlGroup.append(helpBlock);
-
-        input.addEventListener("change", () => {
-            const enabled = input.checked;
-            postMessage({identifier: ExtensionMessageId.SETTINGS_PREVENT_PRE_FILTERS_CHANGED, message: enabled ? 1 : 0} as ExtensionMessage<BooleanishNumber>)
-        })
-
-        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORTED, es => {
-            input.checked = !!es.preventPreFilter;
-        })
-        return controlGroup;
-    }
-
     private static async createDefaultLanguageSetting() {
         const controlGroup = document.createElement("div");
         controlGroup.classList.add("control-group");
@@ -323,7 +287,7 @@ class CommonMenu {
             } as ExtensionMessage<DomainLanguage>)
         })
 
-        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORTED, es => {
+        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, es => {
             getDefaultLanguageForCurrentDomainInSettings(es)
                 .then(l => {
                     for (let option of select.options) {
@@ -386,7 +350,7 @@ class CommonMenu {
 
     private static importSettingsFromClipboard() {
         navigator.clipboard.readText()
-            .then(text => importSettings(text))
+            .then(text => requestSettingsImport(text))
             .then(successful => postExtensionMessage(
                 successful ? ExtensionMessageId.NOTIFICATION_SUCCESS : ExtensionMessageId.NOTIFICATION_ERROR,
                 successful ? "Import successful!" : "Import failed!"
@@ -405,4 +369,4 @@ class CommonMenu {
     }
 }
 
-injectExtensionScript('common-menu-inject.js');
+injectExtensionScript('extension-settings-menu-inject.js');

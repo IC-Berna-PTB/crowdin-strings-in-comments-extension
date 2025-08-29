@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "3.11.0",
+  "version": "3.11.1",
   "name": "Crowdin Strings in Comments",
   "icons": {
     "128": "icon/128.png"
@@ -23,7 +23,8 @@
         "prevent-key-copy.js",
         "dark-theme-html-preview.js",
         "all-content-redirect.js",
-        "common-menu.js",
+        "extension-settings-menu.js",
+        "extension-settings-server.js",
         "common.js"
       ]
     },
@@ -33,7 +34,7 @@
         "*://crowdin.com/*"
       ],
       "js": [
-        "pcfaftuwf.js"
+        "prevent-pre-filter.js"
       ]
     },
     {
@@ -70,8 +71,9 @@
       "resources": [
         "default-language-inject.js",
         "strings-in-comments-inject.js",
-        "common-menu-inject.js",
-        "pcfaftuwf-inject.js",
+        "extension-settings-menu-inject.js",
+        "prevent-pre-filter-inject.js",
+        "extension-settings-server-inject.js",
         "dark-theme-html-preview-inject.js",
         "all-content-redirect-inject.js",
         "common-inject.js"

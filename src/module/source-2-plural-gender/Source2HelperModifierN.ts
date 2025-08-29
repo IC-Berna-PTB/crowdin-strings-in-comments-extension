@@ -3,7 +3,7 @@ import {Source2HelperAbstract} from "./Source2HelperAbstract";
 import {
 	createPluginEditorEnhancementContainer,
 	getCrowdinTranslationTextArea, getGenderName
-} from "./source-2-plural-gender-entrypoint";
+} from "./source-2-plural-gender-content-script";
 import {langDef} from "./langDef";
 
 export class Source2HelperModifierN extends Source2HelperAbstract {

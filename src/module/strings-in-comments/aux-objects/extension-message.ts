@@ -16,7 +16,11 @@ export enum ExtensionMessageId {
     NOTIFICATION_NON_DEFAULT_LANGUAGE = "csic-notification-non-default-language",
     HTML_PREVIEW_UPDATED = "csic-html-preview-updated",
     SETTINGS_DIALOG_OPENED = "csic-settings-dialog-opened",
-    SETTINGS_IMPORTED = "csic-settings-imported",
+    SETTINGS_IMPORT_REQUESTED = "csic-settings-import-requested",
+    SETTINGS_IMPORT_SUCCESSFUL = "csic-settings-import-successful",
+    SETTINGS_IMPORT_FAILED = "csic-settings-import-failed",
+    SETTINGS_EXPORT_REQUESTED = "csic-settings-export-requested",
+    SETTINGS_EXPORT_SUCCESSFUL = "csic-settings-export-successful",
     REPLACE_TEXT_IN_CARET = "csic-replace-text-in-caret",
     SETTINGS_CLICK_BEHAVIOR_CHANGED = "csic-settings-click-behavior-changed",
     SETTINGS_PREVENT_PRE_FILTERS_CHANGED = "csic-settings-prevent-pre-filters-changed",
@@ -24,6 +28,7 @@ export enum ExtensionMessageId {
     SETTINGS_PROJECT_DEFAULT_LANGUAGE_CHANGED = "csic-settings-project-default-language-changed",
     SETTINGS_DARK_THEME_HTML_PREVIEW_CHANGED = "csic-settings-dark-theme-html-preview-changed",
     SETTINGS_ALL_CONTENT_REDIRECT_CHANGED = "csic-settings-all-content-redirect-changed",
+    SETTINGS_REQUESTED_BY_MODULE = "csic-settings-requested-by-module",
     SETTINGS_RETRIEVED = "csic-settings-retrieved",
-    SETTINGS_ACK = "csic-settings-ack"
+    SETTINGS_ACK = "csic-settings-ack",
 }

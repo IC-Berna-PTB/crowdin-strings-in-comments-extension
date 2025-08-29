@@ -1,5 +1,6 @@
-import {ExtensionSettings, getSettings} from "../../common/settings/extension-settings";
-import {CommonContentScriptHelper} from "../../common/common-content-script-helper";
+import {ExtensionSettings} from "../../common/extension-settings";
+import {CommonContentScriptHelper} from "../common/common-content-script-helper";
+import {requestSettings} from "../../common/extension-settings-client";
 
 export const INVALID_LANGUAGE = -1;
 
@@ -23,11 +24,11 @@ export async function getDefaultLanguageForCurrentDomainInSettings(settings: Ext
 }
 
 export async function getDefaultLanguageForDomain(domain: string| null): Promise<number> {
-    return getSettings().then(s => getDefaultLanguageForDomainInSettings(s, domain))
+    return requestSettings().then(s => getDefaultLanguageForDomainInSettings(s, domain))
 }
 
 export async function getDefaultLanguageForProject(domain: string | null, projectId: number): Promise<number> {
-    const s = await getSettings();
+    const s = await requestSettings();
     const array = getDomainEntryArray(s);
     let domainEntry = array.find(e => e.d === domain);
     // No domain entry, no default language set

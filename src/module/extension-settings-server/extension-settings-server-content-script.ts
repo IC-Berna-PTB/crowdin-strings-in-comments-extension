@@ -1,36 +1,27 @@
-import {ClickBehaviorOption} from "../../module/strings-in-comments/settings/click-behavior-option";
-import {ExtensionMessageId} from "../../module/strings-in-comments/aux-objects/extension-message";
-import {base64ToObject, listenToExtensionMessage, objectToBase64, postExtensionMessage} from "../../util/util";
+import {base64ToObject, listenToExtensionMessage, postExtensionMessage} from "../../util/util";
+import {ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {BooleanishNumber, ExtensionSettings} from "../../common/extension-settings";
+import {plainToInstance} from "class-transformer";
+import {ClickBehaviorOption} from "../strings-in-comments/settings/click-behavior-option";
 import {
     DomainLanguage,
     ProjectLanguage,
-    setDefaultLanguageForDomain,
-    setDefaultLanguageForProject
-} from "../../module/default-language/default-language-helper";
-import {plainToInstance} from "class-transformer";
+    setDefaultLanguageForDomain, setDefaultLanguageForProject
+} from "../default-language/default-language-helper";
 
+listenToExtensionMessage<unknown>(ExtensionMessageId.SETTINGS_REQUESTED_BY_MODULE, () => {
+    getSettings().then(settings => postExtensionMessage(ExtensionMessageId.SETTINGS_RETRIEVED, settings))
+})
 
-export class ExtensionSettings {
-
-    version: number = 1;
-    clickBehavior: number = 1;
-    preventPreFilter: BooleanishNumber = 1;
-    defaultLanguage: string = "W10="; // empty array
-    darkThemeHtml: BooleanishNumber = 0;
-    allContentRedirect: BooleanishNumber = 1;
-}
-
-export type BooleanishNumber = 0 | 1;
+let extensionSettings: ExtensionSettings | undefined = undefined;
 
 function isBooleanishNumber(n: number): boolean {
     return [0, 1].includes(n);
 }
 
-let extensionSettings: ExtensionSettings | undefined = undefined;
-
-export async function getSettings(): Promise<ExtensionSettings> {
+async function getSettings(): Promise<ExtensionSettings> {
     if (!extensionSettings) {
-        if (typeof chrome !== 'undefined' && chrome && chrome.storage && chrome.storage.sync){
+        if (typeof chrome !== 'undefined' && chrome && chrome.storage && chrome.storage.sync) {
             return await chrome.storage.sync.get(null)
                 .then(data => data as ExtensionSettings)
                 .then(async savedSettings => {
@@ -53,22 +44,6 @@ export async function getSettings(): Promise<ExtensionSettings> {
 
 void getSettings();
 
-export async function importSettings(base64: string): Promise<boolean> {
-    const instance = base64ToObject(base64, ExtensionSettings);
-    if (instance instanceof ExtensionSettings) {
-        extensionSettings = instance;
-        await chrome.storage.sync.set(extensionSettings);
-        postExtensionMessage(ExtensionMessageId.SETTINGS_IMPORTED, extensionSettings);
-        return true;
-    }
-    return false;
-}
-
-export async function exportSettings(): Promise<string> {
-    return await getSettings().then(s => objectToBase64(s))
-}
-
-
 listenToExtensionMessage<number>(ExtensionMessageId.SETTINGS_CLICK_BEHAVIOR_CHANGED, m => {
     const newBehavior = ClickBehaviorOption.fromId(m);
     if (newBehavior) {
@@ -79,24 +54,14 @@ listenToExtensionMessage<number>(ExtensionMessageId.SETTINGS_CLICK_BEHAVIOR_CHAN
     }
 });
 
-listenToExtensionMessage<number>(ExtensionMessageId.SETTINGS_PREVENT_PRE_FILTERS_CHANGED, m => {
-    const newOption = m as BooleanishNumber;
-    if (isBooleanishNumber(newOption)) {
-        getSettings().then(s => {
-            s.preventPreFilter = newOption;
-            void chrome.storage.sync.set(s);
-        });
-    }
+listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_PREVENT_PRE_FILTERS_CHANGED, (no, s) => {
+    s.preventPreFilter = no;
+    return s;
 })
 
-listenToExtensionMessage<number>(ExtensionMessageId.SETTINGS_DARK_THEME_HTML_PREVIEW_CHANGED, m => {
-    const newOption = m as BooleanishNumber;
-    if (isBooleanishNumber(newOption)) {
-        getSettings().then(s => {
-            s.darkThemeHtml = newOption;
-            void chrome.storage.sync.set(s);
-        });
-    }
+listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_DARK_THEME_HTML_PREVIEW_CHANGED, (no, s) => {
+    s.darkThemeHtml = no;
+    return s;
 })
 
 listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_ALL_CONTENT_REDIRECT_CHANGED, (no, s) => {
@@ -132,3 +97,23 @@ listenToExtensionMessage<ProjectLanguage>(ExtensionMessageId.SETTINGS_PROJECT_DE
     }
 })
 
+listenToExtensionMessage<string>(
+    ExtensionMessageId.SETTINGS_IMPORT_REQUESTED,
+    s => importSettings(s).then(async result => {
+        if (result) {
+            postExtensionMessage(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, await getSettings())
+        } else {
+            postExtensionMessage<string>(ExtensionMessageId.SETTINGS_IMPORT_FAILED, "Could not import settings!")
+        }
+    }))
+
+async function importSettings(base64: string): Promise<boolean> {
+    const instance = base64ToObject(base64, ExtensionSettings);
+    if (instance instanceof ExtensionSettings) {
+        extensionSettings = instance;
+        await chrome.storage.sync.set(extensionSettings);
+        postExtensionMessage(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, extensionSettings);
+        return true;
+    }
+    return false;
+}

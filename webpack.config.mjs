@@ -2,9 +2,31 @@ import WebExtPlugin from 'web-ext-plugin';
 import path from 'path';
 import {fileURLToPath} from 'url';
 import CopyPlugin from "copy-webpack-plugin";
+import * as fs from "node:fs";
 
 const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
 const __dirname = path.dirname(__filename); // get the name of the directory
+
+function checkScriptsForModule(moduleFolder, map) {
+    if (!(moduleFolder instanceof fs.Dirent)) {
+        return;
+    }
+    const files = fs.readdirSync(path.join(moduleFolder.parentPath, moduleFolder.name), {withFileTypes: true});
+    const fileNames = files.map(f => f.name);
+    if (fileNames.includes(`${moduleFolder.name}-content-script.ts`)) {
+        map.set(moduleFolder.name, path.join(path.resolve(moduleFolder.parentPath), moduleFolder.name, `${moduleFolder.name}-content-script.ts`));
+    }
+    if (fileNames.includes(`${moduleFolder.name}-inject.ts`)) {
+        map.set(`${moduleFolder.name}-inject`, path.join(path.resolve(moduleFolder.parentPath), moduleFolder.name, `${moduleFolder.name}-inject.ts`));
+    }
+    return map;
+}
+
+const map = new Map()
+
+fs.readdirSync("./src/module", {recursive: false, withFileTypes: true})
+    .filter(file => file.isDirectory())
+    .map(file => checkScriptsForModule(file, map))
 
 
 export default {
@@ -24,34 +46,7 @@ export default {
         })
         // new UserscriptPlugin({headers: {include: ["*://*.crowdin.com/editor/*", "*://crowdin.com/editor/*"], version: "1.3.0"}})
     ],
-    entry: {
-        'common': './src/common/common-content-script.ts',
-        'common-inject': './src/common/common-inject.ts',
-
-        'strings-in-comments': './src/module/strings-in-comments/strings-in-comments-content-script.ts',
-        'strings-in-comments-inject': './src/module/strings-in-comments/strings-in-comments-inject.ts',
-
-        'show-full-file-name': './src/module/show-full-file-name/full-file-name-entrypoint.ts',
-
-        'common-menu': './src/module/common-menu/common-menu-content-script.ts',
-        'common-menu-inject': './src/module/common-menu/common-menu-inject.ts',
-
-        'pcfaftuwf': './src/module/prevent-crowdin-from-applying-filter-to-url-without-filters/pcfaftuwf-content-script.ts',
-        'pcfaftuwf-inject': './src/module/prevent-crowdin-from-applying-filter-to-url-without-filters/pcfaftuwf-inject.ts',
-
-        'default-language': './src/module/default-language/default-language-content-script.ts',
-        'default-language-inject': './src/module/default-language/default-language-inject.ts',
-
-        'prevent-key-copy': './src/module/prevent-key-copy/prevent-key-copy-content-script.ts',
-
-        'dark-theme-html-preview': './src/module/dark-theme-html-preview/dark-theme-html-preview-content-script.ts',
-        'dark-theme-html-preview-inject': './src/module/dark-theme-html-preview/dark-theme-html-preview-inject.ts',
-
-        'all-content-redirect': './src/module/all-content-redirect/all-content-redirect-content-script.ts',
-        'all-content-redirect-inject': './src/module/all-content-redirect/all-content-redirect-inject.ts',
-
-        'source-2-plural-gender': './src/module/source-2-plural-gender/source-2-plural-gender-entrypoint.ts',
-    },
+    entry: Object.fromEntries(map),
     module: {
         rules: [
             {

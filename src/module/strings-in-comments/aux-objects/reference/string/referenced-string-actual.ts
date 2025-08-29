@@ -10,7 +10,7 @@ import {Htmleable} from "../../../../../util/html-eable";
 import {convertCrowdinTranslationStatus, TranslationStatus} from "../../../../../util/getFetchParams";
 import {ClickBehaviorOption} from "../../../settings/click-behavior-option";
 import {ExtensionMessage, ExtensionMessageId} from "../../extension-message";
-import {getSettings} from "../../../../../common/settings/extension-settings";
+import {requestSettings} from "../../../../../common/extension-settings-client";
 
 
 function applyCollapseIfLong(element: HTMLElement, lengthToCollapse: number): HTMLElement {
@@ -109,7 +109,7 @@ export class ReferencedStringActual extends ReferencedString implements Htmleabl
         } else {
             translationText.classList.add("term_item");
             translationText.addEventListener("click", async () => {
-                switch((await getSettings()).clickBehavior) {
+                switch((await requestSettings()).clickBehavior) {
                     case ClickBehaviorOption.INSERT_CARET.id:
                         postMessage({identifier: ExtensionMessageId.REPLACE_TEXT_IN_CARET, message: this.translation} as ExtensionMessage<string>);
                         break;

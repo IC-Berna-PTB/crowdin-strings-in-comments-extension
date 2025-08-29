@@ -4,7 +4,7 @@ import {langDef} from "./langDef";
 import {
 	createPluginEditorEnhancementContainer, getCrowdinTokenContext,
 	getCrowdinTranslationTextArea, getGenderName, getModifiersFromTokenContext
-} from "./source-2-plural-gender-entrypoint";
+} from "./source-2-plural-gender-content-script";
 
 export class Source2HelperModifierGP extends Source2HelperAbstract {
 	inject(){

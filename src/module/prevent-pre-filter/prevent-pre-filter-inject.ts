@@ -1,5 +1,5 @@
 import {CrowdinSearchQueryType} from "../../util/crowdin/crowdin-search-parameters";
-import {ExtensionSettings} from "../../common/settings/extension-settings";
+import {ExtensionSettings} from "../../common/extension-settings";
 import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
 import {listenToExtensionMessage} from "../../util/util";
 

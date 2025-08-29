@@ -1,6 +1,6 @@
-import {ExtensionMessage, ExtensionMessageId} from "../module/strings-in-comments/aux-objects/extension-message";
-import {CrowdinInitResponse} from "../apis/crowdin/init/crowdin-init-response";
-import {listenToExtensionMessage} from "../util/util";
+import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {CrowdinInitResponse} from "../../apis/crowdin/init/crowdin-init-response";
+import {listenToExtensionMessage} from "../../util/util";
 
 let init: CrowdinInitResponse | undefined = undefined;
 

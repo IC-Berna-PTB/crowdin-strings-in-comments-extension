@@ -5,7 +5,7 @@ import {
 	createPluginEditorEnhancementContainer,
 	getCrowdinTranslationTextArea,
 	getGenderName
-} from "./source-2-plural-gender-entrypoint";
+} from "./source-2-plural-gender-content-script";
 
 export class Source2HelperModifierG extends Source2HelperAbstract {
 	inject(){

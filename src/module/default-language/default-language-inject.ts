@@ -1,5 +1,5 @@
 import {listenToExtensionMessage} from "../../util/util";
-import {ExtensionSettings} from "../../common/settings/extension-settings";
+import {ExtensionSettings} from "../../common/extension-settings";
 import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
 import {CrowdinInitResponse} from "../../apis/crowdin/init/crowdin-init-response";
 import {getDefaultLanguageForDomainInSettings, INVALID_LANGUAGE} from "./default-language-helper";
