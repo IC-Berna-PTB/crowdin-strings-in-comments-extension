@@ -11,18 +11,18 @@
     "package": "rm -rf dist/** && npm run build && cp src/manifest.json dist/manifest.json && zip -j dist/extension.zip dist/**"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.332",
-    "copy-webpack-plugin": "^13.0.0",
-    "sass": "^1.89.2",
-    "ts-loader": "^9.5.2",
-    "typescript": "^5.8.3",
+    "@types/chrome": "^0.1.4",
+    "copy-webpack-plugin": "^13.0.1",
+    "sass": "^1.91.0",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.2",
     "web-ext-plugin": "^2.11.0",
-    "webpack": "^5.100.0",
+    "webpack": "^5.101.3",
     "webpack-cli": "^6.0.1",
     "webpack-userscript": "^3.2.3"
   },
   "dependencies": {
-    "@types/jquery": "^3.5.32",
+    "@types/jquery": "^3.5.33",
     "class-transformer": "^0.5.1",
     "jquery": "^3.7.1",
     "query-string": "^9.2.2"
