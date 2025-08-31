@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "3.12.0",
+  "version": "3.13.0",
   "name": "Crowdin Strings in Comments",
   "icons": {
     "128": "icon/128.png"
@@ -76,7 +76,8 @@
         "extension-settings-server-inject.js",
         "dark-theme-html-preview-inject.js",
         "all-content-redirect-inject.js",
-        "common-inject.js"
+        "common-inject.js",
+        "source-2-plural-gender-inject.js"
       ]
     }
   ],

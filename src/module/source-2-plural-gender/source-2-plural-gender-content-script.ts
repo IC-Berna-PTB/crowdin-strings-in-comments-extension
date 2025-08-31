@@ -4,6 +4,7 @@ import {Source2HelperModifierP} from "./Source2HelperModifierP";
 import {Source2HelperModifierN} from "./Source2HelperModifierN";
 import {Source2HelperModifierNP} from "./Source2HelperModifierNP";
 import {Source2HelperModifierGP} from "./Source2HelperModifierGP";
+import {injectExtensionScript} from "../../util/util";
 
 let sideBySideView = false;
 let sideBySideCurrentTokenId = -1;
@@ -51,6 +52,8 @@ let lastFocusedTranslationTextarea = null;
 // - update this variable whenever #translation or any helper textarea gets focus, preferably to the id of the textarea
 // DONE - when changing token, set to null
 // - when clicking on #source_phrase_container > .crowdin_highlight.tag_light or .crowdin_highlight.placeholder_light, check this variable and insert the .text() value of that element in the last focused textarea. null defaults to #translation.
+
+injectExtensionScript("source-2-plural-gender-inject.js");
 
 export function getModifiersFromTokenContext(tokenContext: string){
     const tokenModifierRx = /.*:((?:[a-zA-Z](?:{[^{}]*})*)+)$/m;
