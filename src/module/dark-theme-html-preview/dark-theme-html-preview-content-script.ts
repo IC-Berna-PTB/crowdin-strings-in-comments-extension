@@ -18,4 +18,7 @@ async function whenHtmlPreviewUpdated() {
         return;
     }
     iFrame.contentDocument.body.classList.add("txt");
+    for (let img of iFrame.contentDocument.getElementsByTagName("img")) {
+        img.style.filter = "invert(1)";
+    }
 }
