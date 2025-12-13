@@ -1,7 +1,8 @@
 {
   "manifest_version": 3,
-  "version": "3.13.1",
-  "name": "Crowdin Strings in Comments",
+  "version": "3.14.0",
+  "name": "Enhanced Crowdin",
+  "description": "New features and QoL for Crowdin",
   "icons": {
     "128": "icon/128.png"
   },
