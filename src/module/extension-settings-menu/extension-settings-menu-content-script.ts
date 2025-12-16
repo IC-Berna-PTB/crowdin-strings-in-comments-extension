@@ -69,6 +69,15 @@ class CommonMenu {
             CommonMenu.createDefaultLanguageSetting()
                 .then(l => dialogBody.appendChild(l))
 
+            const highlanderApproval = CommonMenu.createCheckboxSetting({
+                id: "csic-setting-highlander-approval",
+                label: "Highlander Approval mode",
+                helpText: "When approving a suggestion, automatically remove all approvals from other suggestions",
+                messageId: ExtensionMessageId.SETTINGS_HIGHLANDER_APPROVAL_CHANGED,
+                setting: (es) => !!es.highlanderApproval
+            });
+            dialogBody.appendChild(highlanderApproval);
+
             const buttonFooter = CommonMenu.createDialogButtonFooterElement();
             dialog.append(buttonFooter);
 

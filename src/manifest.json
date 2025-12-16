@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "3.14.0",
+  "version": "3.15.0",
   "name": "Enhanced Crowdin",
   "description": "New features and QoL for Crowdin",
   "icons": {
@@ -26,6 +26,7 @@
         "all-content-redirect.js",
         "extension-settings-menu.js",
         "extension-settings-server.js",
+        "highlander-approval.js",
         "common.js"
       ]
     },
@@ -78,6 +79,7 @@
         "extension-settings-server-inject.js",
         "dark-theme-html-preview-inject.js",
         "all-content-redirect-inject.js",
+        "highlander-approval-inject.js",
         "common-inject.js",
         "source-2-plural-gender-inject.js"
       ]

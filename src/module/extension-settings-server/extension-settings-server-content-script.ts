@@ -45,15 +45,21 @@ async function getSettings(): Promise<ExtensionSettings> {
 
 void getSettings();
 
+function propagateUpdate(s: ExtensionSettings) {
+    void chrome.storage.sync.set(s);
+    postExtensionMessage(ExtensionMessageId.SETTINGS_RETRIEVED, s);
+}
+
 listenToExtensionMessage<number>(ExtensionMessageId.SETTINGS_CLICK_BEHAVIOR_CHANGED, m => {
     const newBehavior = ClickBehaviorOption.fromId(m);
     if (newBehavior) {
         getSettings().then(s => {
             s.clickBehavior = newBehavior.id;
-            void chrome.storage.sync.set(s);
+            propagateUpdate(s);
         });
     }
 });
+
 
 listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_PREVENT_PRE_FILTERS_CHANGED, (no, s) => {
     s.preventPreFilter = no;
@@ -70,6 +76,11 @@ listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_ALL_CONTENT_REDIRECT_CH
     return s;
 })
 
+listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_HIGHLANDER_APPROVAL_CHANGED, (no, s) => {
+    s.highlanderApproval = no;
+    return s;
+})
+
 function listenToBooleanSettingChange(messageId: ExtensionMessageId, apply: (newOption: BooleanishNumber, settings: ExtensionSettings) => ExtensionSettings) {
     listenToExtensionMessage<number>(messageId, m => {
         const newOption = m as BooleanishNumber;
@@ -78,7 +89,7 @@ function listenToBooleanSettingChange(messageId: ExtensionMessageId, apply: (new
         }
         getSettings()
             .then(s => apply(newOption, s))
-            .then(s => chrome.storage.sync.set(s))
+            .then(propagateUpdate)
     })
 }
 
@@ -86,6 +97,7 @@ listenToExtensionMessage<DomainLanguage>(ExtensionMessageId.SETTINGS_DOMAIN_DEFA
     if (m) {
         getSettings().then(s => {
             setDefaultLanguageForDomain(s, m.d, m.l, m.m);
+            propagateUpdate(s);
         })
     }
 })
@@ -94,6 +106,7 @@ listenToExtensionMessage<ProjectLanguage>(ExtensionMessageId.SETTINGS_PROJECT_DE
     if (m) {
         getSettings().then(s => {
             setDefaultLanguageForProject(s, m.d, m.p, m.l);
+            propagateUpdate(s);
         })
     }
 })
@@ -102,7 +115,7 @@ listenToExtensionMessage(ExtensionMessageId.SETTINGS_NAGGED_ABOUT_DEFAULT_LANGUA
     if (didIt) {
         getSettings().then(s => {
             s.naggedAboutDefaultLanguage = 1;
-            void chrome.storage.sync.set(s);
+            propagateUpdate(s);
         })
     }
 })

@@ -7,6 +7,7 @@ export class ExtensionSettings {
     darkThemeHtml: BooleanishNumber = 0;
     allContentRedirect: BooleanishNumber = 1;
     naggedAboutDefaultLanguage: BooleanishNumber = 0;
+    highlanderApproval: BooleanishNumber = 0;
 }
 
 export type BooleanishNumber = 0 | 1;

@@ -32,6 +32,7 @@ export enum ExtensionMessageId {
     SETTINGS_PROJECT_DEFAULT_LANGUAGE_CHANGED = "csic-settings-project-default-language-changed",
     SETTINGS_DARK_THEME_HTML_PREVIEW_CHANGED = "csic-settings-dark-theme-html-preview-changed",
     SETTINGS_ALL_CONTENT_REDIRECT_CHANGED = "csic-settings-all-content-redirect-changed",
+    SETTINGS_HIGHLANDER_APPROVAL_CHANGED = "csic-settings-highlander-approval-changed",
     SETTINGS_REQUESTED_BY_MODULE = "csic-settings-requested-by-module",
     SETTINGS_RETRIEVED = "csic-settings-retrieved",
     SETTINGS_ACK = "csic-settings-ack",
