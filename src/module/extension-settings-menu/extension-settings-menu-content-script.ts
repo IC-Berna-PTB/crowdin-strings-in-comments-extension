@@ -78,7 +78,7 @@ class CommonMenu {
 
             const openMenuButtonDiv = CommonMenu.createRightSideToolbarContainer();
             openMenuButtonDiv.id = "csic-settings-btn";
-            openMenuButtonDiv.title = 'Open "Crowdin Strings in Comments" extension settings'
+            openMenuButtonDiv.title = 'Open "Enhanced Crowdin" extension settings'
 
             openMenuButtonDiv.append(openMenuButton);
             openMenuButtonDiv.addEventListener("click", () => CommonMenu.toggleDialog(dialog))
@@ -122,7 +122,7 @@ class CommonMenu {
         titleBar.append(title);
         title.classList.add("ui-dialog-title");
         title.style.width = "auto";
-        title.innerText = "Crowdin Strings in Comments settings";
+        title.innerText = "Enhanced Crowdin settings";
 
         const closeButton = document.createElement("a");
         titleBar.append(closeButton);

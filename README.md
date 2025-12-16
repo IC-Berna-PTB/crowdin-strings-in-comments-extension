@@ -1,5 +1,5 @@
-# Crowdin Strings in Comments Extension
-_or "how I should not name my projects something specific since they always grow"_
+# Enhanced Crowdin Extension
+_Formerly "Crowdin Strings in Comments"_
 
 ## I just want to install it!
 [Firefox](https://addons.mozilla.org/firefox/addon/crowdin-strings-in-comments/) |
