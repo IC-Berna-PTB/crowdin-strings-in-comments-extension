@@ -72,6 +72,7 @@
       "resources": [
         "default-language-inject.js",
         "strings-in-comments-inject.js",
+        "prevent-key-copy-inject.js",
         "extension-settings-menu-inject.js",
         "prevent-pre-filter-inject.js",
         "extension-settings-server-inject.js",

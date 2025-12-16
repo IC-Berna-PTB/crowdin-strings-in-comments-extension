@@ -9,6 +9,8 @@ export class ExtensionMessage<T> {
 
 export enum ExtensionMessageId {
     CROWDIN_INIT = "csic-language-id",
+    COPY_URL_TO_CLIPBOARD = "csic-copy-url-to-clipboard",
+    COPY_SLACK_FORMATTED_URL_TO_CLIPBOARD = "csic-copy-slack-formatted-url-to-clipboard",
     SET_SEARCH_FIELD_VALUE = "csic-set-search-field-value",
     NOTIFICATION_SUCCESS = "csic-notification-success",
     NOTIFICATION_NOTICE = "csic-notification-notice",

@@ -1,9 +1,7 @@
 import {ExtensionMessageId} from "./aux-objects/extension-message";
 import {CrowdinPhrasesResponse} from "../../apis/crowdin/multiple-phrases/crowdin-phrases-response";
-import {listenToExtensionMessage, observeElementEvenIfNotReady} from "../../util/util";
-
-let altDown = false;
-
+import {listenToExtensionMessage} from "../../util/util";
+import {formatStringUrlToSlack} from "../../util/format-string-url-to-slack";
 const updateStringUrlInterval = setInterval(() => {
     //@ts-ignore
     if (window.crowdin && window.crowdin.helpers && window.crowdin.helpers.translation) {
@@ -39,17 +37,6 @@ const updateStringUrlInterval = setInterval(() => {
 }, 500);
 
 let phrases: CrowdinPhrasesResponse = null;
-
-function altStuff(e: KeyboardEvent, button: HTMLElement) {
-    if (e.altKey) {
-        altDown = true;
-        button.textContent = "Copy Language-Agnostic String URL"
-    } else {
-        altDown = false;
-        button.textContent = "Copy String URL";
-    }
-}
-
 const insertCopyWithoutLanguageForCurrentStringInterval = setInterval(() => {
     const buttonElement = document.querySelector("#string-options-link");
     const listElement = document.querySelector("#file_options");
@@ -58,6 +45,7 @@ const insertCopyWithoutLanguageForCurrentStringInterval = setInterval(() => {
         clearInterval(insertCopyWithoutLanguageForCurrentStringInterval);
         const regularCopyButton = [...listElement.querySelectorAll("li")]
             .find(e => e.textContent === "Copy String URL");
+
         const languagelessCopy = document.createElement("li");
         regularCopyButton.after(languagelessCopy);
         const languagelessCopyAnchor = document.createElement("a");
@@ -72,6 +60,21 @@ const insertCopyWithoutLanguageForCurrentStringInterval = setInterval(() => {
             crowdin.clipboard.copy(crowdin.helpers.translation.getStringUrl(null, true));
             e.preventDefault();
         })
+
+        const slackCopy = document.createElement("li");
+        languagelessCopy.after(slackCopy);
+        const slackCopyAnchor = document.createElement("a");
+        slackCopy.append(slackCopyAnchor);
+        slackCopyAnchor.append("Copy Formatted URL for Slack");
+        slackCopyAnchor.tabIndex = -1;
+        slackCopyAnchor.href = "#";
+        slackCopyAnchor.addEventListener("click", () => {
+            // @ts-ignore
+            crowdin.clipboard.successMessage = "Formatted URL for Slack copied to clipboard!";
+            // @ts-ignore
+            const url: string = crowdin.helpers.translation.getStringUrl(null, true);
+            void navigator.clipboard.write(formatStringUrlToSlack(url));
+        })
     }
 }, 500)
 
@@ -82,22 +85,22 @@ const insertCopyWithoutLanguageForStringListInterval = setInterval(() => {
         clearInterval(insertCopyWithoutLanguageForStringListInterval);
         // @ts-ignore
         if (crowdin.editor.modeTranslate()) {
-            new MutationObserver((m, o) => {
+            new MutationObserver(() => {
                 const button = listElement.querySelector(".contexify_item[data-testid='copyStringUrl']");
 
-                const newButton = document.createElement("div");
-                button.after(newButton);
-                newButton.classList.add("contexify_item");
-                newButton.tabIndex = -1;
-                newButton.ariaDisabled = "false";
-                newButton.role = "menuitem";
+                const languagelessButton = document.createElement("div");
+                button.after(languagelessButton);
+                languagelessButton.classList.add("contexify_item");
+                languagelessButton.tabIndex = -1;
+                languagelessButton.ariaDisabled = "false";
+                languagelessButton.role = "menuitem";
 
-                const newButtonLabel = document.createElement("div");
-                newButton.append(newButtonLabel);
-                newButtonLabel.classList.add("contexify_itemContent");
-                newButtonLabel.textContent = "Copy Language-Agnostic URL";
+                const languagelessButtonLabel = document.createElement("div");
+                languagelessButton.append(languagelessButtonLabel);
+                languagelessButtonLabel.classList.add("contexify_itemContent");
+                languagelessButtonLabel.textContent = "Copy Language-Agnostic URL";
 
-                newButton.addEventListener("click", (e) => {
+                languagelessButton.addEventListener("click", () => {
                     const element = Array.from(document.querySelectorAll("li.context-menu")).find(e => e.id.startsWith("phrase_"));
                     if (element) {
                         const id = parseInt(element.id.replace("phrase_", ""))
@@ -105,6 +108,29 @@ const insertCopyWithoutLanguageForStringListInterval = setInterval(() => {
                         crowdin.clipboard.copy(crowdin.helpers.translation.getStringUrl(id, true))
                     }
                 })
+
+                const slackButton = document.createElement("div");
+                slackButton.classList.add("contexify_item");
+                slackButton.tabIndex = -1;
+                slackButton.ariaDisabled = "false";
+                slackButton.role = "menuitem";
+
+                const slackButtonLabel = document.createElement("div");
+                slackButton.append(slackButtonLabel);
+                slackButtonLabel.classList.add("contexify_itemContent");
+                slackButtonLabel.textContent = "Copy Formatted URL for Slack";
+
+                slackButton.addEventListener("click", () => {
+                    const element = Array.from(document.querySelectorAll("li.context-menu")).find(e => e.id.startsWith("phrase_"));
+                    if (element) {
+                        const id = parseInt(element.id.replace("phrase_", ""))
+                        // @ts-ignore
+                        void navigator.clipboard.write(formatStringUrlToSlack(crowdin.helpers.translation.getStringUrl(id, true)));
+                    }
+                })
+
+                button.after(languagelessButton, slackButton);
+
             })
                 .observe(listElement, {childList: true})
         }
