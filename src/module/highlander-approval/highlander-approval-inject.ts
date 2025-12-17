@@ -24,6 +24,8 @@ const interval = setInterval(() => {
                 }
                 $(document).on('ajaxSuccess', postDisapprove);
                 await suggestions.disapprove_multiple([translationId], true);
+            } else {
+                original.apply(suggestions, originalArguments);
             }
         }
     }
