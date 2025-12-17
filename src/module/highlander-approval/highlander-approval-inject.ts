@@ -1,5 +1,24 @@
 import {requestSettings} from "../../common/extension-settings-client";
 
+async function waitForUnlock(target_language_id: number, suggestion_id: number): Promise<void> {
+    const object = [
+        "approve",
+        // @ts-ignore
+        crowdin.editor.project.id,
+        target_language_id,
+        suggestion_id.toString(),
+    ]
+    return new Promise<void>((resolve) => {
+        const interval = setInterval(() => {
+            // @ts-ignore
+            if (!crowdin.ajax.isLocked(object)) {
+                clearInterval(interval);
+                resolve();
+            }
+        }, 100)
+    })
+}
+
 const interval = setInterval(() => {
     // @ts-ignore
     if (window.crowdin.suggestions.approve_suggestion) {
@@ -7,26 +26,23 @@ const interval = setInterval(() => {
         // @ts-ignore
         const suggestions = window.crowdin.suggestions;
         const original = suggestions.approve_suggestion;
-        suggestions.approve_suggestion = async function(e: unknown, t: unknown) {
+        suggestions.approve_suggestion = async function(suggestion_id: number, t: unknown) {
             const originalArguments = arguments;
             // @ts-ignore
-            const translationId: number = suggestions.get_suggestion(e, null, t).translation_id;
+            const translationId: number = suggestions.get_suggestion(suggestion_id, null, t).translation_id;
             if (!!(await requestSettings()).highlanderApproval) {
-                const postDisapprove = function(_e: JQuery.TriggeredEvent, _xhr: JQuery.jqXHR, options: JQuery.AjaxSettings) {
-                    const url = new URL(options.url, window.location.origin);
-                    const data = new URLSearchParams(options.data);
-                    if (url.pathname.startsWith("/backend/suggestions/disapprove_multiple") &&
-                        data.has("translation_id[]") &&
-                        Number(data.get("translation_id[]")) === translationId) {
-                        $(document).off('ajaxSuccess', postDisapprove);
-                        original.apply(suggestions, originalArguments);
+                for (const otherSuggestion of suggestions.get_suggestions(translationId)
+                    .filter((sug: any) => sug.id !== Number(suggestion_id))) {
+                    for (const val of otherSuggestion.validations) {
+                        // @ts-ignore
+                        suggestions.disapprove_suggestion(otherSuggestion.id, crowdin.editor.target_language.id, val.approved_by, !1, null);
+                        // @ts-ignore
+                        await waitForUnlock(crowdin.editor.target_language.id, otherSuggestion.id);
+
                     }
                 }
-                $(document).on('ajaxSuccess', postDisapprove);
-                await suggestions.disapprove_multiple([translationId], true);
-            } else {
-                original.apply(suggestions, originalArguments);
             }
+            original.apply(suggestions, originalArguments);
         }
     }
 }, 500)
