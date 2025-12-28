@@ -14,6 +14,7 @@ import {getFallback, processReferencedString} from "./string/referenced-string-p
 import {processReferencedSearchQuery} from "./search-query/referenced-search-query-processing";
 import {ExtensionMessage, ExtensionMessageId} from "./aux-objects/extension-message";
 import {CrowdinUserProjects} from "../../util/crowdin/api/user-projects/crowdin-user-projects";
+import {ReferencedCsHighlightReel} from "./aux-objects/reference/cs-highlight-reel/referenced-cs-highlight-reel";
 
 function setupCommentElementTopDown(comment: CommentWithReferences) {
     if (comment.references.length === 0) {
@@ -77,11 +78,19 @@ async function getLinks(comment: CommentWithReferences, currentLanguageId: numbe
     const urls = findUrlsInComment(comment);
     const exactReferences = getLinksWithExactId(urls);
     const queryReferences = await getLinksWithCrowdinSearch(urls, currentLanguageId);
-    return comment.withReplacedReferences(exactReferences.concat(queryReferences))
+    const csHighlightReelReferences = getLinksWithCsHighlightReelUrl(urls);
+    return comment.withReplacedReferences(exactReferences.concat(queryReferences).concat(csHighlightReelReferences));
+}
+
+function urlIsForCurrentCrowdinInstance(url: URL): boolean {
+    const currentCrowdinInstance = window.location.origin;
+    const urlOrigin = url.origin;
+    return currentCrowdinInstance === urlOrigin;
 }
 
 function getLinksWithExactId(urls: URL[]): Reference[] {
     return urls
+        .filter(url => urlIsForCurrentCrowdinInstance(url))
         .filter(url => urlHasExactStringId(url))
         .map(url => ReferencedStringId.fromUrl(url))
         .filter((entry, index, array) => isFirst(entry, index, array))
@@ -90,6 +99,7 @@ function getLinksWithExactId(urls: URL[]): Reference[] {
 async function getLinksWithCrowdinSearch(urls: URL[], currentLanguageId: number): Promise<Reference[]> {
     const parameters = urls
         .map(url => url)
+        .filter(url => urlIsForCurrentCrowdinInstance(url))
         .filter(url => url.hash.match(/^#q=\S+$/) || urlIsForAdvancedOrCroQLFiltering(url))
         .map(async url => ({
             url: url,
@@ -105,12 +115,21 @@ function urlHasExactStringId(url: URL) {
     return url.hash.match(/^#\d+$/);
 }
 
-function urlIsForAdvancedOrCroQLFiltering(url: URL) {
+function urlIsForAdvancedOrCroQLFiltering(url: URL): boolean {
     const value = parseInt(url.searchParams.get("value"));
     if (urlHasExactStringId(url)) {
         return false;
     }
     return value === CrowdinSearchQueryType.CROQL_FILTERING || value === CrowdinSearchQueryType.ADVANCED_FILTERING;
+}
+
+function getLinksWithCsHighlightReelUrl(urls: URL[]): Reference[] {
+    return urls
+        .filter(url => url.origin === "https://cdn.steamstatic.com")
+        .filter(url => url.pathname.startsWith("/apps/csgo/videos/highlightreels/"))
+        .filter(url => url.pathname.endsWith("_1080p.webm"))
+        .filter(url => url.pathname.split("/").length === 8)
+        .map(url => new ReferencedCsHighlightReel(url))
 }
 
 function findUrlsInComment(comment: CommentWithReferences): URL[] {
@@ -123,17 +142,18 @@ function findUrlsInComment(comment: CommentWithReferences): URL[] {
 
 async function getTranslations(comment: CommentWithReferences): Promise<CommentWithReferences> {
     const references = comment.references
-    const r_1 = await Promise.all(references
+    const r_1: Reference[] = await Promise.all(references
         .filter(r => r instanceof ReferencedStringActual || r instanceof ReferencedStringId)
         .map(async (r) => processReferencedString(r)))
         .then(promises => promises.filter(r => r));
-    const partialComment = comment.withReplacedReferences(r_1);
 
-    const r_2 = await Promise.all(references
+    const r_2: Reference[] = await Promise.all(references
         .filter(r => r instanceof ReferencedSearchQuery || r instanceof ReferencedSearchQueryActual)
         .map(async (r) => processReferencedSearchQuery(r)))
         .then(promises => promises.filter(r => r));
-    return partialComment.withAppendedReferences(r_2);
+
+    const r_3 = references.filter(r => r instanceof ReferencedCsHighlightReel);
+    return comment.withReplacedReferences(r_1.concat(r_2).concat(r_3));
 }
 function hookDeleteButtons(element: HTMLElement) {
     Array.from(element.querySelectorAll(".static-icon-trash"))
