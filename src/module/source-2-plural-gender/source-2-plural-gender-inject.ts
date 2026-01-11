@@ -41,3 +41,27 @@ const runHotkeyActionInterval = setInterval(() => {
         }
     }
 })
+
+const runSetValueActionInterval = setInterval(() => {
+    // @ts-ignore
+    if (!window.crowdin || !window.crowdin.translation || !window.crowdin.translation.setValue) {
+        return;
+    }
+    clearInterval(runSetValueActionInterval);
+    // @ts-ignore
+    const originalSet = window.crowdin.translation.setValue;
+    // @ts-ignore
+    const originalInsert = window.crowdin.translation.insertValue;
+    // @ts-ignore
+    window.crowdin.translation.setValue = (value) => {
+        // @ts-ignore
+        originalSet.apply(window.crowdin.translation, [value])
+        document.querySelector("#translation").dispatchEvent(new Event('input'));
+    }
+    // @ts-ignore
+    window.crowdin.translation.insertValue = (value) => {
+        // @ts-ignore
+        originalInsert.apply(window.crowdin.translation, [value])
+        document.querySelector("#translation").dispatchEvent(new Event('input'));
+    }
+})
