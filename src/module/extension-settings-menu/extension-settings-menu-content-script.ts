@@ -133,6 +133,16 @@ class CommonMenu {
         title.style.width = "auto";
         title.innerText = "Enhanced Crowdin settings";
 
+        // @ts-ignore
+        const brw = typeof browser !== "undefined" ? browser : chrome;
+        if (typeof brw !== "undefined") {
+            const version = document.createElement("span");
+            titleBar.append(version);
+            version.id = "csic-settings-dialog-version";
+            version.classList.add("small")
+            version.innerText = `version ${brw.runtime.getManifest().version}`;
+        }
+
         const closeButton = document.createElement("a");
         titleBar.append(closeButton);
         closeButton.classList.add(..."ui-dialog-titlebar-close ui-corner-all".split(" "));
