@@ -2,7 +2,7 @@ import {CommentWithReferences} from "./aux-objects/comment-with-references";
 import {ReferencedString} from "./aux-objects/reference/string/referenced-string";
 import {ReferencedStringId} from "./aux-objects/reference/string/referenced-string-id";
 import {ReferencedStringActual} from "./aux-objects/reference/string/referenced-string-actual";
-import {injectExtensionScript, observeElementEvenIfNotReady} from "../../util/util";
+import {injectExtensionScript, listenToExtensionMessage, observeElementEvenIfNotReady} from "../../util/util";
 import {CrowdinSearchParameters, CrowdinSearchQueryType} from "../../util/crowdin/crowdin-search-parameters";
 import {getFileId, getProjectId} from "../../apis/crowdin/crowdin-main";
 import {ReferencedSearchQuery} from "./aux-objects/reference/search-query/referenced-search-query";
@@ -29,8 +29,17 @@ function updateCommentElementTopDown(comment: CommentWithReferences) {
     if (textElement === null) {
         return;
     }
-    textElement.querySelectorAll(".csic-loading").forEach(e => e.remove());
-    textElement.appendChild(generateLinkList(comment));
+    let containerElement = textElement.querySelector(".csic-container");
+    if (containerElement !== null) {
+        containerElement.querySelectorAll(".csic-loading").forEach(e => e.remove());
+    } else {
+        containerElement = document.createElement("div");
+        containerElement.classList.add("csic-container");
+        let separator = document.createElement("hr");
+        separator.classList.add("csic-separator");
+        containerElement.appendChild(separator);
+    }
+    containerElement.appendChild(generateLinkList(comment));
 }
 
 
@@ -174,9 +183,10 @@ function hookSaveEditButtons(element: HTMLElement) {
         })
 }
 
-function cleanupElement(e: HTMLElement): HTMLElement | undefined {
-    if (e.querySelector(".deleted-comment") !== null) {
+function cleanupElement(e: HTMLElement, forced: boolean = false): HTMLElement | undefined {
+    if (forced || e.querySelector(".deleted-comment") !== null) {
         e.classList.remove(parsedClass);
+        e.querySelector(".csic-container")?.remove();
         return undefined;
     }
     return e;
@@ -212,10 +222,11 @@ function markAsLoading(comment: CommentWithReferences): CommentWithReferences {
     return comment;
 }
 
-async function reloadComments(): Promise<void> {
+async function reloadComments(forced: boolean = false): Promise<void> {
     const currentLanguageId = await getCurrentLanguageId();
+    console.log(currentLanguageId);
     getCommentElements()
-        .map(e => cleanupElement(e))
+        .map(e => cleanupElement(e, forced))
         .filter(e => e !== undefined)
         .filter(e => e.id !== nonPersistedCommentId)
         .filter(e => notYetParsed(e))
@@ -280,5 +291,6 @@ if (window.location.pathname.split("/")[1] === "editor") {
 
 }
 
+listenToExtensionMessage<number>(ExtensionMessageId.EDITOR_LANGUAGE_CHANGED, () => reloadComments(true));
 
 injectExtensionScript('strings-in-comments-inject.js');
