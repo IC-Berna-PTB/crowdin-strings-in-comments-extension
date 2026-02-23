@@ -1,5 +1,5 @@
 import {postExtensionMessage} from "../../util/util";
-import {ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessageId} from "../../common/extension-message";
 
 const runHotkeyActionInterval = setInterval(() => {
     // @ts-ignore

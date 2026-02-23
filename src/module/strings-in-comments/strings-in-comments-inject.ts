@@ -1,4 +1,4 @@
-import {ExtensionMessageId} from "./aux-objects/extension-message";
+import {ExtensionMessageId} from "../../common/extension-message";
 import {CrowdinPhrasesResponse} from "../../apis/crowdin/multiple-phrases/crowdin-phrases-response";
 import {listenToExtensionMessage} from "../../util/util";
 import {formatStringUrlToSlack} from "../../util/format-string-url-to-slack";

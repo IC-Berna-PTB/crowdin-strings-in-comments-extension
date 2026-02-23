@@ -1,5 +1,5 @@
 import {getCurrentLanguagePair} from "./getFetchParams";
-import {ExtensionMessage, ExtensionMessageId} from "../module/strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessage, ExtensionMessageId} from "../common/extension-message";
 import {ClassConstructor, plainToInstance} from "class-transformer";
 
 export function elementReady(selector: string) {

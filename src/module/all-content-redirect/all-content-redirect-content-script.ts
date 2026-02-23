@@ -1,5 +1,5 @@
 import {listenToExtensionMessage} from "../../util/util";
-import {ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessageId} from "../../common/extension-message";
 import {CrowdinInitResponse} from "../../apis/crowdin/init/crowdin-init-response";
 import {requestSettings} from "../../common/extension-settings-client";
 

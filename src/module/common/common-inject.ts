@@ -1,4 +1,4 @@
-import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessage, ExtensionMessageId} from "../../common/extension-message";
 import {CrowdinInitResponse} from "../../apis/crowdin/init/crowdin-init-response";
 import {listenToExtensionMessage, postExtensionMessage} from "../../util/util";
 import {getCurrentLanguageId} from "../../apis/crowdin/crowdin-aux-functions";

@@ -35,6 +35,7 @@ export enum ExtensionMessageId {
     SETTINGS_ALL_CONTENT_REDIRECT_CHANGED = "csic-settings-all-content-redirect-changed",
     SETTINGS_HIGHLANDER_APPROVAL_CHANGED = "csic-settings-highlander-approval-changed",
     SETTINGS_REQUESTED_BY_MODULE = "csic-settings-requested-by-module",
+    SETTINGS_EMBIGGEN_SUBMIT_CHANGED = "csic-settings-embiggen-submit-changed",
     SETTINGS_RETRIEVED = "csic-settings-retrieved",
     SETTINGS_ACK = "csic-settings-ack",
 }

@@ -1,4 +1,4 @@
-import {ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessageId} from "../../common/extension-message";
 import {listenToExtensionMessage} from "../../util/util";
 
 

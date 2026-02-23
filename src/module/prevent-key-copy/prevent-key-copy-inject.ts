@@ -1,5 +1,5 @@
 import {listenToExtensionMessage} from "../../util/util";
-import {ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessageId} from "../../common/extension-message";
 import {formatStringUrlToSlack} from "../../util/format-string-url-to-slack";
 
 listenToExtensionMessage<void>(ExtensionMessageId.COPY_URL_TO_CLIPBOARD, () => {

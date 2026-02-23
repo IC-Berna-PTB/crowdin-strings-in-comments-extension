@@ -1,5 +1,5 @@
 import {listenToExtensionMessage, objectToBase64, postExtensionMessage} from "../util/util";
-import {ExtensionMessageId} from "../module/strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessageId} from "./extension-message";
 import {ExtensionSettings} from "./extension-settings";
 
 export let extensionSettings: ExtensionSettings | undefined = undefined;

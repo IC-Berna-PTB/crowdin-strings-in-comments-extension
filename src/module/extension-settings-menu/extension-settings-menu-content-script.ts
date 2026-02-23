@@ -4,7 +4,7 @@ import {
     observeElementEvenIfNotReady,
     postExtensionMessage
 } from "../../util/util";
-import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessage, ExtensionMessageId} from "../../common/extension-message";
 import {BooleanishNumber, ExtensionSettings,} from "../../common/extension-settings";
 import {ClickBehaviorOption} from "../strings-in-comments/settings/click-behavior-option";
 import {CommonContentScriptHelper} from "../common/common-content-script-helper";
@@ -77,6 +77,14 @@ class CommonMenu {
                 setting: (es) => !!es.highlanderApproval
             });
             dialogBody.appendChild(highlanderApproval);
+
+            const embiggenSubmit = CommonMenu.createCheckboxSetting({
+                id: "csic-setting-embiggen-submit",
+                label: "Show label for 'Submit' button",
+                messageId: ExtensionMessageId.SETTINGS_EMBIGGEN_SUBMIT_CHANGED,
+                setting: (es) => !!es.embiggenSubmit
+            })
+            dialogBody.appendChild(embiggenSubmit);
 
             const buttonFooter = CommonMenu.createDialogButtonFooterElement();
             dialog.append(buttonFooter);

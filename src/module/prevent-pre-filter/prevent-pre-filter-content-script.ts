@@ -1,6 +1,6 @@
 import {injectExtensionScript, listenToExtensionMessage} from "../../util/util";
 import {ExtensionSettings} from "../../common/extension-settings";
-import {ExtensionMessage, ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessage, ExtensionMessageId} from "../../common/extension-message";
 import {requestSettings} from "../../common/extension-settings-client";
 
 injectExtensionScript('prevent-pre-filter-inject.js');

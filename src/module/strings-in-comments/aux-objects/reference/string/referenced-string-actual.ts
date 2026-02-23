@@ -9,7 +9,7 @@ import {ReferencedSearchQuery} from "../search-query/referenced-search-query";
 import {Htmleable} from "../../../../../util/html-eable";
 import {convertCrowdinTranslationStatus, TranslationStatus} from "../../../../../util/getFetchParams";
 import {ClickBehaviorOption} from "../../../settings/click-behavior-option";
-import {ExtensionMessage, ExtensionMessageId} from "../../extension-message";
+import {ExtensionMessage, ExtensionMessageId} from "../../../../../common/extension-message";
 import {requestSettings} from "../../../../../common/extension-settings-client";
 
 

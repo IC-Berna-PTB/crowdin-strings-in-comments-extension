@@ -1,5 +1,5 @@
 import {injectExtensionScript, observeElementEvenIfNotReady, postExtensionMessage} from "../../util/util";
-import {ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessageId} from "../../common/extension-message";
 
 
 function preventCopyTooltip() {

@@ -1,5 +1,5 @@
 import {injectExtensionScript, listenToExtensionMessage} from "../../util/util";
-import {ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessageId} from "../../common/extension-message";
 import {requestSettings} from "../../common/extension-settings-client";
 
 injectExtensionScript("dark-theme-html-preview-inject.js");

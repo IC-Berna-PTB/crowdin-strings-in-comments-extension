@@ -1,5 +1,5 @@
 import {base64ToObject, listenToExtensionMessage, postExtensionMessage} from "../../util/util";
-import {ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessageId} from "../../common/extension-message";
 import {BooleanishNumber, ExtensionSettings} from "../../common/extension-settings";
 import {plainToInstance} from "class-transformer";
 import {ClickBehaviorOption} from "../strings-in-comments/settings/click-behavior-option";
@@ -78,6 +78,11 @@ listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_ALL_CONTENT_REDIRECT_CH
 
 listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_HIGHLANDER_APPROVAL_CHANGED, (no, s) => {
     s.highlanderApproval = no;
+    return s;
+})
+
+listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_EMBIGGEN_SUBMIT_CHANGED, (no, s) => {
+    s.embiggenSubmit = no;
     return s;
 })
 

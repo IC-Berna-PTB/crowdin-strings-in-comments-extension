@@ -1,6 +1,6 @@
 import {listenToExtensionMessage} from "../../util/util";
 import {CrowdinInitResponse} from "../../apis/crowdin/init/crowdin-init-response";
-import {ExtensionMessageId} from "../strings-in-comments/aux-objects/extension-message";
+import {ExtensionMessageId} from "../../common/extension-message";
 import {getCurrentLanguagePair} from "../../util/getFetchParams";
 import {getInit} from "../../apis/crowdin/init/crowdin-init-call";
 

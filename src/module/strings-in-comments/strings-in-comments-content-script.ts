@@ -12,7 +12,7 @@ import {getCurrentLanguageId} from "../../apis/crowdin/crowdin-aux-functions";
 import {nonPersistedCommentId, parsedClass} from "./constants";
 import {getFallback, processReferencedString} from "./string/referenced-string-processing";
 import {processReferencedSearchQuery} from "./search-query/referenced-search-query-processing";
-import {ExtensionMessage, ExtensionMessageId} from "./aux-objects/extension-message";
+import {ExtensionMessage, ExtensionMessageId} from "../../common/extension-message";
 import {CrowdinUserProjects} from "../../util/crowdin/api/user-projects/crowdin-user-projects";
 import {ReferencedCsHighlightReel} from "./aux-objects/reference/cs-highlight-reel/referenced-cs-highlight-reel";
 
