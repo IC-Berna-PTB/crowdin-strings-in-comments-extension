@@ -2,19 +2,20 @@ import {listenToExtensionMessage, observeElementEvenIfNotReady} from "../../util
 import {requestSettings} from "../../common/extension-settings-client";
 import {ExtensionMessageId} from "../../common/extension-message";
 
-observeElementEvenIfNotReady("#suggest_translation", (element, disconnect) => {
+
+observeElementEvenIfNotReady("#suggest_translation", (element: HTMLButtonElement, disconnect) => {
     disconnect();
     listenToExtensionMessage(ExtensionMessageId.SETTINGS_RETRIEVED, () => {
-        applyOption();
+        applyOption(element);
     })
-    applyOption();
+    applyOption(element);
+    const mutationObserver = new MutationObserver(() => {
+        applyOption(element);
+    });
+    mutationObserver.observe(element, {attributeFilter: ["disabled"], childList: false, subtree: false});
 }, true);
 
-function applyOption() {
-    let buttonElement: HTMLElement = document.querySelector("#suggest_translation");
-    if (buttonElement === null) {
-        return;
-    }
+function applyOption(buttonElement: HTMLButtonElement) {
     buttonElement.style.backgroundColor = null;
     let textElement = buttonElement.querySelector(".csic-submit-text");
     if (textElement !== null) {
@@ -23,7 +24,7 @@ function applyOption() {
     showText().then((value) => {
         value && buttonElement.append(createElement());
     });
-    getColor().then(color => {
+    getColor(!buttonElement.disabled).then(color => {
         buttonElement.style.backgroundColor = color;
     })
 }
@@ -40,7 +41,15 @@ async function showText(): Promise<Boolean> {
         .then(s => !!s.embiggenSubmit);
 }
 
-async function getColor(): Promise<string | undefined> {
+async function getColor(buttonEnabled: boolean): Promise<string | undefined> {
     return await requestSettings()
-        .then(s => !!s.submitColorEnabled ? s.submitColorValue : undefined);
+        .then(s => {
+            if (!s.submitColorEnabled) {
+                return undefined;
+            }
+            if (buttonEnabled) {
+                return s.submitColorValue;
+            }
+            return s.submitDisabledColorValue;
+        });
 }

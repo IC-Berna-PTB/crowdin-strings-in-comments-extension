@@ -11,6 +11,7 @@ export class ExtensionSettings {
     embiggenSubmit: BooleanishNumber = 1;
     submitColorEnabled: BooleanishNumber = 0;
     submitColorValue?: string = undefined;
+    submitDisabledColorValue?: string = undefined;
 }
 
 export type BooleanishNumber = 0 | 1;

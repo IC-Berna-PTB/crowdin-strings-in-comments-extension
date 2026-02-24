@@ -96,8 +96,10 @@ class CommonMenu {
             dialogBody.appendChild(submitColorToggle);
 
             const submitColorValue = CommonMenu.createSubmitColorValueSetting();
-
             dialogBody.appendChild(submitColorValue);
+
+            const submitDisabledColorValue = CommonMenu.createSubmitDisabledColorValueSetting();
+            dialogBody.appendChild(submitDisabledColorValue);
 
             const buttonFooter = CommonMenu.createDialogButtonFooterElement();
             dialog.append(buttonFooter);
@@ -342,7 +344,7 @@ class CommonMenu {
 
     private static createSubmitColorValueSetting(): HTMLElement {
         const controlGroup = document.createElement("div");
-        controlGroup.classList.add("control-group");
+        controlGroup.classList.add("control-group", "csic-settings-color-option");
         controlGroup.id = "csic-settings-submit-color-value";
 
         const inputId = controlGroup.id + "-input";
@@ -356,7 +358,7 @@ class CommonMenu {
 
         const label = document.createElement("label");
         controlGroup.append(label);
-        label.textContent = '"Submit" button color';
+        label.textContent = '"Submit" button color when enabled';
         label.htmlFor = inputId;
 
 
@@ -367,6 +369,36 @@ class CommonMenu {
         return controlGroup;
 
     }
+
+    // Refactor this later.
+    private static createSubmitDisabledColorValueSetting(): HTMLElement {
+        const controlGroup = document.createElement("div");
+        controlGroup.classList.add("control-group", "csic-settings-color-option");
+        controlGroup.id = "csic-settings-submit-color-disabled-value";
+
+        const inputId = controlGroup.id + "-input";
+
+        const input = document.createElement("input");
+        controlGroup.append(input);
+        input.type = "color";
+        input.id = inputId;
+        input.name = inputId;
+        requestSettings().then(es => input.value = es.submitDisabledColorValue ?? "");
+
+        const label = document.createElement("label");
+        controlGroup.append(label);
+        label.textContent = '"Submit" button color when disabled';
+        label.htmlFor = inputId;
+
+
+        input.addEventListener("input", (event: InputEvent) => postExtensionMessage<String>(ExtensionMessageId.SETTINGS_SUBMIT_DISABLED_COLOR_VALUE_CHANGED, (event.target as HTMLInputElement).value));
+
+        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, es => input.value = es.submitDisabledColorValue ?? "");
+
+        return controlGroup;
+
+    }
+
 
     private static whenDomainLanguageChanged(es: ExtensionSettings, select: HTMLSelectElement) {
         getDefaultLanguageForCurrentDomainInSettings(es)

@@ -26,11 +26,11 @@
   min-width: 500px;
 }
 
-#csic-settings-submit-color-value label {
+.csic-settings-color-option label {
   display: inline-block;
 }
 
-#csic-settings-submit-color-value input[type="color"] {
+.csic-settings-color-option input[type="color"] {
   display: inline-block;
   height: 1.5rem;
   padding: 0;

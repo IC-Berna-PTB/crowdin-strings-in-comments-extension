@@ -130,6 +130,16 @@ listenToExtensionMessage<string>(ExtensionMessageId.SETTINGS_SUBMIT_COLOR_VALUE_
     }
 })
 
+listenToExtensionMessage<string>(ExtensionMessageId.SETTINGS_SUBMIT_DISABLED_COLOR_VALUE_CHANGED, m => {
+    if (m) {
+        getSettings().then(s => {
+            s.submitDisabledColorValue = m;
+            propagateUpdate(s);
+        })
+    }
+})
+
+
 listenToExtensionMessage(ExtensionMessageId.SETTINGS_NAGGED_ABOUT_DEFAULT_LANGUAGE, didIt => {
     if (didIt) {
         getSettings().then(s => {
