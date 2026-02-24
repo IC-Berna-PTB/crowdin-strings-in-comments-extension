@@ -36,6 +36,8 @@ export enum ExtensionMessageId {
     SETTINGS_HIGHLANDER_APPROVAL_CHANGED = "csic-settings-highlander-approval-changed",
     SETTINGS_REQUESTED_BY_MODULE = "csic-settings-requested-by-module",
     SETTINGS_EMBIGGEN_SUBMIT_CHANGED = "csic-settings-embiggen-submit-changed",
+    SETTINGS_SUBMIT_COLOR_TOGGLE_CHANGED = "csic-settings-submit-color-toggle-changed",
+    SETTINGS_SUBMIT_COLOR_VALUE_CHANGED = "csic-settings-submit-color-value-changed",
     SETTINGS_RETRIEVED = "csic-settings-retrieved",
     SETTINGS_ACK = "csic-settings-ack",
 }

@@ -67,7 +67,7 @@ class CommonMenu {
             dialogBody.appendChild(allContentRedirect);
 
             CommonMenu.createDefaultLanguageSetting()
-                .then(l => dialogBody.appendChild(l))
+                .then(l => dialogBody.prepend(l))
 
             const highlanderApproval = CommonMenu.createCheckboxSetting({
                 id: "csic-setting-highlander-approval",
@@ -80,11 +80,24 @@ class CommonMenu {
 
             const embiggenSubmit = CommonMenu.createCheckboxSetting({
                 id: "csic-setting-embiggen-submit",
-                label: "Show label for 'Submit' button",
+                label: 'Show label for "Submit" button',
                 messageId: ExtensionMessageId.SETTINGS_EMBIGGEN_SUBMIT_CHANGED,
                 setting: (es) => !!es.embiggenSubmit
             })
             dialogBody.appendChild(embiggenSubmit);
+
+            const submitColorToggle = CommonMenu.createCheckboxSetting({
+                id: "csic-setting-submit-color-toggle",
+                label: "Change \"Submit\" button color",
+                helpText: "If disabled, the color selected below won't be applied.",
+                messageId: ExtensionMessageId.SETTINGS_SUBMIT_COLOR_TOGGLE_CHANGED,
+                setting: (settings: ExtensionSettings) => !!settings.submitColorEnabled
+            })
+            dialogBody.appendChild(submitColorToggle);
+
+            const submitColorValue = CommonMenu.createSubmitColorValueSetting();
+
+            dialogBody.appendChild(submitColorValue);
 
             const buttonFooter = CommonMenu.createDialogButtonFooterElement();
             dialog.append(buttonFooter);
@@ -322,6 +335,34 @@ class CommonMenu {
         });
 
         listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, es => this.whenDomainLanguageChanged(es, select));
+
+        return controlGroup;
+
+    }
+
+    private static createSubmitColorValueSetting(): HTMLElement {
+        const controlGroup = document.createElement("div");
+        controlGroup.classList.add("control-group");
+        controlGroup.id = "csic-settings-submit-color-value";
+
+        const inputId = controlGroup.id + "-input";
+
+        const input = document.createElement("input");
+        controlGroup.append(input);
+        input.type = "color";
+        input.id = inputId;
+        input.name = inputId;
+        requestSettings().then(es => input.value = es.submitColorValue ?? "");
+
+        const label = document.createElement("label");
+        controlGroup.append(label);
+        label.textContent = '"Submit" button color';
+        label.htmlFor = inputId;
+
+
+        input.addEventListener("input", (event: InputEvent) => postExtensionMessage<String>(ExtensionMessageId.SETTINGS_SUBMIT_COLOR_VALUE_CHANGED, (event.target as HTMLInputElement).value));
+
+        listenToExtensionMessage<ExtensionSettings>(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, es => input.value = es.submitColorValue ?? "");
 
         return controlGroup;
 

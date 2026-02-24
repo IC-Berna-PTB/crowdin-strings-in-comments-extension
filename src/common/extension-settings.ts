@@ -9,6 +9,8 @@ export class ExtensionSettings {
     naggedAboutDefaultLanguage: BooleanishNumber = 0;
     highlanderApproval: BooleanishNumber = 0;
     embiggenSubmit: BooleanishNumber = 1;
+    submitColorEnabled: BooleanishNumber = 0;
+    submitColorValue?: string = undefined;
 }
 
 export type BooleanishNumber = 0 | 1;

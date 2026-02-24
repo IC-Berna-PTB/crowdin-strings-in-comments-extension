@@ -11,10 +11,11 @@ observeElementEvenIfNotReady("#suggest_translation", (element, disconnect) => {
 }, true);
 
 function applyOption() {
-    let buttonElement = document.querySelector("#suggest_translation");
+    let buttonElement: HTMLElement = document.querySelector("#suggest_translation");
     if (buttonElement === null) {
         return;
     }
+    buttonElement.style.backgroundColor = null;
     let textElement = buttonElement.querySelector(".csic-submit-text");
     if (textElement !== null) {
         textElement.remove();
@@ -22,6 +23,9 @@ function applyOption() {
     showText().then((value) => {
         value && buttonElement.append(createElement());
     });
+    getColor().then(color => {
+        buttonElement.style.backgroundColor = color;
+    })
 }
 
 function createElement(): HTMLSpanElement {
@@ -34,4 +38,9 @@ function createElement(): HTMLSpanElement {
 async function showText(): Promise<Boolean> {
     return await requestSettings()
         .then(s => !!s.embiggenSubmit);
+}
+
+async function getColor(): Promise<string | undefined> {
+    return await requestSettings()
+        .then(s => !!s.submitColorEnabled ? s.submitColorValue : undefined);
 }

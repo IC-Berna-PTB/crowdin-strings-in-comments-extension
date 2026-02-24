@@ -25,3 +25,15 @@
 #csic-settings-dialog {
   min-width: 500px;
 }
+
+#csic-settings-submit-color-value label {
+  display: inline-block;
+}
+
+#csic-settings-submit-color-value input[type="color"] {
+  display: inline-block;
+  height: 1.5rem;
+  padding: 0;
+  margin-right: 0.5rem;
+  width: 2rem;
+}

@@ -86,6 +86,11 @@ listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_EMBIGGEN_SUBMIT_CHANGED
     return s;
 })
 
+listenToBooleanSettingChange(ExtensionMessageId.SETTINGS_SUBMIT_COLOR_TOGGLE_CHANGED, (no, s) => {
+    s.submitColorEnabled = no;
+    return s;
+})
+
 function listenToBooleanSettingChange(messageId: ExtensionMessageId, apply: (newOption: BooleanishNumber, settings: ExtensionSettings) => ExtensionSettings) {
     listenToExtensionMessage<number>(messageId, m => {
         const newOption = m as BooleanishNumber;
@@ -116,6 +121,15 @@ listenToExtensionMessage<ProjectLanguage>(ExtensionMessageId.SETTINGS_PROJECT_DE
     }
 })
 
+listenToExtensionMessage<string>(ExtensionMessageId.SETTINGS_SUBMIT_COLOR_VALUE_CHANGED, m => {
+    if (m) {
+        getSettings().then(s => {
+            s.submitColorValue = m;
+            propagateUpdate(s);
+        })
+    }
+})
+
 listenToExtensionMessage(ExtensionMessageId.SETTINGS_NAGGED_ABOUT_DEFAULT_LANGUAGE, didIt => {
     if (didIt) {
         getSettings().then(s => {
@@ -127,21 +141,15 @@ listenToExtensionMessage(ExtensionMessageId.SETTINGS_NAGGED_ABOUT_DEFAULT_LANGUA
 
 listenToExtensionMessage<string>(
     ExtensionMessageId.SETTINGS_IMPORT_REQUESTED,
-    s => importSettings(s).then(async result => {
-        if (result) {
-            postExtensionMessage(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, await getSettings())
-        } else {
-            postExtensionMessage<string>(ExtensionMessageId.SETTINGS_IMPORT_FAILED, "Could not import settings!")
-        }
-    }))
+    s => importSettings(s));
 
-async function importSettings(base64: string): Promise<boolean> {
+async function importSettings(base64: string): Promise<void> {
     const instance = base64ToObject(base64, ExtensionSettings);
     if (instance instanceof ExtensionSettings) {
         extensionSettings = instance;
         await chrome.storage.sync.set(extensionSettings);
         postExtensionMessage(ExtensionMessageId.SETTINGS_IMPORT_SUCCESSFUL, extensionSettings);
-        return true;
+    } else {
+        postExtensionMessage<string>(ExtensionMessageId.SETTINGS_IMPORT_FAILED, "Could not import settings!")
     }
-    return false;
 }
