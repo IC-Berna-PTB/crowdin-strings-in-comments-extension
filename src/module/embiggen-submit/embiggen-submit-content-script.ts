@@ -17,10 +17,8 @@ observeElementEvenIfNotReady("#suggest_translation", (element: HTMLButtonElement
 
 function applyOption(buttonElement: HTMLButtonElement) {
     buttonElement.style.backgroundColor = null;
-    let textElement = buttonElement.querySelector(".csic-submit-text");
-    if (textElement !== null) {
-        textElement.remove();
-    }
+    buttonElement.querySelectorAll(".csic-submit-text")
+        .forEach(e => e.remove());
     showText().then((value) => {
         value && buttonElement.append(createElement());
     });
