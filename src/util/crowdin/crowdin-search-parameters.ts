@@ -86,7 +86,7 @@ export abstract class CrowdinSearchParameters {
         const fileId = getFileId(url);
         const query = getDecodedSearchQuery(url);
 
-        switch (urlSearchParams.get("filter") as "basic" | "advanced" | "croql") {
+        switch ((urlSearchParams.get("filter") ?? "basic") as "basic" | "advanced" | "croql") {
             case "basic":
                 return CrowdinSearchParametersBasic.generateFromSearchParams(urlSearchParams, projectId, fileId, currentLanguageId, query);
             case "advanced":
