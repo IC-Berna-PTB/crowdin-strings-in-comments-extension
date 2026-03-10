@@ -48,6 +48,11 @@ const runSetValueActionInterval = setInterval(() => {
         return;
     }
     clearInterval(runSetValueActionInterval);
+
+    document.querySelector("#translation").addEventListener("focus", (ev) => {
+        console.log(ev);
+    })
+
     // @ts-ignore
     const originalSet = window.crowdin.translation.setValue;
     // @ts-ignore

@@ -46,3 +46,9 @@ listenToExtensionMessage<string>(ExtensionMessageId.NOTIFICATION_ERROR, m => {
     $.jGrowl(m, {theme: "jGrowl-error"});
 })
 
+listenToExtensionMessage<string>(ExtensionMessageId.SET_SUGGESTION_TEXT, s => {
+    // @ts-ignore
+    window.crowdin.translation.setValue(s);
+    document.querySelector("#translation").dispatchEvent(new Event('input'));
+})
+

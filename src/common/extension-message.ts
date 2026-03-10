@@ -18,6 +18,7 @@ export enum ExtensionMessageId {
     NOTIFICATION_ERROR = "csic-notification-error",
     NOTIFICATION_NON_DEFAULT_LANGUAGE = "csic-notification-non-default-language",
     HTML_PREVIEW_UPDATED = "csic-html-preview-updated",
+    SET_SUGGESTION_TEXT = "csic-set-suggestion-text",
     SETTINGS_DIALOG_OPENED = "csic-settings-dialog-opened",
     SETTINGS_IMPORT_REQUESTED = "csic-settings-import-requested",
     SETTINGS_IMPORT_SUCCESSFUL = "csic-settings-import-successful",

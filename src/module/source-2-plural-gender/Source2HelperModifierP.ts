@@ -7,6 +7,8 @@ import {
 	getCrowdinTranslationTextArea,
 	getModifiersFromTokenContext
 } from "./source-2-plural-gender-content-script";
+import {postExtensionMessage} from "../../util/util";
+import {ExtensionMessageId} from "../../common/extension-message";
 
 export class Source2HelperModifierP extends Source2HelperAbstract {
 	inject(){
@@ -75,7 +77,6 @@ export class Source2HelperModifierP extends Source2HelperAbstract {
 	}
 	
 	syncToSuggestion(){
-		let translationTextArea = getCrowdinTranslationTextArea();
 		let suggestionText = '';
 		
 		let i = 0;
@@ -88,14 +89,7 @@ export class Source2HelperModifierP extends Source2HelperAbstract {
 			suggestionText+= $value.val();
 			i++;
 		});
-		translationTextArea.val(suggestionText).trigger('input');
-		
-		// forcefully enable 'Save' button and update text length. ideally in a future version we find out which event/function to trigger to make Crowdin do their routine properly
-		$('#suggest_translation').prop('disabled', false).addClass("btn-primary");
-		$('#translated_string_length').text(suggestionText.length);
-		let originalStringLength = parseInt($('#original_string_length').text());
-		if(suggestionText.length > 2 * originalStringLength) $('#translated_string_length').addClass('over-length-warning');
-		else $('#translated_string_length').removeClass('over-length-warning');
+		postExtensionMessage<string>(ExtensionMessageId.SET_SUGGESTION_TEXT, suggestionText);
 	}
 	
 	validate(){
