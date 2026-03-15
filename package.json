@@ -1,10 +1,10 @@
 {
   "name": "enhanced-crowdin",
   "private": true,
-  "version": "3.19.4",
+  "version": "3.20.0",
   "author": "Bernardo Lopes (Berna)",
   "scripts": {
-    "compile-css": "npx sass src/module/strings-in-comments/style.scss:dist/css/strings-in-comments.css src/module/source-2-plural-gender/style.scss:dist/css/source-2-plural-gender.css src/module/extension-settings-menu/style.scss:dist/css/common-menu.css src/module/prevent-key-copy/style.scss:dist/css/prevent-key-copy.css",
+    "compile-css": "npx sass src/module/source-2-message-format-alert/style.scss:dist/css/source-2-message-format-alert.css src/module/strings-in-comments/style.scss:dist/css/strings-in-comments.css src/module/source-2-plural-gender/style.scss:dist/css/source-2-plural-gender.css src/module/extension-settings-menu/style.scss:dist/css/common-menu.css src/module/prevent-key-copy/style.scss:dist/css/prevent-key-copy.css",
     "build": "npm run compile-css && webpack --mode=production",
     "build-dev": "npm run compile-css && webpack --mode=development",
     "package-dev": "rm -rf dist/** && npm run build-dev && cp src/manifest.json dist/manifest.json && zip -j dist/extension.zip dist/**",

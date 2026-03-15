@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "3.19.4",
+  "version": "3.20.0",
   "name": "Enhanced Crowdin",
   "description": "New features and QoL for Crowdin",
   "icons": {
@@ -45,10 +45,12 @@
         "*://valve.crowdin.com/*"
       ],
       "css": [
-        "css/source-2-plural-gender.css"
+        "css/source-2-plural-gender.css",
+        "css/source-2-message-format-alert.css"
       ],
       "js": [
-        "source-2-plural-gender.js"
+        "source-2-plural-gender.js",
+        "source-2-message-format-alert.js"
       ]
     }
   ],
@@ -82,7 +84,8 @@
         "all-content-redirect-inject.js",
         "highlander-approval-inject.js",
         "common-inject.js",
-        "source-2-plural-gender-inject.js"
+        "source-2-plural-gender-inject.js",
+        "source-2-message-format-alert-inject.js"
       ]
     }
   ],
