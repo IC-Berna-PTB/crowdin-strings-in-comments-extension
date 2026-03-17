@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "version": "3.20.0",
+  "version": "3.20.2",
   "name": "Enhanced Crowdin",
   "description": "New features and QoL for Crowdin",
   "icons": {

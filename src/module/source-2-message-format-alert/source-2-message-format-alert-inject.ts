@@ -2,7 +2,7 @@ import {observeElementEvenIfNotReady} from "../../util/util";
 
 const regexp = /\{(\S[^:][^\s,]+)(,.*)?}*/g;
 
-observeElementEvenIfNotReady(".string-key-container--text", (e) => {
+observeElementEvenIfNotReady(".string-key-container--text", () => {
     const wrapperId = "csic-icu-warning-wrapper";
     let warningWrapper = document.querySelector(`#${wrapperId}`);
     if (warningWrapper === undefined || warningWrapper === null) {
@@ -13,7 +13,7 @@ observeElementEvenIfNotReady(".string-key-container--text", (e) => {
     }
 
     // @ts-expect-error crowdin not available while programming
-    if (window.crowdin.translation.is_icu || window.crowdin.translation.file_type != "vdf" || !window.crowdin.translation.key.endsWith(":f")) {
+    if (window.crowdin.translation.is_icu || window.crowdin.translation.file_type != "vdf" || !window.crowdin.translation.key.split("\n")[0].endsWith(":f")) {
         warningWrapper.remove();
         return;
     }
@@ -32,6 +32,7 @@ observeElementEvenIfNotReady(".string-key-container--text", (e) => {
     warningWrapper.textContent = `This is an ICU string. Variables:`;
     warningWrapper.appendChild(document.createElement("br"));
     variables.map(s => `{${s}}`)
+        .map(s =>  s.endsWith("}}") ? s.replace("}}", "}") : s)
         .map(s => createVariableElement(s))
         .forEach(e => warningWrapper.appendChild(e));
 }, true);
