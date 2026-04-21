@@ -68,6 +68,7 @@ export class ReferencedSearchQueryActual extends ReferencedSearchQuery implement
         const anchor = document.createElement("a");
         anchor.href = convertUrlToCurrentLanguage(this.getOriginalUrl())
         anchor.textContent = text;
+        anchor.target = "_blank";
         span.append(anchor);
         return span;
     }
